@@ -33,5 +33,14 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\SpriteFontPlus\SpriteFontPlus.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Fonts\DroidSans.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Fonts\DroidSansJapanese.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>  
 </Project>

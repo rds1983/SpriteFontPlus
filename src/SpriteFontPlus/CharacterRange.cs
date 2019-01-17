@@ -32,5 +32,9 @@ namespace SpriteFontPlus
             Start = start;
             End = end;
         }
+        
+        public CharacterRange(char single): this(single, single)
+        {
+        }
     }
 }

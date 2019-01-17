@@ -76,6 +76,20 @@ namespace StbSharp
 			public float yoff;
 			public float xadvance;
 		}
+		
+		    [StructLayout(LayoutKind.Sequential)]
+            public struct stbtt_packedchar
+            {
+                public int x0;
+                public int y0;
+                public int x1;
+                public int y1;
+                public float xoff;
+                public float yoff;
+                public float xadvance;
+                public float xoff2;
+                public float yoff2;
+            }
 
 		[StructLayout(LayoutKind.Sequential)]
 		public unsafe partial struct stbtt_aligned_quad
@@ -97,7 +111,7 @@ namespace StbSharp
 			public int first_unicode_codepoint_in_range;
 			public int* array_of_unicode_codepoints;
 			public int num_chars;
-			public GlyphInfo* chardata_for_range;
+			public stbtt_packedchar* chardata_for_range;
 			public byte h_oversample;
 			public byte v_oversample;
 		}
@@ -3068,7 +3082,7 @@ namespace StbSharp
 					stbrp_rect* r = &rects[k];
 					if ((r->was_packed) != 0)
 					{
-						GlyphInfo* bc = &ranges[i].chardata_for_range[j];
+						stbtt_packedchar* bc = &ranges[i].chardata_for_range[j];
 						int advance;
 						int lsb;
 						int x0;
@@ -3089,15 +3103,15 @@ namespace StbSharp
 							stbtt__h_prefilter(spc->pixels + r->x + r->y * spc->stride_in_bytes, (int)(r->w), (int)(r->h), (int)(spc->stride_in_bytes), (uint)(spc->h_oversample));
 						if ((spc->v_oversample) > (1))
 							stbtt__v_prefilter(spc->pixels + r->x + r->y * spc->stride_in_bytes, (int)(r->w), (int)(r->h), (int)(spc->stride_in_bytes), (uint)(spc->v_oversample));
-						bc->X0 = (ushort)((short)(r->x));
-						bc->Y0 = (ushort)((short)(r->y));
-						bc->X1 = (ushort)((short)(r->x + r->w));
-						bc->Y1 = (ushort)((short)(r->y + r->h));
-						bc->XAdvance = (float)(scale * advance);
-						bc->XOffset = (float)((float)(x0) * recip_h + sub_x);
-						bc->YOffset = (float)((float)(y0) * recip_v + sub_y);
-						bc->XOffset2 = (float)((x0 + r->w) * recip_h + sub_x);
-						bc->YOffset2 = (float)((y0 + r->h) * recip_v + sub_y);
+						bc->x0 = (ushort)((short)(r->x));
+						bc->y0 = (ushort)((short)(r->y));
+						bc->x1 = (ushort)((short)(r->x + r->w));
+						bc->y1 = (ushort)((short)(r->y + r->h));
+						bc->xadvance = (float)(scale * advance);
+						bc->xoff = (float)((float)(x0) * recip_h + sub_x);
+						bc->yoff = (float)((float)(y0) * recip_v + sub_y);
+						bc->xoff2 = (float)((x0 + r->w) * recip_h + sub_x);
+						bc->yoff2 = (float)((y0 + r->h) * recip_v + sub_y);
 					}
 					else
 					{
@@ -3128,7 +3142,7 @@ namespace StbSharp
 			{
 				for (j = (int)(0); (j) < (ranges[i].num_chars); ++j)
 				{
-					ranges[i].chardata_for_range[j].X0 = (ushort)(ranges[i].chardata_for_range[j].Y0 = (ushort)(ranges[i].chardata_for_range[j].X1 = (ushort)(ranges[i].chardata_for_range[j].Y1 = (ushort)(0))));
+					ranges[i].chardata_for_range[j].x0 = (ushort)(ranges[i].chardata_for_range[j].y0 = (ushort)(ranges[i].chardata_for_range[j].x1 = (ushort)(ranges[i].chardata_for_range[j].y1 = (ushort)(0))));
 				}
 			}
 			n = (int)(0);
@@ -3148,7 +3162,7 @@ namespace StbSharp
 			return (int)(return_value);
 		}
 
-		public static int stbtt_PackFontRange(stbtt_pack_context* spc, byte* fontdata, int font_index, float font_size, int first_unicode_codepoint_in_range, int num_chars_in_range, GlyphInfo* chardata_for_range)
+		public static int stbtt_PackFontRange(stbtt_pack_context* spc, byte* fontdata, int font_index, float font_size, int first_unicode_codepoint_in_range, int num_chars_in_range, stbtt_packedchar* chardata_for_range)
 		{
 			stbtt_pack_range range = new stbtt_pack_range();
 			range.first_unicode_codepoint_in_range = (int)(first_unicode_codepoint_in_range);
@@ -3159,33 +3173,33 @@ namespace StbSharp
 			return (int)(stbtt_PackFontRanges(spc, fontdata, (int)(font_index), &range, (int)(1)));
 		}
 
-		public static void stbtt_GetPackedQuad(GlyphInfo* chardata, int pw, int ph, int char_index, float* xpos, float* ypos, stbtt_aligned_quad* q, int align_to_integer)
+		public static void stbtt_GetPackedQuad(stbtt_packedchar* chardata, int pw, int ph, int char_index, float* xpos, float* ypos, stbtt_aligned_quad* q, int align_to_integer)
 		{
 			float ipw = (float)(1.0f / pw);
 			float iph = (float)(1.0f / ph);
-			GlyphInfo* b = chardata + char_index;
+			stbtt_packedchar* b = chardata + char_index;
 			if ((align_to_integer) != 0)
 			{
-				float x = (float)((int)(CRuntime.floor((double)((*xpos + b->XOffset) + 0.5f))));
-				float y = (float)((int)(CRuntime.floor((double)((*ypos + b->YOffset) + 0.5f))));
+				float x = (float)((int)(CRuntime.floor((double)((*xpos + b->xoff) + 0.5f))));
+				float y = (float)((int)(CRuntime.floor((double)((*ypos + b->yoff) + 0.5f))));
 				q->x0 = (float)(x);
 				q->y0 = (float)(y);
-				q->x1 = (float)(x + b->XOffset2 - b->XOffset);
-				q->y1 = (float)(y + b->YOffset2 - b->YOffset);
+				q->x1 = (float)(x + b->xoff2 - b->xoff);
+				q->y1 = (float)(y + b->yoff2 - b->yoff);
 			}
 			else
 			{
-				q->x0 = (float)(*xpos + b->XOffset);
-				q->y0 = (float)(*ypos + b->YOffset);
-				q->x1 = (float)(*xpos + b->XOffset2);
-				q->y1 = (float)(*ypos + b->YOffset2);
+				q->x0 = (float)(*xpos + b->xoff);
+				q->y0 = (float)(*ypos + b->yoff);
+				q->x1 = (float)(*xpos + b->xoff2);
+				q->y1 = (float)(*ypos + b->yoff2);
 			}
 
-			q->s0 = (float)(b->X0 * ipw);
-			q->t0 = (float)(b->Y0 * iph);
-			q->s1 = (float)(b->X1 * ipw);
-			q->t1 = (float)(b->Y1 * iph);
-			*xpos += (float)(b->XAdvance);
+			q->s0 = (float)(b->x0 * ipw);
+			q->t0 = (float)(b->y0 * iph);
+			q->s1 = (float)(b->x1 * ipw);
+			q->t1 = (float)(b->y1 * iph);
+			*xpos += (float)(b->xadvance);
 		}
 
 		public static int stbtt__ray_intersect_bezier(float* orig, float* ray, float* q0, float* q1, float* q2, float* hits)

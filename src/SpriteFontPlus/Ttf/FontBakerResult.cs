@@ -84,13 +84,13 @@ namespace SpriteFontPlus.Ttf
             {
                 var character = Glyphs[key];
                 
-                var bounds = new Rectangle(character.X0, character.Y0, 
-                    character.X1 - character.X0,
-                    character.Y1 - character.Y0);
+                var bounds = new Rectangle(character.X, character.Y, 
+                    character.Width,
+                    character.Height);
 
                 glyphBounds.Add(bounds);
                 cropping.Add(new Rectangle((int)character.XOffset, 
-                    (int)(FontFontPixelHeight + character.YOffset), 
+                    character.YOffset, 
                     bounds.Width, bounds.Height));
 
                 chars.Add(key);

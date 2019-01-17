@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using StbSharp;
 
-namespace SpriteFontPlus.Ttf
+namespace SpriteFontPlus
 {
-	public static unsafe class FontBaker
+	public static unsafe class TtfFontBaker
 	{
-		public static FontBakerResult Bake(byte[] ttf, float fontPixelHeight,
+		public static TtfFontBakerResult Bake(byte[] ttf, float fontPixelHeight,
 			int bitmapWidth, int bitmapHeight,
 			IEnumerable<CharacterRange> characterRanges)
 		{
@@ -102,7 +101,7 @@ namespace SpriteFontPlus.Ttf
 				}
 			}
 
-			return new FontBakerResult(glyphs, fontPixelHeight, pixels, bitmapWidth, bitmapHeight);
+			return new TtfFontBakerResult(glyphs, fontPixelHeight, pixels, bitmapWidth, bitmapHeight);
 		}
 	}
 }

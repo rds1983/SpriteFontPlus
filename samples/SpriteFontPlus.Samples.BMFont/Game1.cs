@@ -16,7 +16,7 @@ namespace SpriteFontPlus.Samples.TtfBaking
 		GraphicsDeviceManager _graphics;
 		SpriteBatch _spriteBatch;
 
-		private SpriteFont _font, _fontJapanese;
+		private SpriteFont _font;
 
 		public Game1()
 		{
@@ -40,35 +40,23 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			// Create a new SpriteBatch, which can be used to draw textures.
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 
-			// TODO: use this.Content to load your game content here
-			var fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes("Fonts/DroidSans.ttf"),
-				25,
-				FontBitmapWidth,
-				FontBitmapHeight,
-				new[]
-				{
-					CharacterRange.BasicLatin,
-					CharacterRange.Latin1Supplement,
-					CharacterRange.LatinExtendedA,
-					CharacterRange.Cyrillic
-				}
-			);
+			Texture2D texture;
+			using (var stream = TitleContainer.OpenStream("Fonts/test_0.png"))
+			{
+				texture = Texture2D.FromStream(GraphicsDevice, stream);
+			}
 
-			_font = fontBakeResult.CreateSpriteFont(GraphicsDevice);
-			
-			fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes("Fonts/DroidSansJapanese.ttf"),
-				25,
-				FontBitmapWidth,
-				FontBitmapHeight,
-				new[]
-				{
-					new CharacterRange(' '),					
-					CharacterRange.Hiragana,
-					CharacterRange.Katakana
-				}
-			);
 
-			_fontJapanese = fontBakeResult.CreateSpriteFont(GraphicsDevice);
+			string fontData;
+			using (var stream = TitleContainer.OpenStream("Fonts/test.fnt"))
+			{
+				using (var reader = new StreamReader(stream))
+				{
+					fontData = reader.ReadToEnd();
+				}
+			}
+
+			_font = BMFontLoader.LoadXml(fontData, texture);
 
 			GC.Collect();
 		}
@@ -96,18 +84,6 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			// Render some text
 			_spriteBatch.DrawString(_font, "The quick brown fox jumps over the lazy dog",
 				new Vector2(0, 0), Color.White);
-			_spriteBatch.DrawString(_font, "Üben quält finſteren Jagdſchloß höfliche Bäcker größeren, N: Blåbærsyltetøy",
-				new Vector2(0, 30), Color.White);
-			_spriteBatch.DrawString(_font, "Høj bly gom vandt fræk sexquiz på wc, S: bäckasiner söka",
-				new Vector2(0, 60), Color.White);
-			_spriteBatch.DrawString(_font, "Sævör grét áðan því úlpan var ónýt, P: Pchnąć w tę łódź jeża lub osiem skrzyń fig",
-				new Vector2(0, 90), Color.White);
-			_spriteBatch.DrawString(_font, "Příliš žluťoučký kůň úpěl ďábelské kódy, R: В чащах юга жил-был цитрус? Да, но фальшивый экземпляр! ёъ.",
-				new Vector2(0, 120), Color.White);
-			_spriteBatch.DrawString(_font, "kilómetros y frío, añoraba, P: vôo à noite, F: Les naïfs ægithales hâtifs pondant à Noël où",
-				new Vector2(0, 150), Color.White);
-			_spriteBatch.DrawString(_fontJapanese, "いろはにほへど",
-				new Vector2(0, 180), Color.White);
 
 			_spriteBatch.End();
 

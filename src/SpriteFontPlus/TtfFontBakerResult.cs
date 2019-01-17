@@ -5,9 +5,9 @@ using System.Reflection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace SpriteFontPlus.Ttf
+namespace SpriteFontPlus
 {
-    public class FontBakerResult
+    public class TtfFontBakerResult
     {
         public Dictionary<char, GlyphInfo> Glyphs { get; private set; }
         public float FontFontPixelHeight { get; private set; }
@@ -15,7 +15,7 @@ namespace SpriteFontPlus.Ttf
         public int Width { get; private set; }
         public int Height { get; private set; }
 
-        public FontBakerResult(Dictionary<char, GlyphInfo> glyphs,
+        public TtfFontBakerResult(Dictionary<char, GlyphInfo> glyphs,
             float fontPixelHeight,
             byte[] pixels,
             int width,

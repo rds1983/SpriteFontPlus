@@ -7,20 +7,20 @@ Library that extends functionality of the SpriteFont. For now it has only one fe
 1. `Install-Package SpriteFontPlus.MonoGame`
 2. Following code creates SpriteFont dynamically:
 ```c#
-			var fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(@"C:\\Windows\\Fonts\arial.ttf"),
-				25,
-				1024,
-				1024,
-				new[]
-				{
-					CharacterRange.BasicLatin,
-					CharacterRange.Latin1Supplement,
-					CharacterRange.LatinExtendedA,
-					CharacterRange.Cyrillic
-				}
-			);
+var fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(@"C:\\Windows\\Fonts\arial.ttf"),
+	25,
+	1024,
+	1024,
+	new[]
+	{
+		CharacterRange.BasicLatin,
+		CharacterRange.Latin1Supplement,
+		CharacterRange.LatinExtendedA,
+		CharacterRange.Cyrillic
+	}
+);
 
-			_font = fontBakeResult.CreateSpriteFont(GraphicsDevice);
+_font = fontBakeResult.CreateSpriteFont(GraphicsDevice);
 ```
 Now text could be drawn:
 ![](/images/sample.png)

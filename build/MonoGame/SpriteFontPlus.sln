@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2042
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpriteFontPlus", "..\..\src\SpriteFontPlus\SpriteFontPlus.csproj", "{4BD519DB-5A91-465F-997D-1875D45D6CE0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4BD519DB-5A91-465F-997D-1875D45D6CE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BD519DB-5A91-465F-997D-1875D45D6CE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BD519DB-5A91-465F-997D-1875D45D6CE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BD519DB-5A91-465F-997D-1875D45D6CE0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {35ACDF4E-2CE2-46B1-A19F-35DC131069A1}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Myra.UIEditor\Myra.UIEditor.csproj
+	EndGlobalSection
+EndGlobal

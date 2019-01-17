@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(SolutionDir)SolutionDefines.targets" />
+
+  <PropertyGroup>
+    <Authors>SpriteFontPlusTeam</Authors>
+    <Product>SpriteFontPlus</Product>
+    <Description>Utility Library for XNA SpriteFont</Description>
+    <PackageLicense>https://github.com/rds1983/SpriteFontPlus#license</PackageLicense>
+    <PackageProjectUrl>https://github.com/rds1983/SpriteFontPlus</PackageProjectUrl>
+    <NoWarn>NU1701</NoWarn>
+    <AssemblyName>SpriteFontPlus</AssemblyName>
+    <RootNamespace>SpriteFontPlus</RootNamespace>
+    <Version>1.0.0.0</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(DefineConstants.Contains('MONOGAME'))">
+    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+    <PackageId>SpriteFontPlus.MonoGame</PackageId>
+    <OutputPath>bin\MonoGame\$(Configuration)</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(DefineConstants.Contains('FNA'))">
+    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+    <PackageId>SpriteFontPlus.FNA</PackageId>
+    <OutputPath>bin\FNA\$(Configuration)</OutputPath>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="$(DefineConstants.Contains('XENKO'))">
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>SpriteFontPlus.Xenko</PackageId>
+    <OutputPath>bin\Xenko\$(Configuration)</OutputPath>
+  </PropertyGroup>
+  
+  <ItemGroup Condition="$(DefineConstants.Contains('MONOGAME'))">
+    <PackageReference Include="MonoGame.Framework.Portable" PrivateAssets="All" Version="3.6.0.1625" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(DefineConstants.Contains('FNA'))">
+    <ProjectReference Include="..\..\deps\FNA\FNA.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(DefineConstants.Contains('XENKO'))">
+    <PackageReference Include="Xenko.Engine" Version="3.1.0.1-beta01-0349" PrivateAssets="contentfiles;analyzers" />
+    <PackageReference Include="Xenko.Core" Version="3.1.0.1-beta01-0349" PrivateAssets="contentfiles;analyzers" />
+  </ItemGroup>  
+</Project>

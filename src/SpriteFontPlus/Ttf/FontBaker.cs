@@ -14,34 +14,38 @@ namespace SpriteFontPlus.Ttf
 		private readonly Dictionary<char, GlyphInfo> result =
 			new Dictionary<char, GlyphInfo>();
 
-		private byte[] _pixels;
+		public float FontPixelHeight { get; }
 
-		public byte[] Pixels
+		public byte[] Pixels { get; }
+
+		private FontBaker(float fontFontPixelHeight, int bitmapWidth, int bitmapHeight)
 		{
-			get { return _pixels; }
-		}
-
-		private FontBaker(int pw, int ph)
-		{
-			if (pw <= 0)
+			if (fontFontPixelHeight <= 0)
 			{
-				throw new ArgumentOutOfRangeException(nameof(pw));
-			}
-
-			if (ph <= 0)
-			{
-				throw new ArgumentOutOfRangeException(nameof(ph));
-			}
+				throw new ArgumentOutOfRangeException(nameof(fontFontPixelHeight));
+			}		
 			
-			_pixels = new byte[pw * ph];
-			_handle = GCHandle.Alloc(_pixels, GCHandleType.Pinned);
+			if (bitmapWidth <= 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(bitmapWidth));
+			}
+
+			if (bitmapHeight <= 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(bitmapHeight));
+			}
+
+			FontPixelHeight = fontFontPixelHeight;
+			
+			Pixels = new byte[bitmapWidth * bitmapHeight];
+			_handle = GCHandle.Alloc(Pixels, GCHandleType.Pinned);
 			fixed (StbTrueType.stbtt_pack_context* pcPtr = &pc)
 			{
-				StbTrueType.stbtt_PackBegin(pcPtr, (byte*) _handle.AddrOfPinnedObject().ToPointer(), pw, ph, pw, 1, null);
+				StbTrueType.stbtt_PackBegin(pcPtr, (byte*) _handle.AddrOfPinnedObject().ToPointer(), bitmapWidth, bitmapHeight, bitmapWidth, 1, null);
 			}
 		}
 
-		private void Add(byte[] ttf, float pixel_height, IEnumerable<CharacterRange> ranges)
+		private void Add(byte[] ttf, IEnumerable<CharacterRange> ranges)
 		{
 			fixed (StbTrueType.stbtt_pack_context* pcPtr = &pc)
 			{
@@ -57,7 +61,7 @@ namespace SpriteFontPlus.Ttf
 						var cd = new GlyphInfo[range.End - range.Start + 1];
 						fixed (GlyphInfo* chardataPtr = cd)
 						{
-							StbTrueType.stbtt_PackFontRange(pcPtr, ttfPtr, 0, pixel_height, range.Start,
+							StbTrueType.stbtt_PackFontRange(pcPtr, ttfPtr, 0, FontPixelHeight, range.Start,
 								range.End - range.Start + 1, chardataPtr);
 						}
 
@@ -82,7 +86,8 @@ namespace SpriteFontPlus.Ttf
 			return result;
 		}
 
-		public static FontBakerResult Bake(int bitmapWidth, int bitmapHeight, IEnumerable<FontBakerEntry> entries)
+		public static FontBakerResult Bake(int bitmapWidth, int bitmapHeight, 
+			float fontPixelHeight, IEnumerable<FontBakerEntry> entries)
 		{
 			if (entries == null)
 			{
@@ -94,16 +99,16 @@ namespace SpriteFontPlus.Ttf
 				throw new ArgumentException("entries must contain at least one entry.");
 			}
 			
-			var baker = new FontBaker(bitmapWidth, bitmapHeight);
+			var baker = new FontBaker(fontPixelHeight, bitmapWidth, bitmapHeight);
 
 			foreach (var entry in entries)
 			{
-				baker.Add(entry.Ttf, entry.PixelHeight, entry.CharacterRanges);
+				baker.Add(entry.Ttf, entry.CharacterRanges);
 			}
 
 			var glyphs = baker.End();
 
-			return new FontBakerResult(glyphs, baker._pixels, bitmapWidth, bitmapHeight);
+			return new FontBakerResult(glyphs, baker.FontPixelHeight, baker.Pixels, bitmapWidth, bitmapHeight);
 		}
 	}
 }

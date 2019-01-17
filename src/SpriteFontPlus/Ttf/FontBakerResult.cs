@@ -10,11 +10,13 @@ namespace SpriteFontPlus.Ttf
     public class FontBakerResult
     {
         public Dictionary<char, GlyphInfo> Glyphs { get; private set; }
+        public float FontFontPixelHeight { get; private set; }
         public byte[] Pixels { get; private set; }
         public int Width { get; private set; }
         public int Height { get; private set; }
 
         public FontBakerResult(Dictionary<char, GlyphInfo> glyphs,
+            float fontPixelHeight,
             byte[] pixels,
             int width,
             int height)
@@ -22,6 +24,11 @@ namespace SpriteFontPlus.Ttf
             if (glyphs == null)
             {
                 throw new ArgumentNullException(nameof(glyphs));
+            }
+
+            if (fontPixelHeight <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(fontPixelHeight));
             }
 
             if (pixels == null)
@@ -45,6 +52,7 @@ namespace SpriteFontPlus.Ttf
             }
 
             Glyphs = glyphs;
+            FontFontPixelHeight = fontPixelHeight;
             Pixels = pixels;
             Width = width;
             Height = height;
@@ -75,13 +83,15 @@ namespace SpriteFontPlus.Ttf
             foreach (var key in orderedKeys)
             {
                 var character = Glyphs[key];
-
+                
                 var bounds = new Rectangle(character.X0, character.Y0, 
                     character.X1 - character.X0,
                     character.Y1 - character.Y0);
 
                 glyphBounds.Add(bounds);
-                cropping.Add(new Rectangle((int)character.XOffset, (int)character.YOffset, bounds.Width, bounds.Height));
+                cropping.Add(new Rectangle((int)character.XOffset, 
+                    (int)(FontFontPixelHeight + character.YOffset), 
+                    bounds.Width, bounds.Height));
 
                 chars.Add(key);
 
@@ -92,7 +102,7 @@ namespace SpriteFontPlus.Ttf
             var font = (SpriteFont) constructorInfo.Invoke(new object[]
             {
                 texture, glyphBounds, cropping,
-                chars, 20, 0, kerning, ' '
+                chars, (int)FontFontPixelHeight, 0, kerning, ' '
             });
 
             return font;

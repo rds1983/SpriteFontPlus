@@ -8,21 +8,15 @@ namespace SpriteFontPlus.Ttf
     public struct FontBakerEntry
     {
         public byte[] Ttf { get; private set; }
-        public float PixelHeight { get; private set; }
         public IEnumerable<CharacterRange> CharacterRanges { get; private set; }
 
-        public FontBakerEntry(byte[] ttf, float pixelHeight, IEnumerable<CharacterRange> characterRanges)
+        public FontBakerEntry(byte[] ttf, IEnumerable<CharacterRange> characterRanges)
         {
             if (ttf == null || ttf.Length == 0)
             {
                 throw new ArgumentNullException(nameof(ttf));
             }
             
-            if (pixelHeight <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(pixelHeight));
-            }
-
             if (characterRanges == null)
             {
                 throw new ArgumentNullException(nameof(characterRanges));
@@ -34,7 +28,6 @@ namespace SpriteFontPlus.Ttf
             }
 
             Ttf = ttf;
-            PixelHeight = pixelHeight;
             CharacterRanges = characterRanges;
         }
     }

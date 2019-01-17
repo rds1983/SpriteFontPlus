@@ -20,7 +20,7 @@ var fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(@"C:\\Windows\\Fonts\ar
 	}
 );
 
-_font = fontBakeResult.CreateSpriteFont(GraphicsDevice);
+SpriteFont font = fontBakeResult.CreateSpriteFont(GraphicsDevice);
 ```
 Now text could be drawn:
 ![](/images/sample.png)

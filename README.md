@@ -5,7 +5,7 @@ Library that extends functionality of the SpriteFont. For now it has only one fe
 
 # Usage
 1. `Install-Package SpriteFontPlus.MonoGame`
-2. Following code creates a SpriteFont:
+2. Following code creates a SpriteFont from a ttf:
 ```c#
 var fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(@"C:\\Windows\\Fonts\arial.ttf"),
 	25,

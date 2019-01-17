@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Authors>SpriteFontPlusTeam</Authors>
     <Product>SpriteFontPlus</Product>
-    <Description>Utility Library for XNA SpriteFont</Description>
+    <Description>Library extending functionality of the SpriteFont.</Description>
     <PackageLicense>https://github.com/rds1983/SpriteFontPlus#license</PackageLicense>
     <PackageProjectUrl>https://github.com/rds1983/SpriteFontPlus</PackageProjectUrl>
     <NoWarn>NU1701</NoWarn>

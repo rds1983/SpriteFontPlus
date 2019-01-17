@@ -23,4 +23,4 @@ Library that extends functionality of the SpriteFont. For now it has only one fe
 			_font = fontBakeResult.CreateSpriteFont(GraphicsDevice);
 ```
 Now text could be drawn:
-[](/images/sample.png)
+![](/images/sample.png)

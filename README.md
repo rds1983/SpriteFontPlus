@@ -1,2 +1,4 @@
 # SpriteFontPlus
-Utility Library for XNA SpriteFont
+Library that extends functionality of the SpriteFont.
+
+# Usage

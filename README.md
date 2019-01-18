@@ -4,7 +4,7 @@
 Library that extends functionality of the SpriteFont. For now it has only one feature - ability to create SpiteFont dynamically from ttf.
 
 # Usage
-1. `Install-Package SpriteFontPlus.MonoGame`
+1. `Install-Package SpriteFontPlus.MonoGame` (or `Install-Package SpriteFontPlus.FNA` for FNA)
 2. Following code creates a SpriteFont from a ttf:
 ```c#
 var fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(@"C:\\Windows\\Fonts\arial.ttf"),

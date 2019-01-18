@@ -22,8 +22,6 @@ namespace SpriteFontPlus.Samples.TtfBaking
 		{
 			_graphics = new GraphicsDeviceManager(this)
 			{
-				PreferredBackBufferWidth = 1024,
-				PreferredBackBufferHeight = 768
 			};
 
 			Content.RootDirectory = "Content";
@@ -62,7 +60,7 @@ namespace SpriteFontPlus.Samples.TtfBaking
 				FontBitmapHeight,
 				new[]
 				{
-					new CharacterRange(' '),					
+					new CharacterRange(' '),
 					CharacterRange.Hiragana,
 					CharacterRange.Katakana
 				}
@@ -91,7 +89,7 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			GraphicsDevice.Clear(Color.CornflowerBlue);
 
 			// TODO: Add your drawing code here
-			_spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+			_spriteBatch.Begin();
 
 			// Render some text
 			_spriteBatch.DrawString(_font, "The quick brown fox jumps over the lazy dog",

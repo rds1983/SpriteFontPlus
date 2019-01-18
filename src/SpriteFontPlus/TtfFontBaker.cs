@@ -42,7 +42,7 @@ namespace SpriteFontPlus
 			}
 
 			byte[] pixels;
-			var glyphs = new Dictionary<char, GlyphInfo>();
+			var glyphs = new Dictionary<int, GlyphInfo>();
 			fixed (byte* ttfPtr = ttf)
 			{
 				StbTrueType.stbtt_fontinfo fontInfo;

@@ -23,9 +23,6 @@
     <TargetFramework>net461</TargetFramework>
     <OutputPath>bin\Xenko\$(Configuration)</OutputPath>
   </PropertyGroup>
-
-  <ItemGroup>
-  </ItemGroup>
   
   <ItemGroup Condition="$(DefineConstants.Contains('MONOGAME'))">
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.7.1.189" Condition="$(DefineConstants.Contains('MONOGAME'))" />

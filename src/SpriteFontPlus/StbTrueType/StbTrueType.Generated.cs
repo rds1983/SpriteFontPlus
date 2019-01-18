@@ -76,20 +76,20 @@ namespace StbSharp
 			public float yoff;
 			public float xadvance;
 		}
-		
-		    [StructLayout(LayoutKind.Sequential)]
-            public struct stbtt_packedchar
-            {
-                public int x0;
-                public int y0;
-                public int x1;
-                public int y1;
-                public float xoff;
-                public float yoff;
-                public float xadvance;
-                public float xoff2;
-                public float yoff2;
-            }
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct stbtt_packedchar
+		{
+			public int x0;
+			public int y0;
+			public int x1;
+			public int y1;
+			public float xoff;
+			public float yoff;
+			public float xadvance;
+			public float xoff2;
+			public float yoff2;
+		}
 
 		[StructLayout(LayoutKind.Sequential)]
 		public unsafe partial struct stbtt_aligned_quad
@@ -2602,7 +2602,7 @@ namespace StbSharp
 				} (*contour_lengths)[n] = (int)(num_points - start);
 			}
 			return points;
-			error:
+		error:
 			;
 			CRuntime.free(points);
 			CRuntime.free(*contour_lengths);

@@ -45,22 +45,22 @@ namespace SpriteFontPlus
 			var glyphs = new Dictionary<int, GlyphInfo>();
 			fixed (byte* ttfPtr = ttf)
 			{
-				StbTrueType.stbtt_fontinfo fontInfo;
-				if (StbTrueType.stbtt_InitFont(&fontInfo, ttfPtr, 0) == 0)
+				StbTrueType.stbtt_fontinfo fontInfo = new StbTrueType.stbtt_fontinfo();
+				if (StbTrueType.stbtt_InitFont(fontInfo, ttfPtr, 0) == 0)
 				{
 					throw new Exception("Failed to init font.");
 				}
 
-				float scaleFactor = StbTrueType.stbtt_ScaleForPixelHeight(&fontInfo, fontPixelHeight);
+				float scaleFactor = StbTrueType.stbtt_ScaleForPixelHeight(fontInfo, fontPixelHeight);
 
 				int ascent, descent, lineGap;
-				StbTrueType.stbtt_GetFontVMetrics(&fontInfo, &ascent, &descent, &lineGap);
+				StbTrueType.stbtt_GetFontVMetrics(fontInfo, &ascent, &descent, &lineGap);
 
 				pixels = new byte[bitmapWidth * bitmapHeight];
-				StbTrueType.stbtt_pack_context pc;
+				StbTrueType.stbtt_pack_context pc = new StbTrueType.stbtt_pack_context();
 				fixed (byte* pixelsPtr = pixels)
 				{
-					StbTrueType.stbtt_PackBegin(&pc, pixelsPtr, bitmapWidth,
+					StbTrueType.stbtt_PackBegin(pc, pixelsPtr, bitmapWidth,
 						bitmapHeight, bitmapWidth, 1, null);
 				}
 
@@ -74,7 +74,7 @@ namespace SpriteFontPlus
 					var cd = new StbTrueType.stbtt_packedchar[range.End - range.Start + 1];
 					fixed (StbTrueType.stbtt_packedchar* chardataPtr = cd)
 					{
-						StbTrueType.stbtt_PackFontRange(&pc, ttfPtr, 0, fontPixelHeight, 
+						StbTrueType.stbtt_PackFontRange(pc, ttfPtr, 0, fontPixelHeight, 
 							range.Start,
 							range.End - range.Start + 1, 
 							chardataPtr);

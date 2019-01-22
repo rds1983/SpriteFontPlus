@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpriteFontPlus.Samples.TtfB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpriteFontPlus.Samples.BMFont", "..\..\samples\SpriteFontPlus.Samples.BMFont\SpriteFontPlus.Samples.BMFont.csproj", "{1CCD7B6A-C1CC-4357-8874-64C5BD7E258F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpriteFontPlus.Samples.DynamicSpriteFont", "..\..\samples\SpriteFontPlus.Samples.DynamicSpriteFont\SpriteFontPlus.Samples.DynamicSpriteFont.csproj", "{BE4D8499-CDDB-422E-B3CB-2FCC38DF1AD1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +31,10 @@ Global
 		{1CCD7B6A-C1CC-4357-8874-64C5BD7E258F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CCD7B6A-C1CC-4357-8874-64C5BD7E258F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CCD7B6A-C1CC-4357-8874-64C5BD7E258F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE4D8499-CDDB-422E-B3CB-2FCC38DF1AD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE4D8499-CDDB-422E-B3CB-2FCC38DF1AD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE4D8499-CDDB-422E-B3CB-2FCC38DF1AD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE4D8499-CDDB-422E-B3CB-2FCC38DF1AD1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -42,5 +48,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{5528B473-7EEA-43EF-8DE2-6338C5F157D2} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
 		{1CCD7B6A-C1CC-4357-8874-64C5BD7E258F} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
+		{BE4D8499-CDDB-422E-B3CB-2FCC38DF1AD1} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
 	EndGlobalSection
 EndGlobal

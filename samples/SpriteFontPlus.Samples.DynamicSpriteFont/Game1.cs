@@ -38,7 +38,7 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 
 			// TODO: use this.Content to load your game content here
-			_font = DynamicSpriteFont.FromTTF(File.ReadAllBytes(@"C:\\Windows\\Fonts\msyh.ttf"));
+			_font = DynamicSpriteFont.FromTtf(File.ReadAllBytes(@"C:\\Windows\\Fonts\msyh.ttf"));
 
 			GC.Collect();
 		}

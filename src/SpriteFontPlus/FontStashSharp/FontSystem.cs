@@ -47,6 +47,11 @@ namespace FontStashSharp
 		public handleErrorDelegate handleError;
 		public void* errorUptr;
 		private Texture2D _texture;
+
+		public Texture2D Texture
+		{
+			get { return _texture; }
+		}
 		
 		public FontSystem(FontSystemParams p)
 		{

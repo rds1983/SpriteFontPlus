@@ -6,24 +6,26 @@ namespace SpriteFontPlus
 {
     public class DynamicSpriteFont
     {
-        private static readonly FontSystem _fontSystem;
+        private readonly FontSystem _fontSystem;
         private readonly int _fontId;
 
-        static DynamicSpriteFont()
+        public Texture2D Texture
+        {
+            get { return _fontSystem.Texture; }
+        }
+
+        private DynamicSpriteFont(byte[] ttf, int textureWidth, int textureHeight)
         {
             var fontParams = new FontSystemParams
             {
-                width = 1024, height = 1024, flags = FontSystem.FONS_ZERO_TOPLEFT
+                width = textureWidth, height = textureHeight, flags = FontSystem.FONS_ZERO_TOPLEFT
             };
             
             _fontSystem = new FontSystem(fontParams);
+            
+            _fontId = _fontSystem.fonsAddFontMem(string.Empty, ttf, 0);
         }
-
-        private DynamicSpriteFont(int fontId)
-        {
-            _fontId = fontId;
-        }
-        
+      
         public float DrawString(SpriteBatch batch, float pixelHeight, string _string_, Vector2 pos, Color color)
         {
 	        _fontSystem.fonsSetFont(_fontId);
@@ -38,11 +40,9 @@ namespace SpriteFontPlus
             return _fontSystem.fonsDrawText(batch, pos.X, pos.Y + yOff, _string_);
         }
 
-        public static DynamicSpriteFont FromTTF(byte[] ttf)
+        public static DynamicSpriteFont FromTtf(byte[] ttf, int textureWidth = 1024, int textureHeight = 1024)
         {
-            var fontId = _fontSystem.fonsAddFontMem(string.Empty, ttf, 0);
-            
-            return new DynamicSpriteFont(fontId);
+            return new DynamicSpriteFont(ttf, textureWidth, textureHeight);
         }
     }
 }

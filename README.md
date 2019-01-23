@@ -25,7 +25,7 @@ var fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(@"C:\\Windows\\Fonts\ar
 SpriteFont font = fontBakeResult.CreateSpriteFont(GraphicsDevice);
 ```
 
-# Using DynamicSpriteFont
+# DynamicSpriteFont
 DynamicSpriteFont allows to render fonts on demand to a texture atlas.
 
 Following code creates it from a ttf:
@@ -35,19 +35,19 @@ DynamicSpriteFont font = DynamicSpriteFont.FromTtf(File.ReadAllBytes(@"C:\\Windo
 
 And following code renders some text with different sizes:
 ```c#
-_spriteBatch.DrawString(_font, 10, "The quick brown fox jumps over the lazy dog", 
+_spriteBatch.DrawString(font, 10, "The quick brown fox jumps over the lazy dog", 
 	new Vector2(0, 0), Color.White);
-_spriteBatch.DrawString(_font, 14, "Üben quält finſteren Jagdſchloß höfliche Bäcker größeren, N: Blåbærsyltetøy",
+_spriteBatch.DrawString(font, 14, "Üben quält finſteren Jagdſchloß höfliche Bäcker größeren, N: Blåbærsyltetøy",
 	new Vector2(0, 30), Color.White);
-_spriteBatch.DrawString(_font, 18, "Høj bly gom vandt fræk sexquiz på wc, S: bäckasiner söka",
+_spriteBatch.DrawString(font, 18, "Høj bly gom vandt fræk sexquiz på wc, S: bäckasiner söka",
 	new Vector2(0, 60), Color.White);
-_spriteBatch.DrawString(_font, 22, "Sævör grét áðan því úlpan var ónýt, P: Pchnąć w tę łódź jeża lub osiem skrzyń fig",
+_spriteBatch.DrawString(font, 22, "Sævör grét áðan því úlpan var ónýt, P: Pchnąć w tę łódź jeża lub osiem skrzyń fig",
 	new Vector2(0, 90), Color.White);
-_spriteBatch.DrawString(_font, 26, "Příliš žluťoučký kůň úpěl ďábelské kódy, R: В чащах юга жил-был цитрус? Да, но фальшивый экземпляр! ёъ.",
+_spriteBatch.DrawString(font, 26, "Příliš žluťoučký kůň úpěl ďábelské kódy, R: В чащах юга жил-был цитрус? Да, но фальшивый экземпляр! ёъ.",
 	new Vector2(0, 120), Color.White);
-_spriteBatch.DrawString(_font, 30, "kilómetros y frío, añoraba, P: vôo à noite, F: Les naïfs ægithales hâtifs pondant à Noël où",
+_spriteBatch.DrawString(font, 30, "kilómetros y frío, añoraba, P: vôo à noite, F: Les naïfs ægithales hâtifs pondant à Noël où",
 	new Vector2(0, 150), Color.White);
-_spriteBatch.DrawString(_font, 34, "いろはにほへど",
+_spriteBatch.DrawString(font, 34, "いろはにほへど",
 	new Vector2(0, 180), Color.White);
 ```
 It would render following:

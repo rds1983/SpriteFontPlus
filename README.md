@@ -57,4 +57,4 @@ It would render following:
 * [MonoGame](http://www.monogame.net/)
 * [Cyotek.Drawing.BitmapFont](https://github.com/cyotek/Cyotek.Drawing.BitmapFont)
 * [stb](https://github.com/nothings/stb)
-* [fontstash] (https://github.com/memononen/fontstash)
+* [fontstash](https://github.com/memononen/fontstash)

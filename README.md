@@ -24,8 +24,6 @@ var fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(@"C:\\Windows\\Fonts\ar
 
 SpriteFont font = fontBakeResult.CreateSpriteFont(GraphicsDevice);
 ```
-Now text could be drawn:
-![](/images/sample.png)
 
 # Using DynamicSpriteFont
 DynamicSpriteFont allows to render fonts on demand to a texture atlas.

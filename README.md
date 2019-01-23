@@ -27,6 +27,7 @@ SpriteFont font = fontBakeResult.CreateSpriteFont(GraphicsDevice);
 
 # Using DynamicSpriteFont
 DynamicSpriteFont allows to render fonts on demand to a texture atlas.
+
 Following code creates it from a ttf:
 ```c#
 DynamicSpriteFont font = DynamicSpriteFont.FromTtf(File.ReadAllBytes(@"C:\\Windows\\Fonts\msyh.ttf"));

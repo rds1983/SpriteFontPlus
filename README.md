@@ -27,6 +27,7 @@ SpriteFont font = fontBakeResult.CreateSpriteFont(GraphicsDevice);
 
 # DynamicSpriteFont
 DynamicSpriteFont allows to render glyphs of different fonts and sizes on demand(it doesnt require to explicity specify what glyphs are required during the font creation).
+
 It's usage is demonstrating in the following sample:
 [samples/SpriteFontPlus.Samples.DynamicSpriteFont/Game1.cs](samples/SpriteFontPlus.Samples.DynamicSpriteFont/Game1.cs)
 

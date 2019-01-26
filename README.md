@@ -35,7 +35,7 @@ Following code creates DynamicSpriteFont from 3 different ttfs:
 	_fontIdEmojis = _font.AddTtf("Emojis", File.ReadAllBytes(@"Fonts/Symbola-Emoji.ttf"));
 ```			
 
-And following code renders text of different sizes with it along with the backing texture:
+And following code renders text with it along with the backing texture:
 ```c#
 	_spriteBatch.Begin();
 

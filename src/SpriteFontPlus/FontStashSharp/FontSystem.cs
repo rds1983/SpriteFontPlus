@@ -1,8 +1,8 @@
-﻿using StbSharp;
-using System;
+﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SpriteFontPlus;
+using StbSharp;
 
 namespace FontStashSharp
 {
@@ -24,435 +24,753 @@ namespace FontStashSharp
 		public const int FONS_STATES_OVERFLOW = 3;
 		public const int FONS_STATES_UNDERFLOW = 4;
 
-		public delegate void handleErrorDelegate(void* uptr, int error, int val);
+		private FontSystemParams _params_ = new FontSystemParams();
+		private FontAtlas _atlas;
+		private Color[] _colors = new Color[1024];
+		private int[] _dirtyRect = new int[4];
+		private int _flags;
+		private Font[] _fonts;
+		private int _fontsNumber;
+		private float _ith;
+		private float _itw;
+		private int _scratchCount;
+		private int _statesCount;
+		private int _vertsNumber;
+		private byte* _scratch;
+		private FontSystemState[] _states = new FontSystemState[20];
+		private Rectangle[] _textureCoords = new Rectangle[1024 * 2];
+		private byte[] _texData;
+		private Rectangle[] _verts = new Rectangle[1024 * 2];
 
-		private int flags;
-		public FontSystemParams _params_ = new FontSystemParams();
-		public float itw;
-		public float ith;
-		public byte[] texData;
-		public int[] dirtyRect = new int[4];
-		public Font[] fonts;
-		public FontAtlas atlas;
-		public int cfonts;
-		public int nfonts;
-		public Rectangle[] verts = new Rectangle[1024 * 2];
-		public Rectangle[] tcoords = new Rectangle[1024 * 2];
-		public uint[] colors = new uint[1024];
-		public int nverts;
-		public byte* scratch;
-		public int nscratch;
-		public FontSystemState[] states = new FontSystemState[20];
-		public int nstates;
-		public handleErrorDelegate handleError;
-		public void* errorUptr;
-		private Texture2D _texture;
-
-		public Texture2D Texture
+		public Font[] Fonts
 		{
-			get { return _texture; }
+			get
+			{
+				return _fonts;
+			}
 		}
-		
+
 		public FontSystem(FontSystemParams p)
 		{
 			_params_ = p;
-			scratch = (byte*)(CRuntime.malloc((ulong)(96000)));
-			
-			atlas = new FontAtlas((int)(_params_.width), (int)(_params_.height), (int)(256));
-			fonts = new Font[4];
-			cfonts = (int)(4);
-			nfonts = (int)(0);
-			itw = (float)(1.0f / _params_.width);
-			ith = (float)(1.0f / _params_.height);
-			texData = new byte[_params_.width * _params_.height];
-			Array.Clear(texData, 0, texData.Length);
-			dirtyRect[0] = (int)(_params_.width);
-			dirtyRect[1] = (int)(_params_.height);
-			dirtyRect[2] = (int)(0);
-			dirtyRect[3] = (int)(0);
-			fons__addWhiteRect((int)(2), (int)(2));
-			fonsPushState();
-			fonsClearState();
+			_scratch = (byte*)CRuntime.malloc((ulong)96000);
+
+			_atlas = new FontAtlas(_params_.Width, _params_.Height, 256);
+			_fonts = new Font[4];
+			_fontsNumber = 0;
+			_itw = 1.0f / _params_.Width;
+			_ith = 1.0f / _params_.Height;
+			_texData = new byte[_params_.Width * _params_.Height];
+			Array.Clear(_texData, 0, _texData.Length);
+			_dirtyRect[0] = _params_.Width;
+			_dirtyRect[1] = _params_.Height;
+			_dirtyRect[2] = 0;
+			_dirtyRect[3] = 0;
+			AddWhiteRect(2, 2);
+			PushState();
+			ClearState();
 		}
+
+		public Texture2D Texture { get; private set; }
 
 		public void Dispose()
 		{
-			int i = 0;
-			for (i = (int)(0); (i) < (nfonts); ++i)
-			{
-				fons__freeFont(fonts[i]);
-			}
+			var i = 0;
+			for (i = 0; i < _fontsNumber; ++i) FreeFont(_fonts[i]);
 
-			if ((scratch) != null)
-				CRuntime.free(scratch);
+			if (_scratch != null)
+				CRuntime.free(_scratch);
 		}
 
-
-		public void fons__addWhiteRect(int w, int h)
+		public void AddWhiteRect(int w, int h)
 		{
-			int x = 0;
-			int y = 0;
-			int gx = 0;
-			int gy = 0;
-			if ((atlas.fons__atlasAddRect((int)(w), (int)(h), &gx, &gy)) == (0))
+			var x = 0;
+			var y = 0;
+			var gx = 0;
+			var gy = 0;
+			if (_atlas.AddRect(w, h, &gx, &gy) == 0)
 				return;
-			fixed (byte *dst2 = &texData[gx + gy * _params_.width])
+			fixed (byte* dst2 = &_texData[gx + gy * _params_.Width])
 			{
 				var dst = dst2;
-				for (y = (int)(0); (y) < (h); y++)
+				for (y = 0; y < h; y++)
 				{
-					for (x = (int)(0); (x) < (w); x++)
-					{
-						dst[x] = (byte)(0xff);
-					}
-					dst += _params_.width;
+					for (x = 0; x < w; x++) dst[x] = 0xff;
+					dst += _params_.Width;
 				}
 			}
-			dirtyRect[0] = (int)(fons__mini((int)(dirtyRect[0]), (int)(gx)));
-			dirtyRect[1] = (int)(fons__mini((int)(dirtyRect[1]), (int)(gy)));
-			dirtyRect[2] = (int)(fons__maxi((int)(dirtyRect[2]), (int)(gx + w)));
-			dirtyRect[3] = (int)(fons__maxi((int)(dirtyRect[3]), (int)(gy + h)));
+
+			_dirtyRect[0] = Math.Min(_dirtyRect[0], gx);
+			_dirtyRect[1] = Math.Min(_dirtyRect[1], gy);
+			_dirtyRect[2] = Math.Max(_dirtyRect[2], gx + w);
+			_dirtyRect[3] = Math.Max(_dirtyRect[3], gy + h);
 		}
 
-		public FontSystemState fons__getState()
+		public FontSystemState GetState()
 		{
-			return states[nstates - 1];
+			return _states[_statesCount - 1];
 		}
 
-		public int fonsAddFallbackFont(int _base_, int fallback)
+		public int AddFallbackFont(int _base_, int fallback)
 		{
-			Font baseFont = fonts[_base_];
-			if ((baseFont.nfallbacks) < (20))
+			var baseFont = _fonts[_base_];
+			if (baseFont.FallbacksCount < 20)
 			{
-				baseFont.fallbacks[baseFont.nfallbacks++] = (int)(fallback);
-				return (int)(1);
+				baseFont.Fallbacks[baseFont.FallbacksCount++] = fallback;
+				return 1;
 			}
 
-			return (int)(0);
+			return 0;
 		}
 
-		public void fonsSetSize(float size)
+		public void SetSize(float size)
 		{
-			fons__getState().size = (float)(size);
+			GetState().Size = size;
 		}
 
-		public void fonsSetColor(uint color)
+		public void SetColor(Color color)
 		{
-			fons__getState().color = (uint)(color);
+			GetState().Color = color;
 		}
 
-		public void fonsSetSpacing(float spacing)
+		public void SetSpacing(float spacing)
 		{
-			fons__getState().spacing = (float)(spacing);
+			GetState().Spacing = spacing;
 		}
 
-		public void fonsSetBlur(float blur)
+		public void SetBlur(float blur)
 		{
-			fons__getState().blur = (float)(blur);
+			GetState().Blur = blur;
 		}
 
 		public void fonsSetAlign(int align)
 		{
-			fons__getState().align = (int)(align);
+			GetState().Alignment = align;
 		}
 
-		public void fonsSetFont(int font)
+		public void SetFont(int fontId)
 		{
-			fons__getState().font = (int)(font);
+			GetState().FontId = fontId;
 		}
 
-		public void fonsPushState()
+		public void PushState()
 		{
-			if ((nstates) >= (20))
+			if (_statesCount >= 20)
 			{
-				if ((handleError) != null)
-					handleError(errorUptr, (int)(FONS_STATES_OVERFLOW), (int)(0));
-				return;
+				throw new Exception("FONS_STATES_OVERFLOW");
 			}
 
-			if ((nstates) > (0))
+			if (_statesCount > 0)
+				_states[_statesCount] = _states[_statesCount - 1].Clone();
+			else
+				_states[_statesCount] = new FontSystemState();
+			_statesCount++;
+		}
+
+		public void PopState()
+		{
+			if (_statesCount <= 1)
 			{
-				states[nstates] = states[nstates - 1].Clone();
+				throw new Exception("FONS_STATES_OVERFLOW");
+			}
+
+			_statesCount--;
+		}
+
+		public void ClearState()
+		{
+			var state = GetState();
+			state.Size = 12.0f;
+			state.Color = Color.White;
+			state.FontId = 0;
+			state.Blur = 0;
+			state.Spacing = 0;
+			state.Alignment = FONS_ALIGN_LEFT | FONS_ALIGN_BASELINE;
+		}
+
+		public int AddFontMem(string name, byte[] data)
+		{
+			var i = 0;
+			var ascent = 0;
+			var descent = 0;
+			var fh = 0;
+			var lineGap = 0;
+			Font font;
+			var idx = AllocFont();
+			if (idx == -1)
+				return -1;
+			font = _fonts[idx];
+			font.Name = name;
+			for (i = 0; i < 256; ++i) font.Lut[i] = -1;
+			font.Data = data;
+			_scratchCount = 0;
+			fixed (byte* ptr = data)
+			{
+				if (LoadFont(font._font, ptr, data.Length) == 0)
+					goto error;
+			}
+
+			font._font.fons__tt_getFontVMetrics(&ascent, &descent, &lineGap);
+			fh = ascent - descent;
+			font.Ascent = ascent;
+			font.Ascender = ascent / (float)fh;
+			font.Descender = descent / (float)fh;
+			font.LineHeight = (fh + lineGap) / (float)fh;
+			return idx;
+		error:;
+			FreeFont(font);
+			_fontsNumber--;
+			return -1;
+		}
+
+		public int GetFontByName(string name)
+		{
+			var i = 0;
+			for (i = 0; i < _fontsNumber; i++)
+				if (_fonts[i].Name == name)
+					return i;
+			return -1;
+		}
+
+		public float DrawText(SpriteBatch batch, float x, float y, StringSegment str)
+		{
+			if (str.IsNullOrEmpty) return 0.0f;
+
+			var state = GetState();
+			FontGlyph* glyph = null;
+			var q = new FontGlyphSquad();
+			var prevGlyphIndex = -1;
+			var isize = (short)(state.Size * 10.0f);
+			var iblur = (short)state.Blur;
+			float scale = 0;
+			Font font;
+			float width = 0;
+			if (state.FontId < 0 || state.FontId >= _fontsNumber)
+				return x;
+			font = _fonts[state.FontId];
+			if (font.Data == null)
+				return x;
+			scale = font._font.fons__tt_getPixelHeightScale(isize / 10.0f);
+
+			if ((state.Alignment & FONS_ALIGN_LEFT) != 0)
+			{
+			}
+			else if ((state.Alignment & FONS_ALIGN_RIGHT) != 0)
+			{
+				var bounds = new Bounds();
+				width = TextBounds(x, y, str, ref bounds);
+				x -= width;
+			}
+			else if ((state.Alignment & FONS_ALIGN_CENTER) != 0)
+			{
+				var bounds = new Bounds();
+				width = TextBounds(x, y, str, ref bounds);
+				x -= width * 0.5f;
+			}
+
+			y += GetVertAlign(font, state.Alignment, isize);
+			for (var i = 0; i < str.Length; ++i)
+			{
+				var codepoint = str[i];
+				glyph = GetGlyph(font, codepoint, isize, iblur,
+					FONS_GLYPH_BITMAP_REQUIRED);
+				if (glyph != null)
+				{
+					GetQuad(font, prevGlyphIndex, glyph, scale, state.Spacing, ref x,
+						ref y, &q);
+					if (_vertsNumber + 6 > 1024)
+						Flush(batch);
+
+					AddVertex(new Rectangle((int)q.X0, (int)q.Y0, (int)(q.X1 - q.X0), (int)(q.Y1 - q.Y0)),
+						new Rectangle((int)(q.S0 * _params_.Width),
+							(int)(q.T0 * _params_.Height),
+							(int)((q.S1 - q.S0) * _params_.Width),
+							(int)((q.T1 - q.T0) * _params_.Height)),
+						state.Color);
+				}
+
+				prevGlyphIndex = glyph != null ? glyph->Index : -1;
+			}
+
+			Flush(batch);
+			return x;
+		}
+
+		public int TextIterInit(FontTextIterator iter, float x, float y, StringSegment str, int bitmapOption)
+		{
+			var state = GetState();
+			float width = 0;
+
+			if (state.FontId < 0 || state.FontId >= _fontsNumber)
+				return 0;
+			iter.Font = _fonts[state.FontId];
+			if (iter.Font.Data == null)
+				return 0;
+			iter.iSize = (short)(state.Size * 10.0f);
+			iter.iBlur = (short)state.Blur;
+			iter.Scale = iter.Font._font.fons__tt_getPixelHeightScale(iter.iSize / 10.0f);
+			if ((state.Alignment & FONS_ALIGN_LEFT) != 0)
+			{
+			}
+			else if ((state.Alignment & FONS_ALIGN_RIGHT) != 0)
+			{
+				var bounds = new Bounds();
+				width = TextBounds(x, y, str, ref bounds);
+				x -= width;
+			}
+			else if ((state.Alignment & FONS_ALIGN_CENTER) != 0)
+			{
+				var bounds = new Bounds();
+				width = TextBounds(x, y, str, ref bounds);
+				x -= width * 0.5f;
+			}
+
+			y += GetVertAlign(iter.Font, state.Alignment, iter.iSize);
+			iter.X = iter.NextX = x;
+			iter.Y = iter.NextY = y;
+			iter.Spacing = state.Spacing;
+			iter.Str = str;
+			iter.Next = str;
+			iter.Codepoint = 0;
+			iter.PrevGlyphIndex = -1;
+			iter.BitmapOption = bitmapOption;
+			return 1;
+		}
+
+		public bool TextIterNext(FontTextIterator iter, FontGlyphSquad* quad)
+		{
+			iter.Str = iter.Next;
+
+			if (iter.Str.IsNullOrEmpty) return false;
+
+			iter.Codepoint = iter.Str[0];
+			iter.X = iter.NextX;
+			iter.Y = iter.NextY;
+			var glyph = GetGlyph(iter.Font, iter.Codepoint, iter.iSize, iter.iBlur, iter.BitmapOption);
+			if (glyph != null)
+				GetQuad(iter.Font, iter.PrevGlyphIndex, glyph, iter.Scale, iter.Spacing, ref iter.NextX,
+					ref iter.NextY, quad);
+			iter.PrevGlyphIndex = glyph != null ? glyph->Index : -1;
+
+			++iter.Next.Location;
+
+			return true;
+		}
+
+		public float TextBounds(float x, float y, StringSegment str, ref Bounds bounds)
+		{
+			var state = GetState();
+			var q = new FontGlyphSquad();
+			FontGlyph* glyph = null;
+			var prevGlyphIndex = -1;
+			var isize = (short)(state.Size * 10.0f);
+			var iblur = (short)state.Blur;
+			float scale = 0;
+			Font font;
+			float startx = 0;
+			float advance = 0;
+			float minx = 0;
+			float miny = 0;
+			float maxx = 0;
+			float maxy = 0;
+			if (state.FontId < 0 || state.FontId >= _fontsNumber)
+				return 0;
+			font = _fonts[state.FontId];
+			if (font.Data == null)
+				return 0;
+			scale = font._font.fons__tt_getPixelHeightScale(isize / 10.0f);
+			y += GetVertAlign(font, state.Alignment, isize);
+			minx = maxx = x;
+			miny = maxy = y;
+			startx = x;
+			for (var i = 0; i < str.Length; ++i)
+			{
+				var codepoint = str[i];
+				glyph = GetGlyph(font, codepoint, isize, iblur, FONS_GLYPH_BITMAP_OPTIONAL);
+				if (glyph != null)
+				{
+					GetQuad(font, prevGlyphIndex, glyph, scale, state.Spacing, ref x, ref y, &q);
+					if (q.X0 < minx)
+						minx = q.X0;
+					if (q.X1 > maxx)
+						maxx = q.X1;
+					if ((_params_.Flags & FONS_ZERO_TOPLEFT) != 0)
+					{
+						if (q.Y0 < miny)
+							miny = q.Y0;
+						if (q.Y1 > maxy)
+							maxy = q.Y1;
+					}
+					else
+					{
+						if (q.Y1 < miny)
+							miny = q.Y1;
+						if (q.Y0 > maxy)
+							maxy = q.Y0;
+					}
+				}
+
+				prevGlyphIndex = glyph != null ? glyph->Index : -1;
+			}
+
+			advance = x - startx;
+			if ((state.Alignment & FONS_ALIGN_LEFT) != 0)
+			{
+			}
+			else if ((state.Alignment & FONS_ALIGN_RIGHT) != 0)
+			{
+				minx -= advance;
+				maxx -= advance;
+			}
+			else if ((state.Alignment & FONS_ALIGN_CENTER) != 0)
+			{
+				minx -= advance * 0.5f;
+				maxx -= advance * 0.5f;
+			}
+
+			bounds.X = minx;
+			bounds.Y = miny;
+			bounds.X2 = maxx;
+			bounds.Y2 = maxy;
+
+			return advance;
+		}
+
+		public void VertMetrics(out float ascender, out float descender, out float lineh)
+		{
+			ascender = descender = lineh = 0;
+			Font font;
+			var state = GetState();
+			short isize = 0;
+			if (state.FontId < 0 || state.FontId >= _fontsNumber)
+				return;
+			font = _fonts[state.FontId];
+			isize = (short)(state.Size * 10.0f);
+			if (font.Data == null)
+				return;
+
+			ascender = font.Ascender * isize / 10.0f;
+			descender = font.Descender * isize / 10.0f;
+			lineh = font.LineHeight * isize / 10.0f;
+		}
+
+		public void LineBounds(float y, ref float miny, ref float maxy)
+		{
+			Font font;
+			var state = GetState();
+			short isize = 0;
+			if (state.FontId < 0 || state.FontId >= _fontsNumber)
+				return;
+			font = _fonts[state.FontId];
+			isize = (short)(state.Size * 10.0f);
+			if (font.Data == null)
+				return;
+			y += GetVertAlign(font, state.Alignment, isize);
+			if ((_params_.Flags & FONS_ZERO_TOPLEFT) != 0)
+			{
+				miny = y - font.Ascender * isize / 10.0f;
+				maxy = miny + font.LineHeight * isize / 10.0f;
 			}
 			else
 			{
-				states[nstates] = new FontSystemState();
+				maxy = y + font.Descender * isize / 10.0f;
+				miny = maxy - font.LineHeight * isize / 10.0f;
 			}
-			nstates++;
 		}
 
-		public void fonsPopState()
+		public byte[] GetTextureData(out int width, out int height)
 		{
-			if (nstates <= 1)
+			width = _params_.Width;
+			height = _params_.Height;
+			return _texData;
+		}
+
+		public int ValidateTexture(int* dirty)
+		{
+			if (_dirtyRect[0] < _dirtyRect[2] && _dirtyRect[1] < _dirtyRect[3])
 			{
-				if ((handleError) != null)
-					handleError(errorUptr, (int)(FONS_STATES_UNDERFLOW), (int)(0));
-				return;
+				dirty[0] = _dirtyRect[0];
+				dirty[1] = _dirtyRect[1];
+				dirty[2] = _dirtyRect[2];
+				dirty[3] = _dirtyRect[3];
+				_dirtyRect[0] = _params_.Width;
+				_dirtyRect[1] = _params_.Height;
+				_dirtyRect[2] = 0;
+				_dirtyRect[3] = 0;
+				return 1;
 			}
 
-			nstates--;
+			return 0;
 		}
 
-		public void fonsClearState()
+		public void GetAtlasSize(out int width, out int height)
 		{
-			FontSystemState state = fons__getState();
-			state.size = (float)(12.0f);
-			state.color = (uint)(0xffffffff);
-			state.font = (int)(0);
-			state.blur = (float)(0);
-			state.spacing = (float)(0);
-			state.align = (int)(FONS_ALIGN_LEFT | FONS_ALIGN_BASELINE);
+			width = _params_.Width;
+			height = _params_.Height;
 		}
 
-		public int fons__tt_loadFont(StbTrueType.stbtt_fontinfo font, byte* data, int dataSize)
+		public int ExpandAtlas(SpriteBatch batch, int width, int height)
 		{
-			int stbError = 0;
+			var i = 0;
+			var maxy = 0;
+			width = Math.Max(width, _params_.Width);
+			height = Math.Max(height, _params_.Height);
+			if (width == _params_.Width && height == _params_.Height)
+				return 1;
+			Flush(batch);
+
+			var data = new byte[width * height];
+			for (i = 0; i < _params_.Height; i++)
+				fixed (byte* dst = &data[i * width])
+				{
+					fixed (byte* src = &_texData[i * _params_.Width])
+					{
+						CRuntime.memcpy(dst, src, (ulong)_params_.Width);
+						if (width > _params_.Width)
+							CRuntime.memset(dst + _params_.Width, 0, (ulong)(width - _params_.Width));
+					}
+				}
+
+			if (height > _params_.Height)
+				Array.Clear(data, _params_.Height * width, (height - _params_.Height) * width);
+
+			_texData = data;
+			_atlas.Expand(width, height);
+			for (i = 0; i < _atlas.NodesNumber; i++) maxy = Math.Max(maxy, _atlas.Nodes[i].Y);
+			_dirtyRect[0] = 0;
+			_dirtyRect[1] = 0;
+			_dirtyRect[2] = _params_.Width;
+			_dirtyRect[3] = maxy;
+			_params_.Width = width;
+			_params_.Height = height;
+			_itw = 1.0f / _params_.Width;
+			_ith = 1.0f / _params_.Height;
+			return 1;
+		}
+
+		public int ResetAtlas(SpriteBatch batch, int width, int height)
+		{
+			var i = 0;
+			var j = 0;
+			Flush(batch);
+
+			_atlas.Reset(width, height);
+			_texData = new byte[width * height];
+			Array.Clear(_texData, 0, _texData.Length);
+			_dirtyRect[0] = width;
+			_dirtyRect[1] = height;
+			_dirtyRect[2] = 0;
+			_dirtyRect[3] = 0;
+			for (i = 0; i < _fontsNumber; i++)
+			{
+				var font = _fonts[i];
+				font.GlyphsNumber = 0;
+				for (j = 0; j < 256; j++) font.Lut[j] = -1;
+			}
+
+			_params_.Width = width;
+			_params_.Height = height;
+			_itw = 1.0f / _params_.Width;
+			_ith = 1.0f / _params_.Height;
+			AddWhiteRect(2, 2);
+			return 1;
+		}
+
+		private int LoadFont(StbTrueType.stbtt_fontinfo font, byte* data, int dataSize)
+		{
+			var stbError = 0;
 			font.userdata = this;
-			stbError = (int)(StbTrueType.stbtt_InitFont(font, data, (int)(0)));
-			return (int)(stbError);
+			stbError = StbTrueType.stbtt_InitFont(font, data, 0);
+			return stbError;
 		}
 
-		public void fons__freeFont(Font font)
+		private void FreeFont(Font font)
 		{
-			if ((font) == null)
+			if (font == null)
 				return;
-			if ((font.glyphs) != null)
-				CRuntime.free(font.glyphs);
+			if (font.Glyphs != null)
+				CRuntime.free(font.Glyphs);
 		}
 
-		public int fons__allocFont()
+		private int AllocFont()
 		{
 			Font font = null;
-			if ((nfonts + 1) > (cfonts))
+			if (_fontsNumber + 1 > _fonts.Length)
 			{
-				cfonts = (int)((cfonts) == (0) ? 8 : cfonts * 2);
-				fonts = new Font[cfonts];
-				if ((fonts) == null)
-					return (int)(-1);
+				var newFonts = new Font[_fonts.Length * 2];
+
+				for (var i = 0; i < _fonts.Length; ++i)
+				{
+					newFonts[i] = _fonts[i];
+				}
+
+				_fonts = newFonts;
 			}
 
 			font = new Font();
-			if ((font) == null)
+			if (font == null)
 				goto error;
-			font.glyphs = (FontGlyph*)(CRuntime.malloc((ulong)(sizeof(FontGlyph) * 256)));
-			if ((font.glyphs) == null)
+			font.Glyphs = (FontGlyph*)CRuntime.malloc((ulong)(sizeof(FontGlyph) * 256));
+			if (font.Glyphs == null)
 				goto error;
-			font.cglyphs = (int)(256);
-			font.nglyphs = (int)(0);
-			fonts[nfonts++] = font;
-			return (int)(nfonts - 1);
-		error:
-			;
-			fons__freeFont(font);
-			return (int)(-1);
+			font.GlyphsCount = 256;
+			font.GlyphsNumber = 0;
+			_fonts[_fontsNumber++] = font;
+			return _fontsNumber - 1;
+		error:;
+			FreeFont(font);
+			return -1;
 		}
 
-		public int fonsAddFontMem(string name, byte[] data, int freeData)
+		private void Blur(byte* dst, int w, int h, int dstStride, int blur)
 		{
-			int i = 0;
-			int ascent = 0;
-			int descent = 0;
-			int fh = 0;
-			int lineGap = 0;
-			Font font;
-			int idx = (int)(fons__allocFont());
-			if ((idx) == (-1))
-				return (int)(-1);
-			font = fonts[idx];
-			font.name = name;
-			for (i = (int)(0); (i) < (256); ++i)
-			{
-				font.lut[i] = (int)(-1);
-			}
-			font.data = data;
-			font.freeData = ((byte)(freeData));
-			nscratch = (int)(0);
-			fixed (byte* ptr = data)
-			{
-				if (fons__tt_loadFont(font.font, ptr, data.Length) == 0)
-					goto error;
-			}
-			font.font.fons__tt_getFontVMetrics(&ascent, &descent, &lineGap);
-			fh = (int)(ascent - descent);
-			font.ascent = ascent;
-			font.ascender = (float)((float)(ascent) / (float)(fh));
-			font.descender = (float)((float)(descent) / (float)(fh));
-			font.lineh = (float)((float)(fh + lineGap) / (float)(fh));
-			return (int)(idx);
-		error:
-			;
-			fons__freeFont(font);
-			nfonts--;
-			return (int)(-1);
-		}
-
-		public int fonsGetFontByName(string name)
-		{
-			int i = 0;
-			for (i = (int)(0); (i) < (nfonts); i++)
-			{
-				if (fonts[i].name == name)
-					return (int)(i);
-			}
-			return (int)(-1);
-		}
-
-		public void fons__blur(byte* dst, int w, int h, int dstStride, int blur)
-		{
-			int alpha = 0;
+			var alpha = 0;
 			float sigma = 0;
-			if ((blur) < (1))
+			if (blur < 1)
 				return;
-			sigma = (float)((float)(blur) * 0.57735f);
-			alpha = ((int)((1 << 16) * (1.0f - Math.Exp((float)(-2.3f / (sigma + 1.0f))))));
-			fons__blurRows(dst, (int)(w), (int)(h), (int)(dstStride), (int)(alpha));
-			fons__blurCols(dst, (int)(w), (int)(h), (int)(dstStride), (int)(alpha));
-			fons__blurRows(dst, (int)(w), (int)(h), (int)(dstStride), (int)(alpha));
-			fons__blurCols(dst, (int)(w), (int)(h), (int)(dstStride), (int)(alpha));
+			sigma = blur * 0.57735f;
+			alpha = (int)((1 << 16) * (1.0f - Math.Exp(-2.3f / (sigma + 1.0f))));
+			BlurRows(dst, w, h, dstStride, alpha);
+			BlurCols(dst, w, h, dstStride, alpha);
+			BlurRows(dst, w, h, dstStride, alpha);
+			BlurCols(dst, w, h, dstStride, alpha);
 		}
 
-		public FontGlyph* fons__getGlyph(Font font, uint codepoint, short isize, short iblur, int bitmapOption)
+		private FontGlyph* GetGlyph(Font font, int codepoint, short isize, short iblur, int bitmapOption)
 		{
-			int i = 0;
-			int g = 0;
-			int advance = 0;
-			int lsb = 0;
-			int x0 = 0;
-			int y0 = 0;
-			int x1 = 0;
-			int y1 = 0;
-			int gw = 0;
-			int gh = 0;
-			int gx = 0;
-			int gy = 0;
-			int x = 0;
-			int y = 0;
+			var i = 0;
+			var g = 0;
+			var advance = 0;
+			var lsb = 0;
+			var x0 = 0;
+			var y0 = 0;
+			var x1 = 0;
+			var y1 = 0;
+			var gw = 0;
+			var gh = 0;
+			var gx = 0;
+			var gy = 0;
+			var x = 0;
+			var y = 0;
 			float scale = 0;
 			FontGlyph* glyph = null;
-			uint h = 0;
-			float size = (float)(isize / 10.0f);
-			int pad = 0;
-			int added = 0;
-			Font renderFont = font;
-			if ((isize) < (2))
+			int h = 0;
+			var size = isize / 10.0f;
+			var pad = 0;
+			var added = 0;
+			var renderFont = font;
+			if (isize < 2)
 				return null;
-			if ((iblur) > (20))
-				iblur = (short)(20);
-			pad = (int)(iblur + 2);
-			nscratch = (int)(0);
-			h = (uint)(fons__hashint((uint)(codepoint)) & (256 - 1));
-			i = (int)(font.lut[h]);
+			if (iblur > 20)
+				iblur = 20;
+			pad = iblur + 2;
+			_scratchCount = 0;
+			h = HashInt(codepoint) & (256 - 1);
+			i = font.Lut[h];
 			while (i != -1)
 			{
-				if ((((font.glyphs[i].codepoint) == (codepoint)) && ((font.glyphs[i].size) == (isize))) && ((font.glyphs[i].blur) == (iblur)))
+				if (font.Glyphs[i].Codepoint == codepoint && font.Glyphs[i].Size == isize &&
+					font.Glyphs[i].Blur == iblur)
 				{
-					glyph = &font.glyphs[i];
-					if (((bitmapOption) == (FONS_GLYPH_BITMAP_OPTIONAL)) || (((glyph->x0) >= (0)) && ((glyph->y0) >= (0))))
-					{
-						return glyph;
-					}
+					glyph = &font.Glyphs[i];
+					if (bitmapOption == FONS_GLYPH_BITMAP_OPTIONAL || glyph->X0 >= 0 && glyph->Y0 >= 0) return glyph;
 					break;
 				}
-				i = (int)(font.glyphs[i].next);
+
+				i = font.Glyphs[i].Next;
 			}
-			g = (int)(font.font.fons__tt_getGlyphIndex((int)(codepoint)));
-			if ((g) == (0))
-			{
-				for (i = (int)(0); (i) < (font.nfallbacks); ++i)
+
+			g = font._font.fons__tt_getGlyphIndex((int)codepoint);
+			if (g == 0)
+				for (i = 0; i < font.FallbacksCount; ++i)
 				{
-					Font fallbackFont = fonts[font.fallbacks[i]];
-					int fallbackIndex = (int)(fallbackFont.font.fons__tt_getGlyphIndex((int)(codepoint)));
+					var fallbackFont = _fonts[font.Fallbacks[i]];
+					var fallbackIndex = fallbackFont._font.fons__tt_getGlyphIndex((int)codepoint);
 					if (fallbackIndex != 0)
 					{
-						g = (int)(fallbackIndex);
+						g = fallbackIndex;
 						renderFont = fallbackFont;
 						break;
 					}
 				}
-			}
 
-			scale = (float)(renderFont.font.fons__tt_getPixelHeightScale((float)(size)));
-			renderFont.font.fons__tt_buildGlyphBitmap((int)(g), (float)(size), (float)(scale), &advance, &lsb, &x0, &y0, &x1, &y1);
-			gw = (int)(x1 - x0 + pad * 2);
-			gh = (int)(y1 - y0 + pad * 2);
-			if ((bitmapOption) == (FONS_GLYPH_BITMAP_REQUIRED))
+			scale = renderFont._font.fons__tt_getPixelHeightScale(size);
+			renderFont._font.fons__tt_buildGlyphBitmap(g, size, scale, &advance, &lsb, &x0, &y0, &x1, &y1);
+			gw = x1 - x0 + pad * 2;
+			gh = y1 - y0 + pad * 2;
+			if (bitmapOption == FONS_GLYPH_BITMAP_REQUIRED)
 			{
-				added = (int)(atlas.fons__atlasAddRect((int)(gw), (int)(gh), &gx, &gy));
-				if (((added) == (0)) && (handleError != null))
-				{
-					handleError(errorUptr, (int)(FONS_ATLAS_FULL), (int)(0));
-					added = (int)(atlas.fons__atlasAddRect((int)(gw), (int)(gh), &gx, &gy));
-				}
-				if ((added) == (0))
-					return null;
+				added = _atlas.AddRect(gw, gh, &gx, &gy);
+				if (added == 0)
+					throw new Exception("FONS_ATLAS_FULL");
 			}
 			else
 			{
-				gx = (int)(-1);
-				gy = (int)(-1);
+				gx = -1;
+				gy = -1;
 			}
 
-			if ((glyph) == null)
+			if (glyph == null)
 			{
-				glyph = fons__allocGlyph(font);
-				glyph->codepoint = (uint)(codepoint);
-				glyph->size = (short)(isize);
-				glyph->blur = (short)(iblur);
-				glyph->next = (int)(0);
-				glyph->next = (int)(font.lut[h]);
-				font.lut[h] = (int)(font.nglyphs - 1);
+				glyph = AllocGlyph(font);
+				glyph->Codepoint = codepoint;
+				glyph->Size = isize;
+				glyph->Blur = iblur;
+				glyph->Next = 0;
+				glyph->Next = font.Lut[h];
+				font.Lut[h] = font.GlyphsNumber - 1;
 			}
 
-			glyph->index = (int)(g);
-			glyph->x0 = ((short)(gx));
-			glyph->y0 = ((short)(gy));
-			glyph->x1 = ((short)(glyph->x0 + gw));
-			glyph->y1 = ((short)(glyph->y0 + gh));
-			glyph->xadv = ((short)(scale * advance * 10.0f));
-			glyph->xoff = ((short)(x0 - pad));
-			glyph->yoff = ((short)(y0 - pad));
-			if ((bitmapOption) == (FONS_GLYPH_BITMAP_OPTIONAL))
+			glyph->Index = g;
+			glyph->X0 = (short)gx;
+			glyph->Y0 = (short)gy;
+			glyph->X1 = (short)(glyph->X0 + gw);
+			glyph->Y1 = (short)(glyph->Y0 + gh);
+			glyph->XAdvance = (short)(scale * advance * 10.0f);
+			glyph->XOffset = (short)(x0 - pad);
+			glyph->YOffset = (short)(y0 - pad);
+			if (bitmapOption == FONS_GLYPH_BITMAP_OPTIONAL) return glyph;
+
+			fixed (byte* dst = &_texData[glyph->X0 + pad + (glyph->Y0 + pad) * _params_.Width])
 			{
-				return glyph;
+				renderFont._font.fons__tt_renderGlyphBitmap(dst, gw - pad * 2, gh - pad * 2, _params_.Width, scale,
+					scale, g);
 			}
 
-			fixed (byte *dst = &texData[(glyph->x0 + pad) + (glyph->y0 + pad) * _params_.width])
+			fixed (byte* dst = &_texData[glyph->X0 + glyph->Y0 * _params_.Width])
 			{
-				renderFont.font.fons__tt_renderGlyphBitmap(dst, (int)(gw - pad * 2), (int)(gh - pad * 2), (int)(_params_.width), (float)(scale), (float)(scale), (int)(g));
-			}
-			fixed (byte* dst = &texData[glyph->x0 + glyph->y0 * _params_.width])
-			{
-
-				for (y = (int)(0); (y) < (gh); y++)
+				for (y = 0; y < gh; y++)
 				{
-					dst[y * _params_.width] = (byte)(0);
-					dst[gw - 1 + y * _params_.width] = (byte)(0);
+					dst[y * _params_.Width] = 0;
+					dst[gw - 1 + y * _params_.Width] = 0;
 				}
-				for (x = (int)(0); (x) < (gw); x++)
-				{
-					dst[x] = (byte)(0);
-					dst[x + (gh - 1) * _params_.width] = (byte)(0);
-				}
-			}
 
-
-			if ((iblur) > (0))
-			{
-				nscratch = (int)(0);
-				fixed (byte* bdst = &texData[glyph->x0 + glyph->y0 * _params_.width])
+				for (x = 0; x < gw; x++)
 				{
-					fons__blur(bdst, (int)(gw), (int)(gh), (int)(_params_.width), (int)(iblur));
+					dst[x] = 0;
+					dst[x + (gh - 1) * _params_.Width] = 0;
 				}
 			}
 
-			dirtyRect[0] = (int)(fons__mini((int)(dirtyRect[0]), (int)(glyph->x0)));
-			dirtyRect[1] = (int)(fons__mini((int)(dirtyRect[1]), (int)(glyph->y0)));
-			dirtyRect[2] = (int)(fons__maxi((int)(dirtyRect[2]), (int)(glyph->x1)));
-			dirtyRect[3] = (int)(fons__maxi((int)(dirtyRect[3]), (int)(glyph->y1)));
+
+			if (iblur > 0)
+			{
+				_scratchCount = 0;
+				fixed (byte* bdst = &_texData[glyph->X0 + glyph->Y0 * _params_.Width])
+				{
+					Blur(bdst, gw, gh, _params_.Width, iblur);
+				}
+			}
+
+			_dirtyRect[0] = Math.Min(_dirtyRect[0], glyph->X0);
+			_dirtyRect[1] = Math.Min(_dirtyRect[1], glyph->Y0);
+			_dirtyRect[2] = Math.Max(_dirtyRect[2], glyph->X1);
+			_dirtyRect[3] = Math.Max(_dirtyRect[3], glyph->Y1);
 			return glyph;
 		}
 
-		public void fons__getQuad(Font font, int prevGlyphIndex, FontGlyph* glyph, float scale, float spacing, ref float x, ref float y, FontGlyphSquad* q)
+		private void GetQuad(Font font, int prevGlyphIndex, FontGlyph* glyph, float scale, float spacing,
+			ref float x, ref float y, FontGlyphSquad* q)
 		{
 			float rx = 0;
 			float ry = 0;
@@ -464,597 +782,201 @@ namespace FontStashSharp
 			float y1 = 0;
 			if (prevGlyphIndex != -1)
 			{
-				float adv = (float)(font.font.fons__tt_getGlyphKernAdvance((int)(prevGlyphIndex), (int)(glyph->index)) * scale);
-				x += (float)((int)(adv + spacing + 0.5f));
+				var adv = font._font.fons__tt_getGlyphKernAdvance(prevGlyphIndex, glyph->Index) * scale;
+				x += (int)(adv + spacing + 0.5f);
 			}
 
-			xoff = (float)((short)(glyph->xoff + 1));
-			yoff = (float)((short)(glyph->yoff + 1));
-			x0 = ((float)(glyph->x0 + 1));
-			y0 = ((float)(glyph->y0 + 1));
-			x1 = ((float)(glyph->x1 - 1));
-			y1 = ((float)(glyph->y1 - 1));
-			if ((_params_.flags & FONS_ZERO_TOPLEFT) != 0)
+			xoff = (short)(glyph->XOffset + 1);
+			yoff = (short)(glyph->YOffset + 1);
+			x0 = glyph->X0 + 1;
+			y0 = glyph->Y0 + 1;
+			x1 = glyph->X1 - 1;
+			y1 = glyph->Y1 - 1;
+			if ((_params_.Flags & FONS_ZERO_TOPLEFT) != 0)
 			{
-				rx = ((float)((int)(x + xoff)));
-				ry = ((float)((int)(y + yoff)));
-				q->x0 = (float)(rx);
-				q->y0 = (float)(ry);
-				q->x1 = (float)(rx + x1 - x0);
-				q->y1 = (float)(ry + y1 - y0);
-				q->s0 = (float)(x0 * itw);
-				q->t0 = (float)(y0 * ith);
-				q->s1 = (float)(x1 * itw);
-				q->t1 = (float)(y1 * ith);
+				rx = (int)(x + xoff);
+				ry = (int)(y + yoff);
+				q->X0 = rx;
+				q->Y0 = ry;
+				q->X1 = rx + x1 - x0;
+				q->Y1 = ry + y1 - y0;
+				q->S0 = x0 * _itw;
+				q->T0 = y0 * _ith;
+				q->S1 = x1 * _itw;
+				q->T1 = y1 * _ith;
 			}
 			else
 			{
-				rx = ((float)((int)(x + xoff)));
-				ry = ((float)((int)(y - yoff)));
-				q->x0 = (float)(rx);
-				q->y0 = (float)(ry);
-				q->x1 = (float)(rx + x1 - x0);
-				q->y1 = (float)(ry - y1 + y0);
-				q->s0 = (float)(x0 * itw);
-				q->t0 = (float)(y0 * ith);
-				q->s1 = (float)(x1 * itw);
-				q->t1 = (float)(y1 * ith);
+				rx = (int)(x + xoff);
+				ry = (int)(y - yoff);
+				q->X0 = rx;
+				q->Y0 = ry;
+				q->X1 = rx + x1 - x0;
+				q->Y1 = ry - y1 + y0;
+				q->S0 = x0 * _itw;
+				q->T0 = y0 * _ith;
+				q->S1 = x1 * _itw;
+				q->T1 = y1 * _ith;
 			}
 
-			x += (float)((int)(glyph->xadv / 10.0f + 0.5f));
+			x += (int)(glyph->XAdvance / 10.0f + 0.5f);
 		}
 
-		public void fons__flush(SpriteBatch batch)
+		private void Flush(SpriteBatch batch)
 		{
-			if (_texture == null)
-			{
-				_texture = new Texture2D(batch.GraphicsDevice, _params_.width, _params_.height);
-			}
+			if (Texture == null) Texture = new Texture2D(batch.GraphicsDevice, _params_.Width, _params_.Height);
 
-			if ((dirtyRect[0]) < (dirtyRect[2]) && ((dirtyRect[1]) < (dirtyRect[3])))
+			if (_dirtyRect[0] < _dirtyRect[2] && _dirtyRect[1] < _dirtyRect[3])
 			{
-				if (texData != null)
+				if (_texData != null)
 				{
-					var x = dirtyRect[0];
-					var y = dirtyRect[1];
-					var w = dirtyRect[2] - x;
-					var h = dirtyRect[3] - y;
+					var x = _dirtyRect[0];
+					var y = _dirtyRect[1];
+					var w = _dirtyRect[2] - x;
+					var h = _dirtyRect[3] - y;
 					var sz = w * h;
-					var b = new byte[_params_.width * _params_.height * 4];
+					var b = new byte[_params_.Width * _params_.Height * 4];
 
-					_texture.GetData<byte>(b);
+					Texture.GetData(b);
 					for (var xx = x; xx < x + w; ++xx)
-					{
 						for (var yy = y; yy < y + h; ++yy)
 						{
-							var destPos = yy * _params_.width + xx;
+							var destPos = yy * _params_.Width + xx;
 
-							for (var k = 0; k < 3; ++k)
-							{
-								b[destPos * 4 + k] = texData[destPos];
-							}
+							for (var k = 0; k < 3; ++k) b[destPos * 4 + k] = _texData[destPos];
 
-							b[destPos * 4 + 3] = texData[destPos];
+							b[destPos * 4 + 3] = _texData[destPos];
 						}
-					}
 
-					_texture.SetData(b);
+					Texture.SetData(b);
 				}
 
-				dirtyRect[0] = (int) (_params_.width);
-				dirtyRect[1] = (int) (_params_.height);
-				dirtyRect[2] = (int) (0);
-				dirtyRect[3] = (int) (0);
+				_dirtyRect[0] = _params_.Width;
+				_dirtyRect[1] = _params_.Height;
+				_dirtyRect[2] = 0;
+				_dirtyRect[3] = 0;
 			}
 
-			if ((nverts) > (0))
+			if (_vertsNumber > 0)
 			{
-				for (var i = 0; i < nverts; ++i)
+				for (var i = 0; i < _vertsNumber; ++i)
 				{
-					batch.Draw(_texture, verts[i], tcoords[i], new Color(colors[i]));
+					batch.Draw(Texture, _verts[i], _textureCoords[i], _colors[i]);
 				}
 
-				nverts = 0;
+				_vertsNumber = 0;
 			}
 		}
 
-		public void fons__vertex(Rectangle destRect, Rectangle srcRect, uint c)
+		private void AddVertex(Rectangle destRect, Rectangle srcRect, Color c)
 		{
-			verts[nverts] = destRect;
-			tcoords[nverts] = srcRect;
-			colors[nverts] = c;
-			nverts++;
+			_verts[_vertsNumber] = destRect;
+			_textureCoords[_vertsNumber] = srcRect;
+			_colors[_vertsNumber] = c;
+			_vertsNumber++;
 		}
 
-		public float fons__getVertAlign(Font font, int align, short isize)
+		private float GetVertAlign(Font font, int align, short isize)
 		{
-			if ((_params_.flags & FONS_ZERO_TOPLEFT) != 0)
+			if ((_params_.Flags & FONS_ZERO_TOPLEFT) != 0)
 			{
 				if ((align & FONS_ALIGN_TOP) != 0)
-				{
-					return (float)(font.ascender * (float)(isize) / 10.0f);
-				}
-				else if ((align & FONS_ALIGN_MIDDLE) != 0)
-				{
-					return (float)((font.ascender + font.descender) / 2.0f * (float)(isize) / 10.0f);
-				}
-				else if ((align & FONS_ALIGN_BASELINE) != 0)
-				{
-					return (float)(0.0f);
-				}
-				else if ((align & FONS_ALIGN_BOTTOM) != 0)
-				{
-					return (float)(font.descender * (float)(isize) / 10.0f);
-				}
+					return font.Ascender * isize / 10.0f;
+				if ((align & FONS_ALIGN_MIDDLE) != 0)
+					return (font.Ascender + font.Descender) / 2.0f * isize / 10.0f;
+				if ((align & FONS_ALIGN_BASELINE) != 0)
+					return 0.0f;
+				if ((align & FONS_ALIGN_BOTTOM) != 0) return font.Descender * isize / 10.0f;
 			}
 			else
 			{
 				if ((align & FONS_ALIGN_TOP) != 0)
-				{
-					return (float)(-font.ascender * (float)(isize) / 10.0f);
-				}
-				else if ((align & FONS_ALIGN_MIDDLE) != 0)
-				{
-					return (float)(-(font.ascender + font.descender) / 2.0f * (float)(isize) / 10.0f);
-				}
-				else if ((align & FONS_ALIGN_BASELINE) != 0)
-				{
-					return (float)(0.0f);
-				}
-				else if ((align & FONS_ALIGN_BOTTOM) != 0)
-				{
-					return (float)(-font.descender * (float)(isize) / 10.0f);
-				}
+					return -font.Ascender * isize / 10.0f;
+				if ((align & FONS_ALIGN_MIDDLE) != 0)
+					return -(font.Ascender + font.Descender) / 2.0f * isize / 10.0f;
+				if ((align & FONS_ALIGN_BASELINE) != 0)
+					return 0.0f;
+				if ((align & FONS_ALIGN_BOTTOM) != 0) return -font.Descender * isize / 10.0f;
 			}
 
-			return (float)(0.0);
+			return (float)0.0;
 		}
 
-		public float fonsDrawText(SpriteBatch batch, float x, float y, StringSegment str)
+		private static FontGlyph* AllocGlyph(Font font)
 		{
-			if (str.IsNullOrEmpty)
+			if (font.GlyphsNumber + 1 > font.GlyphsCount)
 			{
-				return 0.0f;
-			}
-
-			FontSystemState state = fons__getState();
-			FontGlyph* glyph = null;
-			FontGlyphSquad q = new FontGlyphSquad();
-			int prevGlyphIndex = (int) (-1);
-			short isize = (short) (state.size * 10.0f);
-			short iblur = (short) (state.blur);
-			float scale = 0;
-			Font font;
-			float width = 0;
-			if (((state.font) < (0)) || ((state.font) >= (nfonts)))
-				return (float) (x);
-			font = fonts[state.font];
-			if ((font.data) == null)
-				return (float) (x);
-			scale = (float) (font.font.fons__tt_getPixelHeightScale((float) ((float) (isize) / 10.0f)));
-
-			if ((state.align & FONS_ALIGN_LEFT) != 0)
-			{
-			}
-			else if ((state.align & FONS_ALIGN_RIGHT) != 0)
-			{
-				var bounds = new Bounds();
-				width = (float) (fonsTextBounds((float) (x), (float) (y), str, ref bounds));
-				x -= (float) (width);
-			}
-			else if ((state.align & FONS_ALIGN_CENTER) != 0)
-			{
-				var bounds = new Bounds();
-				width = (float) (fonsTextBounds((float) (x), (float) (y), str, ref bounds));
-				x -= (float) (width * 0.5f);
-			}
-
-			y += (float) (fons__getVertAlign(font, (int) (state.align), (short) (isize)));
-			for (var i = 0; i < str.Length; ++i)
-			{
-				var codepoint = str[i];
-				glyph = fons__getGlyph(font, (uint) (codepoint), (short) (isize), (short) (iblur),
-					(int) (FONS_GLYPH_BITMAP_REQUIRED));
-				if (glyph != null)
-				{
-					fons__getQuad(font, (int) (prevGlyphIndex), glyph, (float) (scale), (float) (state.spacing), ref x,
-						ref y, &q);
-					if ((nverts + 6) > (1024))
-						fons__flush(batch);
-
-					fons__vertex(new Rectangle((int) q.x0, (int) q.y0, (int) (q.x1 - q.x0), (int) (q.y1 - q.y0)),
-						new Rectangle((int) (q.s0 * _params_.width),
-							(int) (q.t0 * _params_.height),
-							(int) ((q.s1 - q.s0) * _params_.width),
-							(int) ((q.t1 - q.t0) * _params_.height)),
-						state.color);
-				}
-
-				prevGlyphIndex = (int) (glyph != null ? glyph->index : -1);
-			}
-
-			fons__flush(batch);
-			return (float) (x);
-		}
-
-		public int fonsTextIterInit(FontTextIterator iter, float x, float y, StringSegment str, int bitmapOption)
-		{
-			FontSystemState state = fons__getState();
-			float width = 0;
-
-			if (((state.font) < (0)) || ((state.font) >= (nfonts)))
-				return (int)(0);
-			iter.font = fonts[state.font];
-			if ((iter.font.data) == null)
-				return (int)(0);
-			iter.isize = ((short)(state.size * 10.0f));
-			iter.iblur = ((short)(state.blur));
-			iter.scale = (float)(iter.font.font.fons__tt_getPixelHeightScale((float)((float)(iter.isize) / 10.0f)));
-			if ((state.align & FONS_ALIGN_LEFT) != 0)
-			{
-			}
-			else if ((state.align & FONS_ALIGN_RIGHT) != 0)
-			{
-				var bounds = new Bounds();
-				width = (float)(fonsTextBounds((float)(x), (float)(y), str, ref bounds));
-				x -= (float)(width);
-			}
-			else if ((state.align & FONS_ALIGN_CENTER) != 0)
-			{
-				var bounds = new Bounds();
-				width = (float)(fonsTextBounds((float)(x), (float)(y), str, ref bounds));
-				x -= (float)(width * 0.5f);
-			}
-
-			y += (float)(fons__getVertAlign(iter.font, (int)(state.align), (short)(iter.isize)));
-			iter.x = (float)(iter.nextx = (float)(x));
-			iter.y = (float)(iter.nexty = (float)(y));
-			iter.spacing = (float)(state.spacing);
-			iter.str = str;
-			iter.next = str;
-			iter.codepoint = (uint)(0);
-			iter.prevGlyphIndex = (int)(-1);
-			iter.bitmapOption = (int)(bitmapOption);
-			return (int)(1);
-		}
-
-		public bool fonsTextIterNext(FontTextIterator iter, FontGlyphSquad* quad)
-		{
-			iter.str = iter.next;
-
-			if (iter.str.IsNullOrEmpty)
-			{
-				return false;
-			}
-
-			iter.codepoint = iter.str[0];
-			iter.x = (float)(iter.nextx);
-			iter.y = (float)(iter.nexty);
-			var glyph = fons__getGlyph(iter.font, (uint)(iter.codepoint), (short)(iter.isize), (short)(iter.iblur), (int)(iter.bitmapOption));
-			if (glyph != null)
-				fons__getQuad(iter.font, (int)(iter.prevGlyphIndex), glyph, (float)(iter.scale), (float)(iter.spacing), ref iter.nextx, ref iter.nexty, quad);
-			iter.prevGlyphIndex = (int)(glyph != null ? glyph->index : -1);
-
-			++iter.next.Location;
-
-			return true;
-		}
-
-		public float fonsTextBounds(float x, float y, StringSegment str, ref Bounds bounds)
-		{
-			FontSystemState state = fons__getState();
-			FontGlyphSquad q = new FontGlyphSquad();
-			FontGlyph* glyph = null;
-			int prevGlyphIndex = (int)(-1);
-			short isize = (short)(state.size * 10.0f);
-			short iblur = (short)(state.blur);
-			float scale = 0;
-			Font font;
-			float startx = 0;
-			float advance = 0;
-			float minx = 0;
-			float miny = 0;
-			float maxx = 0;
-			float maxy = 0;
-			if (((state.font) < (0)) || ((state.font) >= (nfonts)))
-				return (float)(0);
-			font = fonts[state.font];
-			if ((font.data) == null)
-				return (float)(0);
-			scale = (float)(font.font.fons__tt_getPixelHeightScale((float)((float)(isize) / 10.0f)));
-			y += (float)(fons__getVertAlign(font, (int)(state.align), (short)(isize)));
-			minx = (float)(maxx = (float)(x));
-			miny = (float)(maxy = (float)(y));
-			startx = (float)(x);
-			for (var i = 0; i < str.Length; ++i)
-			{
-				var codepoint = str[i];
-				glyph = fons__getGlyph(font, (uint)(codepoint), (short)(isize), (short)(iblur), (int)(FONS_GLYPH_BITMAP_OPTIONAL));
-				if (glyph != null)
-				{
-					fons__getQuad(font, (int)(prevGlyphIndex), glyph, (float)(scale), (float)(state.spacing), ref x, ref y, &q);
-					if ((q.x0) < (minx))
-						minx = (float)(q.x0);
-					if ((q.x1) > (maxx))
-						maxx = (float)(q.x1);
-					if ((_params_.flags & FONS_ZERO_TOPLEFT) != 0)
-					{
-						if ((q.y0) < (miny))
-							miny = (float)(q.y0);
-						if ((q.y1) > (maxy))
-							maxy = (float)(q.y1);
-					}
-					else
-					{
-						if ((q.y1) < (miny))
-							miny = (float)(q.y1);
-						if ((q.y0) > (maxy))
-							maxy = (float)(q.y0);
-					}
-				}
-				prevGlyphIndex = (int)(glyph != null ? glyph->index : -1);
-			}
-			advance = (float)(x - startx);
-			if ((state.align & FONS_ALIGN_LEFT) != 0)
-			{
-			}
-			else if ((state.align & FONS_ALIGN_RIGHT) != 0)
-			{
-				minx -= (float)(advance);
-				maxx -= (float)(advance);
-			}
-			else if ((state.align & FONS_ALIGN_CENTER) != 0)
-			{
-				minx -= (float)(advance * 0.5f);
-				maxx -= (float)(advance * 0.5f);
-			}
-
-			bounds.b1 = (float)(minx);
-			bounds.b2 = (float)(miny);
-			bounds.b3 = (float)(maxx);
-			bounds.b4 = (float)(maxy);
-
-			return (float)(advance);
-		}
-
-		public void fonsVertMetrics(out float ascender, out float descender, out float lineh)
-		{
-			ascender = descender = lineh = 0;
-			Font font;
-			FontSystemState state = fons__getState();
-			short isize = 0;
-			if (((state.font) < (0)) || ((state.font) >= (nfonts)))
-				return;
-			font = fonts[state.font];
-			isize = ((short)(state.size * 10.0f));
-			if ((font.data) == null)
-				return;
-
-			ascender = (float)(font.ascender * isize / 10.0f);
-			descender = (float)(font.descender * isize / 10.0f);
-			lineh = (float)(font.lineh * isize / 10.0f);
-		}
-
-		public void fonsLineBounds(float y, ref float miny, ref float maxy)
-		{
-			Font font;
-			FontSystemState state = fons__getState();
-			short isize = 0;
-			if (((state.font) < (0)) || ((state.font) >= (nfonts)))
-				return;
-			font = fonts[state.font];
-			isize = ((short)(state.size * 10.0f));
-			if ((font.data) == null)
-				return;
-			y += (float)(fons__getVertAlign(font, (int)(state.align), (short)(isize)));
-			if ((_params_.flags & FONS_ZERO_TOPLEFT) != 0)
-			{
-				miny = (float)(y - font.ascender * (float)(isize) / 10.0f);
-				maxy = (float)(miny + font.lineh * isize / 10.0f);
-			}
-			else
-			{
-				maxy = (float)(y + font.descender * (float)(isize) / 10.0f);
-				miny = (float)(maxy - font.lineh * isize / 10.0f);
-			}
-
-		}
-
-		public byte[] fonsGetTextureData(int* width, int* height)
-		{
-			if (width != null)
-				*width = (int)(_params_.width);
-			if (height != null)
-				*height = (int)(_params_.height);
-			return texData;
-		}
-
-		public int fonsValidateTexture(int* dirty)
-		{
-			if (((dirtyRect[0]) < (dirtyRect[2])) && ((dirtyRect[1]) < (dirtyRect[3])))
-			{
-				dirty[0] = (int)(dirtyRect[0]);
-				dirty[1] = (int)(dirtyRect[1]);
-				dirty[2] = (int)(dirtyRect[2]);
-				dirty[3] = (int)(dirtyRect[3]);
-				dirtyRect[0] = (int)(_params_.width);
-				dirtyRect[1] = (int)(_params_.height);
-				dirtyRect[2] = (int)(0);
-				dirtyRect[3] = (int)(0);
-				return (int)(1);
-			}
-
-			return (int)(0);
-		}
-
-		public void fonsSetErrorCallback(FontSystem.handleErrorDelegate callback, void* uptr)
-		{
-			handleError = callback;
-			errorUptr = uptr;
-		}
-
-		public void fonsGetAtlasSize(int* width, int* height)
-		{
-			*width = (int)(_params_.width);
-			*height = (int)(_params_.height);
-		}
-
-		public int fonsExpandAtlas(SpriteBatch batch, int width, int height)
-		{
-			int i = 0;
-			int maxy = (int)(0);
-			width = (int)(fons__maxi((int)(width), (int)(_params_.width)));
-			height = (int)(fons__maxi((int)(height), (int)(_params_.height)));
-			if (((width) == (_params_.width)) && ((height) == (_params_.height)))
-				return (int)(1);
-			fons__flush(batch);
-
-			var data = new byte[width * height];
-			for (i = (int)(0); (i) < (_params_.height); i++)
-			{
-				fixed (byte* dst = &data[i * width])
-				{
-					fixed (byte* src = &texData[i * _params_.width])
-					{
-						CRuntime.memcpy(dst, src, (ulong)(_params_.width));
-						if ((width) > (_params_.width))
-							CRuntime.memset(dst + _params_.width, (int)(0), (ulong)(width - _params_.width));
-					}
-				}
-			}
-			if ((height) > (_params_.height))
-			{
-				Array.Clear(data, _params_.height * width, (height - _params_.height) * width);
-			}
-
-			texData = data;
-			atlas.fons__atlasExpand((int)(width), (int)(height));
-			for (i = (int)(0); (i) < (atlas.nnodes); i++)
-			{
-				maxy = (int)(fons__maxi((int)(maxy), (int)(atlas.nodes[i].y)));
-			}
-			dirtyRect[0] = (int)(0);
-			dirtyRect[1] = (int)(0);
-			dirtyRect[2] = (int)(_params_.width);
-			dirtyRect[3] = (int)(maxy);
-			_params_.width = (int)(width);
-			_params_.height = (int)(height);
-			itw = (float)(1.0f / _params_.width);
-			ith = (float)(1.0f / _params_.height);
-			return (int)(1);
-		}
-
-		public int fonsResetAtlas(SpriteBatch batch, int width, int height)
-		{
-			int i = 0;
-			int j = 0;
-			fons__flush(batch);
-
-			atlas.fons__atlasReset((int)(width), (int)(height));
-			texData = new byte[width * height];
-			Array.Clear(texData, 0, texData.Length);
-			dirtyRect[0] = (int)(width);
-			dirtyRect[1] = (int)(height);
-			dirtyRect[2] = (int)(0);
-			dirtyRect[3] = (int)(0);
-			for (i = (int)(0); (i) < (nfonts); i++)
-			{
-				Font font = fonts[i];
-				font.nglyphs = (int)(0);
-				for (j = (int)(0); (j) < (256); j++)
-				{
-					font.lut[j] = (int)(-1);
-				}
-			}
-			_params_.width = (int)(width);
-			_params_.height = (int)(height);
-			itw = (float)(1.0f / _params_.width);
-			ith = (float)(1.0f / _params_.height);
-			fons__addWhiteRect((int)(2), (int)(2));
-			return (int)(1);
-		}
-
-		public static FontGlyph* fons__allocGlyph(Font font)
-		{
-			if ((font.nglyphs + 1) > (font.cglyphs))
-			{
-				font.cglyphs = (int)((font.cglyphs) == (0) ? 8 : font.cglyphs * 2);
-				font.glyphs = (FontGlyph*)(CRuntime.realloc(font.glyphs, (ulong)(sizeof(FontGlyph) * font.cglyphs)));
-				if ((font.glyphs) == null)
+				font.GlyphsCount = font.GlyphsCount == 0 ? 8 : font.GlyphsCount * 2;
+				font.Glyphs = (FontGlyph*)CRuntime.realloc(font.Glyphs, (ulong)(sizeof(FontGlyph) * font.GlyphsCount));
+				if (font.Glyphs == null)
 					return null;
 			}
 
-			font.nglyphs++;
-			return &font.glyphs[font.nglyphs - 1];
+			font.GlyphsNumber++;
+			return &font.Glyphs[font.GlyphsNumber - 1];
 		}
 
-		public static void fons__blurCols(byte* dst, int w, int h, int dstStride, int alpha)
+		private static void BlurCols(byte* dst, int w, int h, int dstStride, int alpha)
 		{
-			int x = 0;
-			int y = 0;
-			for (y = (int)(0); (y) < (h); y++)
+			var x = 0;
+			var y = 0;
+			for (y = 0; y < h; y++)
 			{
-				int z = (int)(0);
-				for (x = (int)(1); (x) < (w); x++)
+				var z = 0;
+				for (x = 1; x < w; x++)
 				{
-					z += (int)((alpha * (((int)(dst[x]) << 7) - z)) >> 16);
-					dst[x] = ((byte)(z >> 7));
+					z += (alpha * ((dst[x] << 7) - z)) >> 16;
+					dst[x] = (byte)(z >> 7);
 				}
-				dst[w - 1] = (byte)(0);
-				z = (int)(0);
-				for (x = (int)(w - 2); (x) >= (0); x--)
+
+				dst[w - 1] = 0;
+				z = 0;
+				for (x = w - 2; x >= 0; x--)
 				{
-					z += (int)((alpha * (((int)(dst[x]) << 7) - z)) >> 16);
-					dst[x] = ((byte)(z >> 7));
+					z += (alpha * ((dst[x] << 7) - z)) >> 16;
+					dst[x] = (byte)(z >> 7);
 				}
-				dst[0] = (byte)(0);
+
+				dst[0] = 0;
 				dst += dstStride;
 			}
 		}
 
-		public static void fons__blurRows(byte* dst, int w, int h, int dstStride, int alpha)
+		private static void BlurRows(byte* dst, int w, int h, int dstStride, int alpha)
 		{
-			int x = 0;
-			int y = 0;
-			for (x = (int)(0); (x) < (w); x++)
+			var x = 0;
+			var y = 0;
+			for (x = 0; x < w; x++)
 			{
-				int z = (int)(0);
-				for (y = (int)(dstStride); (y) < (h * dstStride); y += (int)(dstStride))
+				var z = 0;
+				for (y = dstStride; y < h * dstStride; y += dstStride)
 				{
-					z += (int)((alpha * (((int)(dst[y]) << 7) - z)) >> 16);
-					dst[y] = ((byte)(z >> 7));
+					z += (alpha * ((dst[y] << 7) - z)) >> 16;
+					dst[y] = (byte)(z >> 7);
 				}
-				dst[(h - 1) * dstStride] = (byte)(0);
-				z = (int)(0);
-				for (y = (int)((h - 2) * dstStride); (y) >= (0); y -= (int)(dstStride))
+
+				dst[(h - 1) * dstStride] = 0;
+				z = 0;
+				for (y = (h - 2) * dstStride; y >= 0; y -= dstStride)
 				{
-					z += (int)((alpha * (((int)(dst[y]) << 7) - z)) >> 16);
-					dst[y] = ((byte)(z >> 7));
+					z += (alpha * ((dst[y] << 7) - z)) >> 16;
+					dst[y] = (byte)(z >> 7);
 				}
-				dst[0] = (byte)(0);
+
+				dst[0] = 0;
 				dst++;
 			}
 		}
 
-		public static uint fons__hashint(uint a)
+		private static int HashInt(int a)
 		{
-			a += (uint)(~(a << 15));
-			a ^= (uint)(a >> 10);
-			a += (uint)(a << 3);
-			a ^= (uint)(a >> 6);
-			a += (uint)(~(a << 11));
-			a ^= (uint)(a >> 16);
-			return (uint)(a);
-		}
-
-		public static int fons__mini(int a, int b)
-		{
-			return (int)((a) < (b) ? a : b);
-		}
-
-		public static int fons__maxi(int a, int b)
-		{
-			return (int)((a) > (b) ? a : b);
+			a += ~(a << 15);
+			a ^= a >> 10;
+			a += a << 3;
+			a ^= a >> 6;
+			a += ~(a << 11);
+			a ^= a >> 16;
+			return a;
 		}
 	}
 }

@@ -5,8 +5,8 @@ namespace FontStashSharp
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct FontAtlasNode
 	{
-		public short x;
-		public short y;
-		public short width;
+		public short X;
+		public short Y;
+		public short Width;
 	}
 }

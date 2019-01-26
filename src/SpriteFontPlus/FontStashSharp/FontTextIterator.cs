@@ -2,18 +2,18 @@
 {
 	internal class FontTextIterator
 	{
-		public float x;
-		public float y;
-		public float nextx;
-		public float nexty;
-		public float scale;
-		public float spacing;
-		public uint codepoint;
-		public short isize;
-		public short iblur;
-		public Font font;
-		public int prevGlyphIndex;
-		public StringSegment str, next;
-		public int bitmapOption;
+		public float X;
+		public float Y;
+		public float NextX;
+		public float NextY;
+		public float Scale;
+		public float Spacing;
+		public int Codepoint;
+		public short iSize;
+		public short iBlur;
+		public Font Font;
+		public int PrevGlyphIndex;
+		public StringSegment Str, Next;
+		public int BitmapOption;
 	}
 }

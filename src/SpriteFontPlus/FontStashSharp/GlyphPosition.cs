@@ -5,9 +5,9 @@ namespace FontStashSharp
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct GlyphPosition
 	{
-		public StringSegment str;
-		public float x;
-		public float minx;
-		public float maxx;
+		public StringSegment Str;
+		public float X;
+		public float MinX;
+		public float MaxX;
 	}
 }

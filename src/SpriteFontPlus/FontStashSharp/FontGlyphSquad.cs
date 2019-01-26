@@ -5,13 +5,13 @@ namespace FontStashSharp
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct FontGlyphSquad
 	{
-		public float x0;
-		public float y0;
-		public float s0;
-		public float t0;
-		public float x1;
-		public float y1;
-		public float s1;
-		public float t1;
+		public float X0;
+		public float Y0;
+		public float S0;
+		public float T0;
+		public float X1;
+		public float Y1;
+		public float S1;
+		public float T1;
 	}
 }

@@ -1,24 +1,26 @@
-﻿namespace FontStashSharp
+﻿using Microsoft.Xna.Framework;
+
+namespace FontStashSharp
 {
 	internal class FontSystemState
 	{
-		public int font;
-		public int align;
-		public float size;
-		public uint color;
-		public float blur;
-		public float spacing;
+		public int FontId;
+		public int Alignment;
+		public float Size;
+		public Color Color;
+		public float Blur;
+		public float Spacing;
 
 		public FontSystemState Clone()
 		{
 			return new FontSystemState
 			{
-				font = font,
-				align = align,
-				size = size,
-				color = color,
-				blur = blur,
-				spacing = spacing
+				FontId = FontId,
+				Alignment = Alignment,
+				Size = Size,
+				Color = Color,
+				Blur = Blur,
+				Spacing = Spacing
 			};
 		}
 	}

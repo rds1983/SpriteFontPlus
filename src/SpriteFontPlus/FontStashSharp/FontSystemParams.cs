@@ -2,8 +2,8 @@
 {
 	internal class FontSystemParams
 	{
-		public int width;
-		public int height;
-		public byte flags;
+		public int Width;
+		public int Height;
+		public byte Flags;
 	}
 }

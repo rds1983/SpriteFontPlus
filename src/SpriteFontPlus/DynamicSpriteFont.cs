@@ -6,15 +6,60 @@ namespace SpriteFontPlus
 {
 	public class DynamicSpriteFont
 	{
-		private readonly FontSystem _fontSystem;
-		private readonly int _fontId;
+		private static readonly string DefaultFontName = string.Empty;
 
+		private readonly FontSystem _fontSystem;
+		private readonly int _defaultFontId;
 		public Texture2D Texture
 		{
 			get { return _fontSystem.Texture; }
 		}
 
-		private DynamicSpriteFont(byte[] ttf, int textureWidth, int textureHeight)
+		public float Size
+		{
+			get
+			{
+				return _fontSystem.Size;
+			}
+			set
+			{
+				_fontSystem.Size = value;
+			}
+		}
+
+		public float Spacing
+		{
+			get
+			{
+				return _fontSystem.Spacing;
+			}
+			set
+			{
+				_fontSystem.Spacing = value;
+			}
+		}
+
+		public int FontId
+		{
+			get
+			{
+				return _fontSystem.FontId;
+			}
+			set
+			{
+				_fontSystem.FontId = value;
+			}
+		}
+
+		public int DefaultFontId
+		{
+			get
+			{
+				return _defaultFontId;
+			}
+		}
+
+		private DynamicSpriteFont(byte[] ttf, float defaultSize, int textureWidth, int textureHeight)
 		{
 			var fontParams = new FontSystemParams
 			{
@@ -25,26 +70,35 @@ namespace SpriteFontPlus
 
 			_fontSystem = new FontSystem(fontParams);
 
-			_fontId = _fontSystem.AddFontMem(string.Empty, ttf);
+			_defaultFontId = _fontSystem.AddFontMem(DefaultFontName, ttf);
+			Size = defaultSize;
 		}
 
-		public float DrawString(SpriteBatch batch, float pixelHeight, string _string_, Vector2 pos, Color color)
+		public float DrawString(SpriteBatch batch, string _string_, Vector2 pos, Color color)
 		{
-			_fontSystem.SetFont(_fontId);
-			_fontSystem.SetSize(pixelHeight);
-			_fontSystem.SetColor(color);
+			var font = _fontSystem.Fonts[FontId];
+			var scale = font._font.fons__tt_getPixelHeightScale(Size);
 
-			var font = _fontSystem.Fonts[_fontSystem.GetState().FontId];
-			var scale = font._font.fons__tt_getPixelHeightScale((float)(pixelHeight));
+			_fontSystem.Color = color;
 
 			var yOff = font.Ascent * scale;
 
 			return _fontSystem.DrawText(batch, pos.X, pos.Y + yOff, _string_);
 		}
 
-		public static DynamicSpriteFont FromTtf(byte[] ttf, int textureWidth = 1024, int textureHeight = 1024)
+		public int AddTtf(string name, byte[] ttf)
 		{
-			return new DynamicSpriteFont(ttf, textureWidth, textureHeight);
+			return _fontSystem.AddFontMem(name, ttf);
+		}
+
+		public int? GetFontIdByName(string name)
+		{
+			return _fontSystem.GetFontByName(name);
+		}
+
+		public static DynamicSpriteFont FromTtf(byte[] ttf, float defaultSize, int textureWidth = 1024, int textureHeight = 1024)
+		{
+			return new DynamicSpriteFont(ttf, defaultSize, textureWidth, textureHeight);
 		}
 	}
 }

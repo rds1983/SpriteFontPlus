@@ -50,6 +50,77 @@ namespace FontStashSharp
 			}
 		}
 
+		public float Size
+		{
+			get
+			{
+				return GetState().Size;
+			}
+			set
+			{
+				GetState().Size = value;
+			}
+		}
+
+		public Color Color
+		{
+			get
+			{
+				return GetState().Color;
+			}
+			set
+			{
+				GetState().Color = value;
+			}
+		}
+
+		public float Spacing
+		{
+			get
+			{
+				return GetState().Spacing;
+			}
+			set
+			{
+				GetState().Spacing = value;
+			}
+		}
+
+		public float BlurValue
+		{
+			get
+			{
+				return GetState().Blur;
+			}
+			set
+			{
+				GetState().Blur = value;
+			}
+		}
+
+		public int Alignment
+		{
+			get
+			{
+				return GetState().Alignment;
+			}
+			set
+			{
+				GetState().Alignment = value;
+			}
+		}
+		public int FontId
+		{
+			get
+			{
+				return GetState().FontId;
+			}
+			set
+			{
+				GetState().FontId = value;
+			}
+		}
+
 		public FontSystem(FontSystemParams p)
 		{
 			_params_ = p;
@@ -123,36 +194,6 @@ namespace FontStashSharp
 			return 0;
 		}
 
-		public void SetSize(float size)
-		{
-			GetState().Size = size;
-		}
-
-		public void SetColor(Color color)
-		{
-			GetState().Color = color;
-		}
-
-		public void SetSpacing(float spacing)
-		{
-			GetState().Spacing = spacing;
-		}
-
-		public void SetBlur(float blur)
-		{
-			GetState().Blur = blur;
-		}
-
-		public void fonsSetAlign(int align)
-		{
-			GetState().Alignment = align;
-		}
-
-		public void SetFont(int fontId)
-		{
-			GetState().FontId = fontId;
-		}
-
 		public void PushState()
 		{
 			if (_statesCount >= 20)
@@ -223,13 +264,13 @@ namespace FontStashSharp
 			return -1;
 		}
 
-		public int GetFontByName(string name)
+		public int? GetFontByName(string name)
 		{
 			var i = 0;
 			for (i = 0; i < _fontsNumber; i++)
 				if (_fonts[i].Name == name)
 					return i;
-			return -1;
+			return null;
 		}
 
 		public float DrawText(SpriteBatch batch, float x, float y, StringSegment str)
@@ -269,9 +310,9 @@ namespace FontStashSharp
 			}
 
 			y += GetVertAlign(font, state.Alignment, isize);
-			for (var i = 0; i < str.Length; ++i)
+			for (int i = 0; i < str.Length; i += Char.IsSurrogatePair(str.String, i + str.Location) ? 2 : 1)
 			{
-				var codepoint = str[i];
+				var codepoint = Char.ConvertToUtf32(str.String, i + str.Location);
 				glyph = GetGlyph(font, codepoint, isize, iblur,
 					FONS_GLYPH_BITMAP_REQUIRED);
 				if (glyph != null)
@@ -341,18 +382,26 @@ namespace FontStashSharp
 		{
 			iter.Str = iter.Next;
 
-			if (iter.Str.IsNullOrEmpty) return false;
+			if (iter.Str.IsNullOrEmpty)
+				return false;
 
-			iter.Codepoint = iter.Str[0];
+			iter.Codepoint = Char.ConvertToUtf32(iter.Str.String, iter.Str.Location);
 			iter.X = iter.NextX;
 			iter.Y = iter.NextY;
 			var glyph = GetGlyph(iter.Font, iter.Codepoint, iter.iSize, iter.iBlur, iter.BitmapOption);
 			if (glyph != null)
-				GetQuad(iter.Font, iter.PrevGlyphIndex, glyph, iter.Scale, iter.Spacing, ref iter.NextX,
-					ref iter.NextY, quad);
+				GetQuad(iter.Font, iter.PrevGlyphIndex, glyph, iter.Scale, iter.Spacing, ref iter.NextX, ref iter.NextY,
+					quad);
 			iter.PrevGlyphIndex = glyph != null ? glyph->Index : -1;
 
-			++iter.Next.Location;
+			if (Char.IsSurrogatePair(iter.Str.String, iter.Str.Location))
+			{
+				iter.Next.Location += 2;
+			}
+			else
+			{
+				++iter.Next.Location;
+			}
 
 			return true;
 		}
@@ -383,9 +432,9 @@ namespace FontStashSharp
 			minx = maxx = x;
 			miny = maxy = y;
 			startx = x;
-			for (var i = 0; i < str.Length; ++i)
+			for (int i = 0; i < str.Length; i += Char.IsSurrogatePair(str.String, i + str.Location) ? 2 : 1)
 			{
-				var codepoint = str[i];
+				var codepoint = Char.ConvertToUtf32(str.String, i + str.Location);
 				glyph = GetGlyph(font, codepoint, isize, iblur, FONS_GLYPH_BITMAP_OPTIONAL);
 				if (glyph != null)
 				{

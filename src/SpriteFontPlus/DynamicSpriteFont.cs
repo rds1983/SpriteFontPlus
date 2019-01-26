@@ -74,7 +74,7 @@ namespace SpriteFontPlus
 			Size = defaultSize;
 		}
 
-		public float DrawString(SpriteBatch batch, string _string_, Vector2 pos, Color color)
+		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color color)
 		{
 			var font = _fontSystem.Fonts[FontId];
 			var scale = font._font.fons__tt_getPixelHeightScale(Size);
@@ -83,7 +83,7 @@ namespace SpriteFontPlus
 
 			var yOff = font.Ascent * scale;
 
-			return _fontSystem.DrawText(batch, pos.X, pos.Y + yOff, _string_);
+			return _fontSystem.DrawText(batch, pos.X, pos.Y + yOff, text);
 		}
 
 		public int AddTtf(string name, byte[] ttf)
@@ -94,6 +94,15 @@ namespace SpriteFontPlus
 		public int? GetFontIdByName(string name)
 		{
 			return _fontSystem.GetFontByName(name);
+		}
+
+
+		public Vector2 MeasureString(string text)
+		{
+			Bounds bounds = new Bounds();
+			 _fontSystem.TextBounds(0, 0, text, ref bounds);
+
+			 return new Vector2(bounds.X2 - bounds.X, bounds.Y2 - bounds.Y);
 		}
 
 		public static DynamicSpriteFont FromTtf(byte[] ttf, float defaultSize, int textureWidth = 1024, int textureHeight = 1024)

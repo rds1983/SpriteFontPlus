@@ -97,7 +97,7 @@ namespace SpriteFontPlus
 			Bounds bounds = new Bounds();
 			_fontSystem.TextBounds(0, 0, text, ref bounds);
 
-			return new Vector2(bounds.X2 - bounds.X, bounds.Y2 - bounds.Y);
+			return new Vector2(bounds.X2, bounds.Y2);
 		}
 
 		public Rectangle GetTextBounds(Vector2 position, string text)

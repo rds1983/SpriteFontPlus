@@ -15,6 +15,18 @@
 			"console": "internalConsole",
 			"stopAtEntry": false,
 			"internalConsoleOptions": "openOnSessionStart"
-		}
+		},
+		{
+			"name": "TtfBaking",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "FNA Debug",
+			"program": "${workspaceFolder}/samples/SpriteFontPlus.Samples.TtfBaking/bin/FNA/Debug/netcoreapp2.1/SpriteFontPlus.Samples.TtfBaking.dll",
+			"args": [],
+			"cwd": "${workspaceFolder}/samples/SpriteFontPlus.Samples.TtfBaking/bin/FNA/Debug/netcoreapp2.1/",
+			"console": "internalConsole",
+			"stopAtEntry": false,
+			"internalConsoleOptions": "openOnSessionStart"
+		}		
 	]
 }

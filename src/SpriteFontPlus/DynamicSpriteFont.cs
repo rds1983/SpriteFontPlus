@@ -69,6 +69,7 @@ namespace SpriteFontPlus
 			};
 
 			_fontSystem = new FontSystem(fontParams);
+			_fontSystem.Alignment = FontSystem.FONS_ALIGN_TOP;
 
 			_defaultFontId = _fontSystem.AddFontMem(DefaultFontName, ttf);
 			Size = defaultSize;
@@ -76,14 +77,9 @@ namespace SpriteFontPlus
 
 		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color color)
 		{
-			var font = _fontSystem.Fonts[FontId];
-			var scale = font._font.fons__tt_getPixelHeightScale(Size);
-
 			_fontSystem.Color = color;
 
-			var yOff = font.Ascent * scale;
-
-			return _fontSystem.DrawText(batch, pos.X, pos.Y + yOff, text);
+			return _fontSystem.DrawText(batch, pos.X, pos.Y, text);
 		}
 
 		public int AddTtf(string name, byte[] ttf)
@@ -96,13 +92,20 @@ namespace SpriteFontPlus
 			return _fontSystem.GetFontByName(name);
 		}
 
-
 		public Vector2 MeasureString(string text)
 		{
 			Bounds bounds = new Bounds();
-			 _fontSystem.TextBounds(0, 0, text, ref bounds);
+			_fontSystem.TextBounds(0, 0, text, ref bounds);
 
-			 return new Vector2(bounds.X2 - bounds.X, bounds.Y2 - bounds.Y);
+			return new Vector2(bounds.X2 - bounds.X, bounds.Y2 - bounds.Y);
+		}
+
+		public Rectangle GetTextBounds(Vector2 position, string text)
+		{
+			Bounds bounds = new Bounds();
+			_fontSystem.TextBounds(position.X, position.Y, text, ref bounds);
+
+			return new Rectangle((int)bounds.X, (int)bounds.Y, (int)(bounds.X2 - bounds.X), (int)(bounds.Y2 - bounds.Y));
 		}
 
 		public static DynamicSpriteFont FromTtf(byte[] ttf, float defaultSize, int textureWidth = 1024, int textureHeight = 1024)

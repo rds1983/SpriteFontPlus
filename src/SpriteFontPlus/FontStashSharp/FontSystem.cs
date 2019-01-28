@@ -197,22 +197,26 @@ namespace FontStashSharp
 				x -= width * 0.5f;
 			}
 
-			y += GetVertAlign(font, Alignment, isize);
+			float originX = 0.0f;
+			float originY = 0.0f;
+
+
+			originY += GetVertAlign(font, Alignment, isize);
 			for (int i = 0; i < str.Length; i += Char.IsSurrogatePair(str.String, i + str.Location) ? 2 : 1)
 			{
 				var codepoint = Char.ConvertToUtf32(str.String, i + str.Location);
 				glyph = GetGlyph(font, codepoint, isize, iblur, FONS_GLYPH_BITMAP_REQUIRED);
 				if (glyph != null)
 				{
-					GetQuad(font, prevGlyphIndex, glyph, scale, Spacing, ref x,
-						ref y, &q);
+					GetQuad(font, prevGlyphIndex, glyph, scale, Spacing, ref originX,
+						ref originY, &q);
 					if (_vertsNumber + 6 > 1024)
 						Flush(batch);
 
-					AddVertex(new Rectangle((int)q.X0,
-								(int)q.Y0,
-								(int)(q.X1 - q.X0),
-								(int)(q.Y1 - q.Y0)),
+					AddVertex(new Rectangle((int)(x + q.X0 * Scale.X),
+								(int)(y + q.Y0 * Scale.Y),
+								(int)((q.X1 - q.X0) * Scale.X),
+								(int)((q.Y1 - q.Y0) * Scale.Y)),
 							new Rectangle((int)(q.S0 * _params_.Width),
 								(int)(q.T0 * _params_.Height),
 								(int)((q.S1 - q.S0) * _params_.Width),
@@ -714,11 +718,11 @@ namespace FontStashSharp
 			if (prevGlyphIndex != -1)
 			{
 				var adv = font._font.fons__tt_getGlyphKernAdvance(prevGlyphIndex, glyph->Index) * scale;
-				x += (int)(adv + spacing + 0.5f) * Scale.X;
+				x += (int)(adv + spacing + 0.5f);
 			}
 
-			xoff = (short)(glyph->XOffset + 1) * Scale.X;
-			yoff = (short)(glyph->YOffset + 1) * Scale.Y;
+			xoff = (short)(glyph->XOffset + 1);
+			yoff = (short)(glyph->YOffset + 1);
 			x0 = glyph->X0 + 1;
 			y0 = glyph->Y0 + 1;
 			x1 = glyph->X1 - 1;
@@ -729,8 +733,8 @@ namespace FontStashSharp
 				ry = (int)(y + yoff);
 				q->X0 = rx;
 				q->Y0 = ry;
-				q->X1 = rx + (x1 - x0) * Scale.X;
-				q->Y1 = ry + (y1 - y0) * Scale.Y;
+				q->X1 = rx + (x1 - x0);
+				q->Y1 = ry + (y1 - y0);
 				q->S0 = x0 * _itw;
 				q->T0 = y0 * _ith;
 				q->S1 = x1 * _itw;
@@ -742,15 +746,15 @@ namespace FontStashSharp
 				ry = (int)(y - yoff);
 				q->X0 = rx;
 				q->Y0 = ry;
-				q->X1 = rx + (x1 - x0) * Scale.X;
-				q->Y1 = ry - (y1 + y0) * Scale.Y;
+				q->X1 = rx + (x1 - x0);
+				q->Y1 = ry - (y1 + y0);
 				q->S0 = x0 * _itw;
 				q->T0 = y0 * _ith;
 				q->S1 = x1 * _itw;
 				q->T1 = y1 * _ith;
 			}
 
-			x += (int)(glyph->XAdvance / 10.0f + 0.5f) * Scale.X;
+			x += (int)(glyph->XAdvance / 10.0f + 0.5f);
 		}
 
 		private void Flush(SpriteBatch batch)
@@ -849,7 +853,7 @@ namespace FontStashSharp
 				}
 			}
 
-			return result * Scale.Y;
+			return result;
 		}
 
 		private static FontGlyph* AllocGlyph(Font font)

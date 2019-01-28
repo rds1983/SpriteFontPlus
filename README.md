@@ -5,7 +5,7 @@ Library that extends functionality of the SpriteFont.
 
 # Features
 * Creation of SpriteFont in the run-time from ttf.
-* DynamicSpriteFont class that renders glyphs on demand to the underlying texture atlas. Also it supports utf-16.
+* DynamicSpriteFont class that renders glyphs on demand to the underlying texture atlas. Also it supports 32-bit characters.
 
 # Adding Reference
 1. `Install-Package SpriteFontPlus.MonoGame` (or `Install-Package SpriteFontPlus.FNA` for FNA)

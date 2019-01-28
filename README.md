@@ -1,7 +1,7 @@
 # SpriteFontPlus
 [![NuGet](https://img.shields.io/nuget/v/SpriteFontPlus.MonoGame.svg)](https://www.nuget.org/packages/SpriteFontPlus.MonoGame/) [![Build status](https://ci.appveyor.com/api/projects/status/2mbacxymarcxq4we?svg=true)](https://ci.appveyor.com/project/RomanShapiro/spritefontplus)
 
-Library that extends functionality of the SpriteFont. For now it has only one feature - ability to create SpiteFont dynamically from ttf.
+Library that extends functionality of the SpriteFont.
 
 # Adding Reference
 1. `Install-Package SpriteFontPlus.MonoGame` (or `Install-Package SpriteFontPlus.FNA` for FNA)

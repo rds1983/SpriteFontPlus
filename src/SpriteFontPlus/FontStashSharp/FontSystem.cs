@@ -201,8 +201,7 @@ namespace FontStashSharp
 			for (int i = 0; i < str.Length; i += Char.IsSurrogatePair(str.String, i + str.Location) ? 2 : 1)
 			{
 				var codepoint = Char.ConvertToUtf32(str.String, i + str.Location);
-				glyph = GetGlyph(font, codepoint, isize, iblur,
-					FONS_GLYPH_BITMAP_REQUIRED);
+				glyph = GetGlyph(font, codepoint, isize, iblur, FONS_GLYPH_BITMAP_REQUIRED);
 				if (glyph != null)
 				{
 					GetQuad(font, prevGlyphIndex, glyph, scale, Spacing, ref x,
@@ -718,8 +717,8 @@ namespace FontStashSharp
 				x += (int)(adv + spacing + 0.5f) * Scale.X;
 			}
 
-			xoff = (short)(glyph->XOffset + 1);
-			yoff = (short)(glyph->YOffset + 1);
+			xoff = (short)(glyph->XOffset + 1) * Scale.X;
+			yoff = (short)(glyph->YOffset + 1) * Scale.Y;
 			x0 = glyph->X0 + 1;
 			y0 = glyph->Y0 + 1;
 			x1 = glyph->X1 - 1;
@@ -810,28 +809,47 @@ namespace FontStashSharp
 
 		private float GetVertAlign(Font font, int align, short isize)
 		{
+			float result = 0.0f; ;
 			if ((_params_.Flags & FONS_ZERO_TOPLEFT) != 0)
 			{
 				if ((align & FONS_ALIGN_TOP) != 0)
-					return font.Ascender * isize / 10.0f;
-				if ((align & FONS_ALIGN_MIDDLE) != 0)
-					return (font.Ascender + font.Descender) / 2.0f * isize / 10.0f;
-				if ((align & FONS_ALIGN_BASELINE) != 0)
-					return 0.0f;
-				if ((align & FONS_ALIGN_BOTTOM) != 0) return font.Descender * isize / 10.0f;
+				{
+					result = font.Ascender * isize / 10.0f;
+				}
+				else if ((align & FONS_ALIGN_MIDDLE) != 0)
+				{
+					result = (font.Ascender + font.Descender) / 2.0f * isize / 10.0f;
+				}
+				else if ((align & FONS_ALIGN_BASELINE) != 0)
+				{
+				}
+				else if ((align & FONS_ALIGN_BOTTOM) != 0)
+				{
+					result = font.Descender * isize / 10.0f;
+				}
 			}
 			else
 			{
 				if ((align & FONS_ALIGN_TOP) != 0)
-					return -font.Ascender * isize / 10.0f;
+				{
+					result = -font.Ascender * isize / 10.0f;
+				}
+				else
 				if ((align & FONS_ALIGN_MIDDLE) != 0)
-					return -(font.Ascender + font.Descender) / 2.0f * isize / 10.0f;
+				{
+					result = -(font.Ascender + font.Descender) / 2.0f * isize / 10.0f;
+				}
+				else
 				if ((align & FONS_ALIGN_BASELINE) != 0)
-					return 0.0f;
-				if ((align & FONS_ALIGN_BOTTOM) != 0) return -font.Descender * isize / 10.0f;
+				{
+				}
+				else if ((align & FONS_ALIGN_BOTTOM) != 0)
+				{
+					result = -font.Descender * isize / 10.0f;
+				}
 			}
 
-			return (float)0.0;
+			return result * Scale.Y;
 		}
 
 		private static FontGlyph* AllocGlyph(Font font)

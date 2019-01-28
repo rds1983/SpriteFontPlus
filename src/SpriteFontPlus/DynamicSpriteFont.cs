@@ -85,7 +85,11 @@ namespace SpriteFontPlus
 			_fontSystem.Color = color;
 			_fontSystem.Scale = scale;
 
-			return _fontSystem.DrawText(batch, pos.X, pos.Y, text);
+			var result = _fontSystem.DrawText(batch, pos.X, pos.Y, text);
+
+			_fontSystem.Scale = Vector2.One;
+
+			return result;
 		}
 
 		public int AddTtf(string name, byte[] ttf)

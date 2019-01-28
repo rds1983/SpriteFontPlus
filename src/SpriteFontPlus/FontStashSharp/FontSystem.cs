@@ -33,98 +33,23 @@ namespace FontStashSharp
 		private int _fontsNumber;
 		private float _ith;
 		private float _itw;
-		private int _scratchCount;
 		private int _statesCount;
 		private int _vertsNumber;
-		private byte* _scratch;
-		private FontSystemState[] _states = new FontSystemState[20];
 		private Rectangle[] _textureCoords = new Rectangle[1024 * 2];
 		private byte[] _texData;
 		private Rectangle[] _verts = new Rectangle[1024 * 2];
 
-		public Font[] Fonts
-		{
-			get
-			{
-				return _fonts;
-			}
-		}
-
-		public float Size
-		{
-			get
-			{
-				return GetState().Size;
-			}
-			set
-			{
-				GetState().Size = value;
-			}
-		}
-
-		public Color Color
-		{
-			get
-			{
-				return GetState().Color;
-			}
-			set
-			{
-				GetState().Color = value;
-			}
-		}
-
-		public float Spacing
-		{
-			get
-			{
-				return GetState().Spacing;
-			}
-			set
-			{
-				GetState().Spacing = value;
-			}
-		}
-
-		public float BlurValue
-		{
-			get
-			{
-				return GetState().Blur;
-			}
-			set
-			{
-				GetState().Blur = value;
-			}
-		}
-
-		public int Alignment
-		{
-			get
-			{
-				return GetState().Alignment;
-			}
-			set
-			{
-				GetState().Alignment = value;
-			}
-		}
-		public int FontId
-		{
-			get
-			{
-				return GetState().FontId;
-			}
-			set
-			{
-				GetState().FontId = value;
-			}
-		}
+		public int FontId;
+		public int Alignment;
+		public float Size;
+		public Color Color;
+		public float BlurValue;
+		public float Spacing;
+		public Vector2 Scale;
 
 		public FontSystem(FontSystemParams p)
 		{
 			_params_ = p;
-			_scratch = (byte*)CRuntime.malloc((ulong)96000);
 
 			_atlas = new FontAtlas(_params_.Width, _params_.Height, 256);
 			_fonts = new Font[4];
@@ -138,7 +63,6 @@ namespace FontStashSharp
 			_dirtyRect[2] = 0;
 			_dirtyRect[3] = 0;
 			AddWhiteRect(2, 2);
-			PushState();
 			ClearState();
 		}
 
@@ -148,9 +72,6 @@ namespace FontStashSharp
 		{
 			var i = 0;
 			for (i = 0; i < _fontsNumber; ++i) FreeFont(_fonts[i]);
-
-			if (_scratch != null)
-				CRuntime.free(_scratch);
 		}
 
 		public void AddWhiteRect(int w, int h)
@@ -177,11 +98,6 @@ namespace FontStashSharp
 			_dirtyRect[3] = Math.Max(_dirtyRect[3], gy + h);
 		}
 
-		public FontSystemState GetState()
-		{
-			return _states[_statesCount - 1];
-		}
-
 		public int AddFallbackFont(int _base_, int fallback)
 		{
 			var baseFont = _fonts[_base_];
@@ -193,40 +109,14 @@ namespace FontStashSharp
 
 			return 0;
 		}
-
-		public void PushState()
-		{
-			if (_statesCount >= 20)
-			{
-				throw new Exception("FONS_STATES_OVERFLOW");
-			}
-
-			if (_statesCount > 0)
-				_states[_statesCount] = _states[_statesCount - 1].Clone();
-			else
-				_states[_statesCount] = new FontSystemState();
-			_statesCount++;
-		}
-
-		public void PopState()
-		{
-			if (_statesCount <= 1)
-			{
-				throw new Exception("FONS_STATES_OVERFLOW");
-			}
-
-			_statesCount--;
-		}
-
 		public void ClearState()
 		{
-			var state = GetState();
-			state.Size = 12.0f;
-			state.Color = Color.White;
-			state.FontId = 0;
-			state.Blur = 0;
-			state.Spacing = 0;
-			state.Alignment = FONS_ALIGN_LEFT | FONS_ALIGN_BASELINE;
+			Size = 12.0f;
+			Color = Color.White;
+			FontId = 0;
+			BlurValue = 0;
+			Spacing = 0;
+			Alignment = FONS_ALIGN_LEFT | FONS_ALIGN_BASELINE;
 		}
 
 		public int AddFontMem(string name, byte[] data)
@@ -244,7 +134,6 @@ namespace FontStashSharp
 			font.Name = name;
 			for (i = 0; i < 256; ++i) font.Lut[i] = -1;
 			font.Data = data;
-			_scratchCount = 0;
 			fixed (byte* ptr = data)
 			{
 				if (LoadFont(font._font, ptr, data.Length) == 0)
@@ -277,39 +166,38 @@ namespace FontStashSharp
 		{
 			if (str.IsNullOrEmpty) return 0.0f;
 
-			var state = GetState();
 			FontGlyph* glyph = null;
 			var q = new FontGlyphSquad();
 			var prevGlyphIndex = -1;
-			var isize = (short)(state.Size * 10.0f);
-			var iblur = (short)state.Blur;
+			var isize = (short)(Size * 10.0f);
+			var iblur = (short)BlurValue;
 			float scale = 0;
 			Font font;
 			float width = 0;
-			if (state.FontId < 0 || state.FontId >= _fontsNumber)
+			if (FontId < 0 || FontId >= _fontsNumber)
 				return x;
-			font = _fonts[state.FontId];
+			font = _fonts[FontId];
 			if (font.Data == null)
 				return x;
 			scale = font._font.fons__tt_getPixelHeightScale(isize / 10.0f);
 
-			if ((state.Alignment & FONS_ALIGN_LEFT) != 0)
+			if ((Alignment & FONS_ALIGN_LEFT) != 0)
 			{
 			}
-			else if ((state.Alignment & FONS_ALIGN_RIGHT) != 0)
+			else if ((Alignment & FONS_ALIGN_RIGHT) != 0)
 			{
 				var bounds = new Bounds();
 				width = TextBounds(x, y, str, ref bounds);
 				x -= width;
 			}
-			else if ((state.Alignment & FONS_ALIGN_CENTER) != 0)
+			else if ((Alignment & FONS_ALIGN_CENTER) != 0)
 			{
 				var bounds = new Bounds();
 				width = TextBounds(x, y, str, ref bounds);
 				x -= width * 0.5f;
 			}
 
-			y += GetVertAlign(font, state.Alignment, isize);
+			y += GetVertAlign(font, Alignment, isize);
 			for (int i = 0; i < str.Length; i += Char.IsSurrogatePair(str.String, i + str.Location) ? 2 : 1)
 			{
 				var codepoint = Char.ConvertToUtf32(str.String, i + str.Location);
@@ -317,17 +205,20 @@ namespace FontStashSharp
 					FONS_GLYPH_BITMAP_REQUIRED);
 				if (glyph != null)
 				{
-					GetQuad(font, prevGlyphIndex, glyph, scale, state.Spacing, ref x,
+					GetQuad(font, prevGlyphIndex, glyph, scale, Spacing, ref x,
 						ref y, &q);
 					if (_vertsNumber + 6 > 1024)
 						Flush(batch);
 
-					AddVertex(new Rectangle((int)q.X0, (int)q.Y0, (int)(q.X1 - q.X0), (int)(q.Y1 - q.Y0)),
-						new Rectangle((int)(q.S0 * _params_.Width),
-							(int)(q.T0 * _params_.Height),
-							(int)((q.S1 - q.S0) * _params_.Width),
-							(int)((q.T1 - q.T0) * _params_.Height)),
-						state.Color);
+					AddVertex(new Rectangle((int)q.X0,
+								(int)q.Y0,
+								(int)(q.X1 - q.X0),
+								(int)(q.Y1 - q.Y0)),
+							new Rectangle((int)(q.S0 * _params_.Width),
+								(int)(q.T0 * _params_.Height),
+								(int)((q.S1 - q.S0) * _params_.Width),
+								(int)((q.T1 - q.T0) * _params_.Height)),
+							Color);
 				}
 
 				prevGlyphIndex = glyph != null ? glyph->Index : -1;
@@ -339,37 +230,36 @@ namespace FontStashSharp
 
 		public int TextIterInit(FontTextIterator iter, float x, float y, StringSegment str, int bitmapOption)
 		{
-			var state = GetState();
 			float width = 0;
 
-			if (state.FontId < 0 || state.FontId >= _fontsNumber)
+			if (FontId < 0 || FontId >= _fontsNumber)
 				return 0;
-			iter.Font = _fonts[state.FontId];
+			iter.Font = _fonts[FontId];
 			if (iter.Font.Data == null)
 				return 0;
-			iter.iSize = (short)(state.Size * 10.0f);
-			iter.iBlur = (short)state.Blur;
+			iter.iSize = (short)(Size * 10.0f);
+			iter.iBlur = (short)BlurValue;
 			iter.Scale = iter.Font._font.fons__tt_getPixelHeightScale(iter.iSize / 10.0f);
-			if ((state.Alignment & FONS_ALIGN_LEFT) != 0)
+			if ((Alignment & FONS_ALIGN_LEFT) != 0)
 			{
 			}
-			else if ((state.Alignment & FONS_ALIGN_RIGHT) != 0)
+			else if ((Alignment & FONS_ALIGN_RIGHT) != 0)
 			{
 				var bounds = new Bounds();
 				width = TextBounds(x, y, str, ref bounds);
 				x -= width;
 			}
-			else if ((state.Alignment & FONS_ALIGN_CENTER) != 0)
+			else if ((Alignment & FONS_ALIGN_CENTER) != 0)
 			{
 				var bounds = new Bounds();
 				width = TextBounds(x, y, str, ref bounds);
 				x -= width * 0.5f;
 			}
 
-			y += GetVertAlign(iter.Font, state.Alignment, iter.iSize);
+			y += GetVertAlign(iter.Font, Alignment, iter.iSize);
 			iter.X = iter.NextX = x;
 			iter.Y = iter.NextY = y;
-			iter.Spacing = state.Spacing;
+			iter.Spacing = Spacing;
 			iter.Str = str;
 			iter.Next = str;
 			iter.Codepoint = 0;
@@ -408,12 +298,11 @@ namespace FontStashSharp
 
 		public float TextBounds(float x, float y, StringSegment str, ref Bounds bounds)
 		{
-			var state = GetState();
 			var q = new FontGlyphSquad();
 			FontGlyph* glyph = null;
 			var prevGlyphIndex = -1;
-			var isize = (short)(state.Size * 10.0f);
-			var iblur = (short)state.Blur;
+			var isize = (short)(Size * 10.0f);
+			var iblur = (short)BlurValue;
 			float scale = 0;
 			Font font;
 			float startx = 0;
@@ -422,13 +311,13 @@ namespace FontStashSharp
 			float miny = 0;
 			float maxx = 0;
 			float maxy = 0;
-			if (state.FontId < 0 || state.FontId >= _fontsNumber)
+			if (FontId < 0 || FontId >= _fontsNumber)
 				return 0;
-			font = _fonts[state.FontId];
+			font = _fonts[FontId];
 			if (font.Data == null)
 				return 0;
 			scale = font._font.fons__tt_getPixelHeightScale(isize / 10.0f);
-			y += GetVertAlign(font, state.Alignment, isize);
+			y += GetVertAlign(font, Alignment, isize);
 			minx = maxx = x;
 			miny = maxy = y;
 			startx = x;
@@ -438,7 +327,7 @@ namespace FontStashSharp
 				glyph = GetGlyph(font, codepoint, isize, iblur, FONS_GLYPH_BITMAP_OPTIONAL);
 				if (glyph != null)
 				{
-					GetQuad(font, prevGlyphIndex, glyph, scale, state.Spacing, ref x, ref y, &q);
+					GetQuad(font, prevGlyphIndex, glyph, scale, Spacing, ref x, ref y, &q);
 					if (q.X0 < minx)
 						minx = q.X0;
 					if (q.X1 > maxx)
@@ -463,15 +352,15 @@ namespace FontStashSharp
 			}
 
 			advance = x - startx;
-			if ((state.Alignment & FONS_ALIGN_LEFT) != 0)
+			if ((Alignment & FONS_ALIGN_LEFT) != 0)
 			{
 			}
-			else if ((state.Alignment & FONS_ALIGN_RIGHT) != 0)
+			else if ((Alignment & FONS_ALIGN_RIGHT) != 0)
 			{
 				minx -= advance;
 				maxx -= advance;
 			}
-			else if ((state.Alignment & FONS_ALIGN_CENTER) != 0)
+			else if ((Alignment & FONS_ALIGN_CENTER) != 0)
 			{
 				minx -= advance * 0.5f;
 				maxx -= advance * 0.5f;
@@ -489,12 +378,11 @@ namespace FontStashSharp
 		{
 			ascender = descender = lineh = 0;
 			Font font;
-			var state = GetState();
 			short isize = 0;
-			if (state.FontId < 0 || state.FontId >= _fontsNumber)
+			if (FontId < 0 || FontId >= _fontsNumber)
 				return;
-			font = _fonts[state.FontId];
-			isize = (short)(state.Size * 10.0f);
+			font = _fonts[FontId];
+			isize = (short)(Size * 10.0f);
 			if (font.Data == null)
 				return;
 
@@ -506,15 +394,14 @@ namespace FontStashSharp
 		public void LineBounds(float y, ref float miny, ref float maxy)
 		{
 			Font font;
-			var state = GetState();
 			short isize = 0;
-			if (state.FontId < 0 || state.FontId >= _fontsNumber)
+			if (FontId < 0 || FontId >= _fontsNumber)
 				return;
-			font = _fonts[state.FontId];
-			isize = (short)(state.Size * 10.0f);
+			font = _fonts[FontId];
+			isize = (short)(Size * 10.0f);
 			if (font.Data == null)
 				return;
-			y += GetVertAlign(font, state.Alignment, isize);
+			y += GetVertAlign(font, Alignment, isize);
 			if ((_params_.Flags & FONS_ZERO_TOPLEFT) != 0)
 			{
 				miny = y - font.Ascender * isize / 10.0f;
@@ -558,7 +445,7 @@ namespace FontStashSharp
 			height = _params_.Height;
 		}
 
-		public int ExpandAtlas(SpriteBatch batch, int width, int height)
+		public int ExpandAtlas(int width, int height)
 		{
 			var i = 0;
 			var maxy = 0;
@@ -566,7 +453,6 @@ namespace FontStashSharp
 			height = Math.Max(height, _params_.Height);
 			if (width == _params_.Width && height == _params_.Height)
 				return 1;
-			Flush(batch);
 
 			var data = new byte[width * height];
 			for (i = 0; i < _params_.Height; i++)
@@ -597,11 +483,10 @@ namespace FontStashSharp
 			return 1;
 		}
 
-		public int ResetAtlas(SpriteBatch batch, int width, int height)
+		public int ResetAtlas(int width, int height)
 		{
 			var i = 0;
 			var j = 0;
-			Flush(batch);
 
 			_atlas.Reset(width, height);
 			_texData = new byte[width * height];
@@ -713,7 +598,6 @@ namespace FontStashSharp
 			if (iblur > 20)
 				iblur = 20;
 			pad = iblur + 2;
-			_scratchCount = 0;
 			h = HashInt(codepoint) & (256 - 1);
 			i = font.Lut[h];
 			while (i != -1)
@@ -801,10 +685,8 @@ namespace FontStashSharp
 				}
 			}
 
-
 			if (iblur > 0)
 			{
-				_scratchCount = 0;
 				fixed (byte* bdst = &_texData[glyph->X0 + glyph->Y0 * _params_.Width])
 				{
 					Blur(bdst, gw, gh, _params_.Width, iblur);
@@ -818,8 +700,8 @@ namespace FontStashSharp
 			return glyph;
 		}
 
-		private void GetQuad(Font font, int prevGlyphIndex, FontGlyph* glyph, float scale, float spacing,
-			ref float x, ref float y, FontGlyphSquad* q)
+		private void GetQuad(Font font, int prevGlyphIndex, FontGlyph* glyph, float scale,
+			float spacing, ref float x, ref float y, FontGlyphSquad* q)
 		{
 			float rx = 0;
 			float ry = 0;
@@ -829,10 +711,11 @@ namespace FontStashSharp
 			float y0 = 0;
 			float x1 = 0;
 			float y1 = 0;
+
 			if (prevGlyphIndex != -1)
 			{
 				var adv = font._font.fons__tt_getGlyphKernAdvance(prevGlyphIndex, glyph->Index) * scale;
-				x += (int)(adv + spacing + 0.5f);
+				x += (int)(adv + spacing + 0.5f) * Scale.X;
 			}
 
 			xoff = (short)(glyph->XOffset + 1);
@@ -847,8 +730,8 @@ namespace FontStashSharp
 				ry = (int)(y + yoff);
 				q->X0 = rx;
 				q->Y0 = ry;
-				q->X1 = rx + x1 - x0;
-				q->Y1 = ry + y1 - y0;
+				q->X1 = rx + (x1 - x0) * Scale.X;
+				q->Y1 = ry + (y1 - y0) * Scale.Y;
 				q->S0 = x0 * _itw;
 				q->T0 = y0 * _ith;
 				q->S1 = x1 * _itw;
@@ -860,15 +743,15 @@ namespace FontStashSharp
 				ry = (int)(y - yoff);
 				q->X0 = rx;
 				q->Y0 = ry;
-				q->X1 = rx + x1 - x0;
-				q->Y1 = ry - y1 + y0;
+				q->X1 = rx + (x1 - x0) * Scale.X;
+				q->Y1 = ry - (y1 + y0) * Scale.Y;
 				q->S0 = x0 * _itw;
 				q->T0 = y0 * _ith;
 				q->S1 = x1 * _itw;
 				q->T1 = y1 * _ith;
 			}
 
-			x += (int)(glyph->XAdvance / 10.0f + 0.5f);
+			x += (int)(glyph->XAdvance / 10.0f + 0.5f) * Scale.X;
 		}
 
 		private void Flush(SpriteBatch batch)

@@ -26,7 +26,7 @@ SpriteFont font = fontBakeResult.CreateSpriteFont(GraphicsDevice);
 ```
 
 # DynamicSpriteFont
-DynamicSpriteFont renders glyphs on demand to the underlying texture atlas. Thus it doesnt require to explicity specify character ranges that are going to be usedduring the font creation.
+DynamicSpriteFont renders glyphs on demand to the underlying texture atlas. Thus it doesnt require to explicity specify character ranges that are going to be used during the font creation.
 
 Following code creates DynamicSpriteFont from 3 different ttfs:
 ```c#

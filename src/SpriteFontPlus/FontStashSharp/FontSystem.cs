@@ -200,7 +200,6 @@ namespace FontStashSharp
 			float originX = 0.0f;
 			float originY = 0.0f;
 
-
 			originY += GetVertAlign(font, Alignment, isize);
 			for (int i = 0; i < str.Length; i += Char.IsSurrogatePair(str.String, i + str.Location) ? 2 : 1)
 			{
@@ -211,12 +210,19 @@ namespace FontStashSharp
 					GetQuad(font, prevGlyphIndex, glyph, scale, Spacing, ref originX,
 						ref originY, &q);
 					if (_vertsNumber + 6 > 1024)
+					{
 						Flush(batch);
+					}
 
-					AddVertex(new Rectangle((int)(x + q.X0 * Scale.X),
-								(int)(y + q.Y0 * Scale.Y),
-								(int)((q.X1 - q.X0) * Scale.X),
-								(int)((q.Y1 - q.Y0) * Scale.Y)),
+					q.X0 = (int)(q.X0 * Scale.X);
+					q.X1 = (int)(q.X1 * Scale.X);
+					q.Y0 = (int)(q.Y0 * Scale.Y);
+					q.Y1 = (int)(q.Y1 * Scale.Y);
+
+					AddVertex(new Rectangle((int)(x + q.X0),
+								(int)(y + q.Y0),
+								(int)(q.X1 - q.X0),
+								(int)(q.Y1 - q.Y0)),
 							new Rectangle((int)(q.S0 * _params_.Width),
 								(int)(q.T0 * _params_.Height),
 								(int)((q.S1 - q.S0) * _params_.Width),

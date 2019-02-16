@@ -3,19 +3,19 @@
 namespace FontStashSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal struct FontGlyph
+	internal class FontGlyph
 	{
 		public int Codepoint;
 		public int Index;
 		public int Next;
-		public short Size;
-		public short Blur;
-		public short X0;
-		public short Y0;
-		public short X1;
-		public short Y1;
-		public short XAdvance;
-		public short XOffset;
-		public short YOffset;
+		public int Size;
+		public int Blur;
+		public int X0;
+		public int Y0;
+		public int X1;
+		public int Y1;
+		public int XAdvance;
+		public int XOffset;
+		public int YOffset;
 	}
 }

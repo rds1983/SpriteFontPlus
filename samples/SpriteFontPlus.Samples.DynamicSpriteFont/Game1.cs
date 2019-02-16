@@ -15,6 +15,9 @@ namespace SpriteFontPlus.Samples.TtfBaking
 		SpriteBatch _spriteBatch;
 		private DynamicSpriteFont _font;
 		private int _fontIdJapanese, _fontIdEmojis;
+		private Texture2D _white;
+		private bool _drawBackground = false;
+		private bool _wasSpaceDown;
 
 		public Game1()
 		{
@@ -43,16 +46,37 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			_fontIdJapanese = _font.AddTtf("Japanese", File.ReadAllBytes(@"Fonts/DroidSansJapanese.ttf"));
 			_fontIdEmojis = _font.AddTtf("Emojis", File.ReadAllBytes(@"Fonts/Symbola-Emoji.ttf"));
 
+			_white = new Texture2D(GraphicsDevice, 1, 1);
+			_white.SetData(new[] { Color.White });
+
 			GC.Collect();
 		}
 
-		/// <summary>
-		/// UnloadContent will be called once per game and is the place to unload
-		/// game-specific content.
-		/// </summary>
-		protected override void UnloadContent()
+		protected override void Update(GameTime gameTime)
 		{
-			// TODO: Unload any non ContentManager content here
+			base.Update(gameTime);
+
+			var state = Keyboard.GetState();
+
+			var isSpaceDown = state.IsKeyDown(Keys.Space);
+
+			if (isSpaceDown && !_wasSpaceDown)
+			{
+				_drawBackground = !_drawBackground;
+			}
+
+			_wasSpaceDown = isSpaceDown;
+		}
+
+		private void DrawString(string text, int y)
+		{
+			if (_drawBackground)
+			{
+				var size = _font.MeasureString(text);
+				_spriteBatch.Draw(_white, new Rectangle(0, y, (int)size.X, (int)size.Y), Color.Green);
+			}
+
+			_spriteBatch.DrawString(_font, text, new Vector2(0, y), Color.White);
 		}
 
 		/// <summary>
@@ -69,42 +93,34 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			_font.FontId = _font.DefaultFontId;
 			// Render some text
 			_font.Size = 18;
-			_spriteBatch.DrawString(_font, "The quick brown fox jumps over the lazy dog",
-				new Vector2(0, 0), Color.White);
+			DrawString("The quick brown fox jumps over the lazy dog", 0);
 
 			_font.Size = 20;
-			_spriteBatch.DrawString(_font, "Üben quält finſteren Jagdſchloß höfliche Bäcker größeren, N: Blåbærsyltetøy",
-				new Vector2(0, 30), Color.White);
+			DrawString("Üben quält finſteren Jagdſchloß höfliche Bäcker größeren, N: Blåbærsyltetøy", 30);
 
 			_font.Size = 22;
-			_spriteBatch.DrawString(_font, "Høj bly gom vandt fræk sexquiz på wc, S: bäckasiner söka",
-				new Vector2(0, 60), Color.White);
+			DrawString("Høj bly gom vandt fræk sexquiz på wc, S: bäckasiner söka", 60);
 
 			_font.Size = 24;
-			_spriteBatch.DrawString(_font, "Sævör grét áðan því úlpan var ónýt, P: Pchnąć w tę łódź jeża lub osiem skrzyń fig",
-				new Vector2(0, 90), Color.White);
+			DrawString("Sævör grét áðan því úlpan var ónýt, P: Pchnąć w tę łódź jeża lub osiem skrzyń fig", 90);
 
 			_font.Size = 26;
-			_spriteBatch.DrawString(_font, "Příliš žluťoučký kůň úpěl ďábelské kódy, R: В чащах юга жил-был цитрус? Да, но фальшивый экземпляр! ёъ.",
-				new Vector2(0, 120), Color.White);
+			DrawString("Příliš žluťoučký kůň úpěl ďábelské kódy, R: В чащах юга жил-был цитрус? Да, но фальшивый экземпляр! ёъ.", 120);
 
 			_font.Size = 28;
-			_spriteBatch.DrawString(_font, "kilómetros y frío, añoraba, P: vôo à noite, F: Les naïfs ægithales hâtifs pondant à Noël où",
-				new Vector2(0, 150), Color.White);
+			DrawString("kilómetros y frío, añoraba, P: vôo à noite, F: Les naïfs ægithales hâtifs pondant à Noël où", 150);
 
 			_font.FontId = _fontIdJapanese;
 			_font.Size = 30;
-			_spriteBatch.DrawString(_font, "いろはにほへど", new Vector2(0, 180), Color.White);
+			DrawString("いろはにほへど", 180);
 
 			_font.FontId = _fontIdEmojis;
 			_font.Size = 32;
-			_spriteBatch.DrawString(_font, "🙌📦👏🔥👍😻😂🎉💻😍🚀😁🙈🇧🇪👩😉🍻🎶🏆👀👉👶💕😎😱🌌🌻🍺🏀👇👯💁💝💩😃😅🙏🚄🇫🌧🌾🍀🍁🍓🍕🎾🏈",
-				new Vector2(0, 220), Color.Gold);
+			DrawString("🙌📦👏🔥👍😻😂🎉💻😍🚀😁🙈🇧🇪👩😉🍻🎶🏆👀👉👶💕😎😱🌌🌻🍺🏀👇👯💁💝💩😃😅🙏🚄🇫🌧🌾🍀🍁🍓🍕🎾🏈", 220);
 
 			_font.FontId = _font.DefaultFontId;
 			_font.Size = 26;
-			_spriteBatch.DrawString(_font, "Texture:",
-				new Vector2(0, 300), Color.White);
+			DrawString("Texture:", 300);
 
 			_spriteBatch.Draw(_font.Texture, new Vector2(0, 330), Color.White);
 

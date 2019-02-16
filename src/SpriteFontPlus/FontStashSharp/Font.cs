@@ -11,8 +11,7 @@ namespace FontStashSharp
 		public float Ascender;
 		public float Descender;
 		public float LineHeight;
-		public FontGlyph* Glyphs;
-		public int GlyphsCount;
+		public FontGlyph[] Glyphs;
 		public int GlyphsNumber;
 		public int[] Lut = new int[256];
 		public int[] Fallbacks = new int[20];

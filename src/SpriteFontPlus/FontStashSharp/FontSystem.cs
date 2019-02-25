@@ -35,6 +35,7 @@ namespace FontStashSharp
 		private int _vertsNumber;
 		private Rectangle[] _textureCoords = new Rectangle[1024 * 2];
 		private byte[] _texData;
+		private Color[] _colorData;
 		private Rectangle[] _verts = new Rectangle[1024 * 2];
 
 		public int FontId;
@@ -55,6 +56,7 @@ namespace FontStashSharp
 			_itw = 1.0f / _params_.Width;
 			_ith = 1.0f / _params_.Height;
 			_texData = new byte[_params_.Width * _params_.Height];
+			_colorData = new Color[_params_.Width * _params_.Height];
 			Array.Clear(_texData, 0, _texData.Length);
 			_dirtyRect[0] = _params_.Width;
 			_dirtyRect[1] = _params_.Height;
@@ -401,6 +403,16 @@ namespace FontStashSharp
 				Array.Clear(data, _params_.Height * width, (height - _params_.Height) * width);
 
 			_texData = data;
+
+			_colorData = new Color[width * height];
+			for(i = 0; i < width * height; ++i)
+			{
+				_colorData[i].R = _texData[i];
+				_colorData[i].G = _texData[i];
+				_colorData[i].B = _texData[i];
+				_colorData[i].A = _texData[i];
+			}
+
 			_atlas.Expand(width, height);
 			for (i = 0; i < _atlas.NodesNumber; i++) maxy = Math.Max(maxy, _atlas.Nodes[i].Y);
 			_dirtyRect[0] = 0;
@@ -674,20 +686,21 @@ namespace FontStashSharp
 					var w = _dirtyRect[2] - x;
 					var h = _dirtyRect[3] - y;
 					var sz = w * h;
-					var b = new byte[_params_.Width * _params_.Height * 4];
-
-					Texture.GetData(b);
 					for (var xx = x; xx < x + w; ++xx)
+					{
 						for (var yy = y; yy < y + h; ++yy)
 						{
 							var destPos = yy * _params_.Width + xx;
 
-							for (var k = 0; k < 3; ++k) b[destPos * 4 + k] = _texData[destPos];
-
-							b[destPos * 4 + 3] = _texData[destPos];
+							var c = _texData[destPos];
+							_colorData[destPos].R = c;
+							_colorData[destPos].G = c;
+							_colorData[destPos].B = c;
+							_colorData[destPos].A = c;
 						}
+					}
 
-					Texture.SetData(b);
+					Texture.SetData(_colorData);
 				}
 
 				_dirtyRect[0] = _params_.Width;

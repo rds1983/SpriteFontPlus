@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SpriteFontPlus;
@@ -155,7 +155,7 @@ namespace FontStashSharp
 			return null;
 		}
 
-		public float DrawText(SpriteBatch batch, float x, float y, StringSegment str)
+		public float DrawText(SpriteBatch batch, float x, float y, StringSegment str, float depth)
 		{
 			if (str.IsNullOrEmpty) return 0.0f;
 
@@ -203,7 +203,7 @@ namespace FontStashSharp
 					GetQuad(font, prevGlyphIndex, glyph, scale, Spacing, ref originX, ref originY, &q);
 					if (_vertsNumber + 6 > 1024)
 					{
-						Flush(batch);
+						Flush(batch, depth);
 					}
 
 					q.X0 = (int)(q.X0 * Scale.X);
@@ -225,7 +225,7 @@ namespace FontStashSharp
 				prevGlyphIndex = glyph != null ? glyph.Index : -1;
 			}
 
-			Flush(batch);
+			Flush(batch, depth);
 			return x;
 		}
 
@@ -673,7 +673,7 @@ namespace FontStashSharp
 			x += (int)(glyph.XAdvance / 10.0f + 0.5f);
 		}
 
-		private void Flush(SpriteBatch batch)
+		private void Flush(SpriteBatch batch, float depth)
 		{
 			if (Texture == null) Texture = new Texture2D(batch.GraphicsDevice, _params_.Width, _params_.Height);
 
@@ -713,7 +713,7 @@ namespace FontStashSharp
 			{
 				for (var i = 0; i < _vertsNumber; ++i)
 				{
-					batch.Draw(Texture, _verts[i], _textureCoords[i], _colors[i]);
+					batch.Draw(Texture, _verts[i], _textureCoords[i], _colors[i], 0f, Vector2.Zero, SpriteEffects.None, depth);
 				}
 
 				_vertsNumber = 0;

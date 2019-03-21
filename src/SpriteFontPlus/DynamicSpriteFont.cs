@@ -80,12 +80,12 @@ namespace SpriteFontPlus
 			return DrawString(batch, text, pos, color, Vector2.One);
 		}
 
-		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color color, Vector2 scale)
+		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color color, Vector2 scale, float depth = 0f)
 		{
 			_fontSystem.Color = color;
 			_fontSystem.Scale = scale;
 
-			var result = _fontSystem.DrawText(batch, pos.X, pos.Y, text);
+			var result = _fontSystem.DrawText(batch, pos.X, pos.Y, text, depth);
 
 			_fontSystem.Scale = Vector2.One;
 

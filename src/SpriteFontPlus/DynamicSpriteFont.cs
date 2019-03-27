@@ -65,11 +65,11 @@ namespace SpriteFontPlus
 			{
 				Width = textureWidth,
 				Height = textureHeight,
-				Flags = FontSystem.FONS_ZERO_TOPLEFT
+				IsAlignmentTopLeft = true
 			};
 
 			_fontSystem = new FontSystem(fontParams);
-			_fontSystem.Alignment = FontSystem.FONS_ALIGN_TOP;
+			_fontSystem.Alignment = Alignment.Top;
 
 			_defaultFontId = _fontSystem.AddFontMem(DefaultFontName, ttf);
 			Size = defaultSize;

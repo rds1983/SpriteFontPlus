@@ -1,13 +1,9 @@
-﻿using System.Runtime.InteropServices;
-
-namespace FontStashSharp
+﻿namespace FontStashSharp
 {
-	[StructLayout(LayoutKind.Sequential)]
 	internal class FontGlyph
 	{
 		public int Codepoint;
 		public int Index;
-		public int Next;
 		public int Size;
 		public int Blur;
 		public int X0;

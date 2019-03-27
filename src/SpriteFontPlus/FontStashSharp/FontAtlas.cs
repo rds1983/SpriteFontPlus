@@ -1,46 +1,59 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using StbSharp;
 
 namespace FontStashSharp
 {
-	[StructLayout(LayoutKind.Sequential)]
-	internal unsafe class FontAtlas
+	internal class FontAtlas
 	{
-		public int NodesCount;
-		public int Height;
-		public int NodesNumber;
-		public FontAtlasNode* Nodes;
-		public int Width;
+		public int Width
+		{
+			get; private set;
+		}
+
+		public int Height
+		{
+			get; private set;
+		}
+
+		public int NodesNumber
+		{
+			get; private set;
+		}
+
+		public FontAtlasNode[] Nodes
+		{
+			get; private set;
+		}
 
 		public FontAtlas(int w, int h, int count)
 		{
 			Width = w;
 			Height = h;
-			Nodes = (FontAtlasNode*)CRuntime.malloc((ulong)(sizeof(FontAtlasNode) * count));
-			CRuntime.memset(Nodes, 0, (ulong)(sizeof(FontAtlasNode) * count));
+			Nodes = new FontAtlasNode[count];
 			count = 0;
-			NodesCount = count;
 			Nodes[0].X = 0;
 			Nodes[0].Y = 0;
-			Nodes[0].Width = (short)w;
+			Nodes[0].Width = w;
 			NodesNumber++;
 		}
 
 		public int InsertNode(int idx, int x, int y, int w)
 		{
-			if (NodesNumber + 1 > NodesCount)
+			if (NodesNumber + 1 > Nodes.Length)
 			{
-				NodesCount = NodesCount == 0 ? 8 : NodesCount * 2;
-				Nodes = (FontAtlasNode*)CRuntime.realloc(Nodes, (ulong)(sizeof(FontAtlasNode) * NodesCount));
-				if (Nodes == null)
-					return 0;
+				var oldNodes = Nodes;
+				var newLength = Nodes.Length == 0 ? 8 : Nodes.Length * 2;
+				Nodes = new FontAtlasNode[newLength];
+				for (var i = 0; i < oldNodes.Length; ++i)
+				{
+					Nodes[i] = oldNodes[i];
+				}
 			}
 
-			for (var i = NodesNumber; i > idx; i--) Nodes[i] = Nodes[i - 1];
-			Nodes[idx].X = (short)x;
-			Nodes[idx].Y = (short)y;
-			Nodes[idx].Width = (short)w;
+			for (var i = NodesNumber; i > idx; i--)
+				Nodes[i] = Nodes[i - 1];
+			Nodes[idx].X = x;
+			Nodes[idx].Y = y;
+			Nodes[idx].Width = w;
 			NodesNumber++;
 			return 1;
 		}
@@ -49,7 +62,8 @@ namespace FontStashSharp
 		{
 			if (NodesNumber == 0)
 				return;
-			for (var i = idx; i < NodesNumber - 1; i++) Nodes[i] = Nodes[i + 1];
+			for (var i = idx; i < NodesNumber - 1; i++)
+				Nodes[i] = Nodes[i + 1];
 			NodesNumber--;
 		}
 
@@ -68,7 +82,7 @@ namespace FontStashSharp
 			NodesNumber = 0;
 			Nodes[0].X = 0;
 			Nodes[0].Y = 0;
-			Nodes[0].Width = (short)w;
+			Nodes[0].Width = w;
 			NodesNumber++;
 		}
 
@@ -80,8 +94,8 @@ namespace FontStashSharp
 				if (Nodes[i].X < Nodes[i - 1].X + Nodes[i - 1].Width)
 				{
 					var shrink = Nodes[i - 1].X + Nodes[i - 1].Width - Nodes[i].X;
-					Nodes[i].X += (short)shrink;
-					Nodes[i].Width -= (short)shrink;
+					Nodes[i].X += shrink;
+					Nodes[i].Width -= shrink;
 					if (Nodes[i].Width <= 0)
 					{
 						RemoveNode(i);
@@ -129,7 +143,7 @@ namespace FontStashSharp
 			return y;
 		}
 
-		public int AddRect(int rw, int rh, int* rx, int* ry)
+		public bool AddRect(int rw, int rh, ref int rx, ref int ry)
 		{
 			var besth = Height;
 			var bestw = Width;
@@ -151,12 +165,13 @@ namespace FontStashSharp
 			}
 
 			if (besti == -1)
-				return 0;
+				return false;
 			if (AddSkylineLevel(besti, bestx, besty, rw, rh) == 0)
-				return 0;
-			*rx = bestx;
-			*ry = besty;
-			return 1;
+				return false;
+
+			rx = bestx;
+			ry = besty;
+			return true;
 		}
 	}
 }

@@ -68,7 +68,7 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			_wasSpaceDown = isSpaceDown;
 		}
 
-		private void DrawString(string text, int y)
+		private void DrawString(string text, int y, Color color)
 		{
 			if (_drawBackground)
 			{
@@ -76,7 +76,12 @@ namespace SpriteFontPlus.Samples.TtfBaking
 				_spriteBatch.Draw(_white, new Rectangle(0, y, (int)size.X, (int)size.Y), Color.Green);
 			}
 
-			_spriteBatch.DrawString(_font, text, new Vector2(0, y), Color.White);
+			_spriteBatch.DrawString(_font, text, new Vector2(0, y), color);
+		}
+
+		private void DrawString(string text, int y)
+		{
+			DrawString(text, y, Color.White);
 		}
 
 		/// <summary>
@@ -116,7 +121,7 @@ namespace SpriteFontPlus.Samples.TtfBaking
 
 			_font.FontId = _fontIdEmojis;
 			_font.Size = 32;
-			DrawString("🙌📦👏🔥👍😻😂🎉💻😍🚀😁🙈🇧🇪👩😉🍻🎶🏆👀👉👶💕😎😱🌌🌻🍺🏀👇👯💁💝💩😃😅🙏🚄🇫🌧🌾🍀🍁🍓🍕🎾🏈", 220);
+			DrawString("🙌📦👏🔥👍😻😂🎉💻😍🚀😁🙈🇧🇪👩😉🍻🎶🏆👀👉👶💕😎😱🌌🌻🍺🏀👇👯💁💝💩😃😅🙏🚄🇫🌧🌾🍀🍁🍓🍕🎾🏈", 220, Color.Gold);
 
 			_font.FontId = _font.DefaultFontId;
 			_font.Size = 26;

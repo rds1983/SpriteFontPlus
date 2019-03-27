@@ -1,35 +1,22 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SpriteFontPlus;
-using StbSharp;
+using StbTrueTypeSharp;
+using static StbTrueTypeSharp.StbTrueType;
 
 namespace FontStashSharp
 {
 	internal unsafe class FontSystem
 	{
-		public const int FONS_ZERO_TOPLEFT = 1;
-		public const int FONS_ZERO_BOTTOMLEFT = 2;
-		public const int FONS_ALIGN_LEFT = 1 << 0;
-		public const int FONS_ALIGN_CENTER = 1 << 1;
-		public const int FONS_ALIGN_RIGHT = 1 << 2;
-		public const int FONS_ALIGN_TOP = 1 << 3;
-		public const int FONS_ALIGN_MIDDLE = 1 << 4;
-		public const int FONS_ALIGN_BOTTOM = 1 << 5;
-		public const int FONS_ALIGN_BASELINE = 1 << 6;
-		public const int FONS_GLYPH_BITMAP_OPTIONAL = 1;
-		public const int FONS_GLYPH_BITMAP_REQUIRED = 2;
 		public const int FONS_ATLAS_FULL = 1;
-		public const int FONS_SCRATCH_FULL = 2;
-		public const int FONS_STATES_OVERFLOW = 3;
-		public const int FONS_STATES_UNDERFLOW = 4;
 
 		private FontSystemParams _params_ = new FontSystemParams();
 		private FontAtlas _atlas;
 		private Color[] _colors = new Color[1024];
 		private int[] _dirtyRect = new int[4];
-		private Font[] _fonts;
-		private int _fontsNumber;
+		private readonly List<Font> _fonts = new List<Font>();
 		private float _ith;
 		private float _itw;
 		private int _vertsNumber;
@@ -39,7 +26,7 @@ namespace FontStashSharp
 		private Rectangle[] _verts = new Rectangle[1024 * 2];
 
 		public int FontId;
-		public int Alignment;
+		public Alignment Alignment;
 		public float Size;
 		public Color Color;
 		public float BlurValue;
@@ -51,8 +38,6 @@ namespace FontStashSharp
 			_params_ = p;
 
 			_atlas = new FontAtlas(_params_.Width, _params_.Height, 256);
-			_fonts = new Font[4];
-			_fontsNumber = 0;
 			_itw = 1.0f / _params_.Width;
 			_ith = 1.0f / _params_.Height;
 			_texData = new byte[_params_.Width * _params_.Height];
@@ -74,7 +59,7 @@ namespace FontStashSharp
 			var y = 0;
 			var gx = 0;
 			var gy = 0;
-			if (_atlas.AddRect(w, h, &gx, &gy) == 0)
+			if (!_atlas.AddRect(w, h, ref gx, ref gy))
 				return;
 			fixed (byte* dst2 = &_texData[gx + gy * _params_.Width])
 			{
@@ -92,17 +77,6 @@ namespace FontStashSharp
 			_dirtyRect[3] = Math.Max(_dirtyRect[3], gy + h);
 		}
 
-		public int AddFallbackFont(int _base_, int fallback)
-		{
-			var baseFont = _fonts[_base_];
-			if (baseFont.FallbacksCount < 20)
-			{
-				baseFont.Fallbacks[baseFont.FallbacksCount++] = fallback;
-				return 1;
-			}
-
-			return 0;
-		}
 		public void ClearState()
 		{
 			Size = 12.0f;
@@ -110,7 +84,7 @@ namespace FontStashSharp
 			FontId = 0;
 			BlurValue = 0;
 			Spacing = 0;
-			Alignment = FONS_ALIGN_LEFT | FONS_ALIGN_BASELINE;
+			Alignment = Alignment.Left | Alignment.Baseline;
 		}
 
 		public int AddFontMem(string name, byte[] data)
@@ -120,18 +94,15 @@ namespace FontStashSharp
 			var descent = 0;
 			var fh = 0;
 			var lineGap = 0;
-			Font font;
-			var idx = AllocFont();
-			if (idx == -1)
-				return -1;
-			font = _fonts[idx];
-			font.Name = name;
-			for (i = 0; i < 256; ++i) font.Lut[i] = -1;
-			font.Data = data;
+			var font = new Font
+			{
+				Name = name,
+				Data = data
+			};
 			fixed (byte* ptr = data)
 			{
 				if (LoadFont(font._font, ptr, data.Length) == 0)
-					goto error;
+					return -1;
 			}
 
 			font._font.fons__tt_getFontVMetrics(&ascent, &descent, &lineGap);
@@ -140,16 +111,15 @@ namespace FontStashSharp
 			font.Ascender = ascent / (float)fh;
 			font.Descender = descent / (float)fh;
 			font.LineHeight = (fh + lineGap) / (float)fh;
-			return idx;
-		error:;
-			_fontsNumber--;
-			return -1;
+
+			_fonts.Add(font);
+			return _fonts.Count - 1;
 		}
 
 		public int? GetFontByName(string name)
 		{
 			var i = 0;
-			for (i = 0; i < _fontsNumber; i++)
+			for (i = 0; i < _fonts.Count; i++)
 				if (_fonts[i].Name == name)
 					return i;
 			return null;
@@ -167,23 +137,23 @@ namespace FontStashSharp
 			float scale = 0;
 			Font font;
 			float width = 0;
-			if (FontId < 0 || FontId >= _fontsNumber)
+			if (FontId < 0 || FontId >= _fonts.Count)
 				return x;
 			font = _fonts[FontId];
 			if (font.Data == null)
 				return x;
 			scale = font._font.fons__tt_getPixelHeightScale(isize / 10.0f);
 
-			if ((Alignment & FONS_ALIGN_LEFT) != 0)
+			if ((Alignment & Alignment.Left) != 0)
 			{
 			}
-			else if ((Alignment & FONS_ALIGN_RIGHT) != 0)
+			else if ((Alignment & Alignment.Right) != 0)
 			{
 				var bounds = new Bounds();
 				width = TextBounds(x, y, str, ref bounds);
 				x -= width;
 			}
-			else if ((Alignment & FONS_ALIGN_CENTER) != 0)
+			else if ((Alignment & Alignment.Center) != 0)
 			{
 				var bounds = new Bounds();
 				width = TextBounds(x, y, str, ref bounds);
@@ -194,10 +164,10 @@ namespace FontStashSharp
 			float originY = 0.0f;
 
 			originY += GetVertAlign(font, Alignment, isize);
-			for (int i = 0; i < str.Length; i += Char.IsSurrogatePair(str.String, i + str.Location) ? 2 : 1)
+			for (int i = 0; i < str.Length; i += char.IsSurrogatePair(str.String, i + str.Location) ? 2 : 1)
 			{
-				var codepoint = Char.ConvertToUtf32(str.String, i + str.Location);
-				glyph = GetGlyph(font, codepoint, isize, iblur, FONS_GLYPH_BITMAP_REQUIRED);
+				var codepoint = char.ConvertToUtf32(str.String, i + str.Location);
+				glyph = GetGlyph(font, codepoint, isize, iblur, true);
 				if (glyph != null)
 				{
 					GetQuad(font, prevGlyphIndex, glyph, scale, Spacing, ref originX, ref originY, &q);
@@ -244,7 +214,7 @@ namespace FontStashSharp
 			float miny = 0;
 			float maxx = 0;
 			float maxy = 0;
-			if (FontId < 0 || FontId >= _fontsNumber)
+			if (FontId < 0 || FontId >= _fonts.Count)
 				return 0;
 			font = _fonts[FontId];
 			if (font.Data == null)
@@ -257,7 +227,7 @@ namespace FontStashSharp
 			for (int i = 0; i < str.Length; i += char.IsSurrogatePair(str.String, i + str.Location) ? 2 : 1)
 			{
 				var codepoint = char.ConvertToUtf32(str.String, i + str.Location);
-				glyph = GetGlyph(font, codepoint, isize, iblur, FONS_GLYPH_BITMAP_OPTIONAL);
+				glyph = GetGlyph(font, codepoint, isize, iblur, false);
 				if (glyph != null)
 				{
 					GetQuad(font, prevGlyphIndex, glyph, scale, Spacing, ref x, ref y, &q);
@@ -265,7 +235,7 @@ namespace FontStashSharp
 						minx = q.X0;
 					if (x > maxx)
 						maxx = x;
-					if ((_params_.Flags & FONS_ZERO_TOPLEFT) != 0)
+					if (_params_.IsAlignmentTopLeft)
 					{
 						if (q.Y0 < miny)
 							miny = q.Y0;
@@ -285,15 +255,15 @@ namespace FontStashSharp
 			}
 
 			advance = x - startx;
-			if ((Alignment & FONS_ALIGN_LEFT) != 0)
+			if ((Alignment & Alignment.Left) != 0)
 			{
 			}
-			else if ((Alignment & FONS_ALIGN_RIGHT) != 0)
+			else if ((Alignment & Alignment.Right) != 0)
 			{
 				minx -= advance;
 				maxx -= advance;
 			}
-			else if ((Alignment & FONS_ALIGN_CENTER) != 0)
+			else if ((Alignment & Alignment.Center) != 0)
 			{
 				minx -= advance * 0.5f;
 				maxx -= advance * 0.5f;
@@ -312,7 +282,7 @@ namespace FontStashSharp
 			ascender = descender = lineh = 0;
 			Font font;
 			int isize = 0;
-			if (FontId < 0 || FontId >= _fontsNumber)
+			if (FontId < 0 || FontId >= _fonts.Count)
 				return;
 			font = _fonts[FontId];
 			isize = (int)(Size * 10.0f);
@@ -328,14 +298,14 @@ namespace FontStashSharp
 		{
 			Font font;
 			int isize = 0;
-			if (FontId < 0 || FontId >= _fontsNumber)
+			if (FontId < 0 || FontId >= _fonts.Count)
 				return;
 			font = _fonts[FontId];
 			isize = (int)(Size * 10.0f);
 			if (font.Data == null)
 				return;
 			y += GetVertAlign(font, Alignment, isize);
-			if ((_params_.Flags & FONS_ZERO_TOPLEFT) != 0)
+			if (_params_.IsAlignmentTopLeft)
 			{
 				miny = y - font.Ascender * isize / 10.0f;
 				maxy = miny + font.LineHeight * isize / 10.0f;
@@ -352,24 +322,6 @@ namespace FontStashSharp
 			width = _params_.Width;
 			height = _params_.Height;
 			return _texData;
-		}
-
-		public int ValidateTexture(int* dirty)
-		{
-			if (_dirtyRect[0] < _dirtyRect[2] && _dirtyRect[1] < _dirtyRect[3])
-			{
-				dirty[0] = _dirtyRect[0];
-				dirty[1] = _dirtyRect[1];
-				dirty[2] = _dirtyRect[2];
-				dirty[3] = _dirtyRect[3];
-				_dirtyRect[0] = _params_.Width;
-				_dirtyRect[1] = _params_.Height;
-				_dirtyRect[2] = 0;
-				_dirtyRect[3] = 0;
-				return 1;
-			}
-
-			return 0;
 		}
 
 		public void GetAtlasSize(out int width, out int height)
@@ -389,6 +341,7 @@ namespace FontStashSharp
 
 			var data = new byte[width * height];
 			for (i = 0; i < _params_.Height; i++)
+			{
 				fixed (byte* dst = &data[i * width])
 				{
 					fixed (byte* src = &_texData[i * _params_.Width])
@@ -398,6 +351,7 @@ namespace FontStashSharp
 							CRuntime.memset(dst + _params_.Width, 0, (ulong)(width - _params_.Width));
 					}
 				}
+			}
 
 			if (height > _params_.Height)
 				Array.Clear(data, _params_.Height * width, (height - _params_.Height) * width);
@@ -438,11 +392,10 @@ namespace FontStashSharp
 			_dirtyRect[1] = height;
 			_dirtyRect[2] = 0;
 			_dirtyRect[3] = 0;
-			for (i = 0; i < _fontsNumber; i++)
+			for (i = 0; i < _fonts.Count; i++)
 			{
 				var font = _fonts[i];
-				font.GlyphsNumber = 0;
-				for (j = 0; j < 256; j++) font.Lut[j] = -1;
+				font.Glyphs.Clear();
 			}
 
 			_params_.Width = width;
@@ -453,37 +406,9 @@ namespace FontStashSharp
 			return 1;
 		}
 
-		private int LoadFont(StbTrueType.stbtt_fontinfo font, byte* data, int dataSize)
+		private int LoadFont(stbtt_fontinfo font, byte* data, int dataSize)
 		{
-			var stbError = 0;
-			font.userdata = this;
-			stbError = StbTrueType.stbtt_InitFont(font, data, 0);
-			return stbError;
-		}
-
-		private int AllocFont()
-		{
-			Font font = null;
-			if (_fontsNumber + 1 > _fonts.Length)
-			{
-				var newFonts = new Font[_fonts.Length * 2];
-
-				for (var i = 0; i < _fonts.Length; ++i)
-				{
-					newFonts[i] = _fonts[i];
-				}
-
-				_fonts = newFonts;
-			}
-
-			font = new Font
-			{
-				Glyphs = new FontGlyph[256],
-				GlyphsNumber = 0
-			};
-
-			_fonts[_fontsNumber++] = font;
-			return _fontsNumber - 1;
+			return stbtt_InitFont(font, data, 0);
 		}
 
 		private void Blur(byte* dst, int w, int h, int dstStride, int blur)
@@ -500,7 +425,7 @@ namespace FontStashSharp
 			BlurCols(dst, w, h, dstStride, alpha);
 		}
 
-		private FontGlyph GetGlyph(Font font, int codepoint, int isize, int iblur, int bitmapOption)
+		private FontGlyph GetGlyph(Font font, int codepoint, int isize, int iblur, bool isBitmapRequired)
 		{
 			var i = 0;
 			var g = 0;
@@ -521,50 +446,32 @@ namespace FontStashSharp
 			int h = 0;
 			var size = isize / 10.0f;
 			var pad = 0;
-			var added = 0;
 			var renderFont = font;
 			if (isize < 2)
 				return null;
 			if (iblur > 20)
 				iblur = 20;
 			pad = iblur + 2;
-			h = HashInt(codepoint) & (256 - 1);
-			i = font.Lut[h];
-			while (i != -1)
+
+			if (font.TryGetGlyph(codepoint, isize, iblur, out glyph))
 			{
-				if (font.Glyphs[i].Codepoint == codepoint && font.Glyphs[i].Size == isize &&
-					font.Glyphs[i].Blur == iblur)
-				{
-					glyph = font.Glyphs[i];
-					if (bitmapOption == FONS_GLYPH_BITMAP_OPTIONAL || glyph.X0 >= 0 && glyph.Y0 >= 0) return glyph;
-					break;
-				}
+				if (!isBitmapRequired || glyph.X0 >= 0 && glyph.Y0 >= 0)
+					return glyph;
 
-				i = font.Glyphs[i].Next;
 			}
-
-			g = font._font.fons__tt_getGlyphIndex((int)codepoint);
+			g = font._font.fons__tt_getGlyphIndex(codepoint);
 			if (g == 0)
-				for (i = 0; i < font.FallbacksCount; ++i)
-				{
-					var fallbackFont = _fonts[font.Fallbacks[i]];
-					var fallbackIndex = fallbackFont._font.fons__tt_getGlyphIndex((int)codepoint);
-					if (fallbackIndex != 0)
-					{
-						g = fallbackIndex;
-						renderFont = fallbackFont;
-						break;
-					}
-				}
+			{
+				throw new Exception(string.Format("Could not find glyph for codepoint {0}", g));
+			}
 
 			scale = renderFont._font.fons__tt_getPixelHeightScale(size);
 			renderFont._font.fons__tt_buildGlyphBitmap(g, size, scale, &advance, &lsb, &x0, &y0, &x1, &y1);
 			gw = x1 - x0 + pad * 2;
 			gh = y1 - y0 + pad * 2;
-			if (bitmapOption == FONS_GLYPH_BITMAP_REQUIRED)
+			if (isBitmapRequired)
 			{
-				added = _atlas.AddRect(gw, gh, &gx, &gy);
-				if (added == 0)
+				if (!_atlas.AddRect(gw, gh, ref gx, ref gy))
 					throw new Exception("FONS_ATLAS_FULL");
 			}
 			else
@@ -575,24 +482,25 @@ namespace FontStashSharp
 
 			if (glyph == null)
 			{
-				glyph = AllocGlyph(font);
-				glyph.Codepoint = codepoint;
-				glyph.Size = isize;
-				glyph.Blur = iblur;
-				glyph.Next = 0;
-				glyph.Next = font.Lut[h];
-				font.Lut[h] = font.GlyphsNumber - 1;
+				glyph = new FontGlyph
+				{
+					Codepoint = codepoint,
+					Size = isize,
+					Blur = iblur
+				};
+
+				font.SetGlyph(codepoint, isize, iblur, glyph);
 			}
 
 			glyph.Index = g;
-			glyph.X0 = (int)gx;
-			glyph.Y0 = (int)gy;
-			glyph.X1 = (int)(glyph.X0 + gw);
-			glyph.Y1 = (int)(glyph.Y0 + gh);
+			glyph.X0 = gx;
+			glyph.Y0 = gy;
+			glyph.X1 = glyph.X0 + gw;
+			glyph.Y1 = glyph.Y0 + gh;
 			glyph.XAdvance = (int)(scale * advance * 10.0f);
-			glyph.XOffset = (int)(x0 - pad);
-			glyph.YOffset = (int)(y0 - pad);
-			if (bitmapOption == FONS_GLYPH_BITMAP_OPTIONAL) return glyph;
+			glyph.XOffset = x0 - pad;
+			glyph.YOffset = y0 - pad;
+			if (!isBitmapRequired) return glyph;
 
 			fixed (byte* dst = &_texData[glyph.X0 + pad + (glyph.Y0 + pad) * _params_.Width])
 			{
@@ -643,7 +551,7 @@ namespace FontStashSharp
 			float rx = 0;
 			float ry = 0;
 
-			if ((_params_.Flags & FONS_ZERO_TOPLEFT) != 0)
+			if (_params_.IsAlignmentTopLeft)
 			{
 				rx = x + glyph.XOffset;
 				ry = y + glyph.YOffset;
@@ -728,68 +636,49 @@ namespace FontStashSharp
 			_vertsNumber++;
 		}
 
-		private float GetVertAlign(Font font, int align, int isize)
+		private float GetVertAlign(Font font, Alignment align, int isize)
 		{
 			float result = 0.0f; ;
-			if ((_params_.Flags & FONS_ZERO_TOPLEFT) != 0)
+			if (_params_.IsAlignmentTopLeft)
 			{
-				if ((align & FONS_ALIGN_TOP) != 0)
+				if ((align & Alignment.Top) != 0)
 				{
 					result = font.Ascender * isize / 10.0f;
 				}
-				else if ((align & FONS_ALIGN_MIDDLE) != 0)
+				else if ((align & Alignment.Middle) != 0)
 				{
 					result = (font.Ascender + font.Descender) / 2.0f * isize / 10.0f;
 				}
-				else if ((align & FONS_ALIGN_BASELINE) != 0)
+				else if ((align & Alignment.Baseline) != 0)
 				{
 				}
-				else if ((align & FONS_ALIGN_BOTTOM) != 0)
+				else if ((align & Alignment.Bottom) != 0)
 				{
 					result = font.Descender * isize / 10.0f;
 				}
 			}
 			else
 			{
-				if ((align & FONS_ALIGN_TOP) != 0)
+				if ((align & Alignment.Top) != 0)
 				{
 					result = -font.Ascender * isize / 10.0f;
 				}
 				else
-				if ((align & FONS_ALIGN_MIDDLE) != 0)
+				if ((align & Alignment.Middle) != 0)
 				{
 					result = -(font.Ascender + font.Descender) / 2.0f * isize / 10.0f;
 				}
 				else
-				if ((align & FONS_ALIGN_BASELINE) != 0)
+				if ((align & Alignment.Baseline) != 0)
 				{
 				}
-				else if ((align & FONS_ALIGN_BOTTOM) != 0)
+				else if ((align & Alignment.Bottom) != 0)
 				{
 					result = -font.Descender * isize / 10.0f;
 				}
 			}
 
 			return result;
-		}
-
-		private static FontGlyph AllocGlyph(Font font)
-		{
-			if (font.GlyphsNumber + 1 > font.Glyphs.Length)
-			{
-				var oldGlyphs = font.Glyphs;
-				font.Glyphs = new FontGlyph[font.Glyphs.Length * 2];
-
-				for (var i = 0; i < oldGlyphs.Length; ++i)
-				{
-					font.Glyphs[i] = oldGlyphs[i];
-				}
-			}
-
-			font.Glyphs[font.GlyphsNumber] = new FontGlyph();
-
-			font.GlyphsNumber++;
-			return font.Glyphs[font.GlyphsNumber - 1];
 		}
 
 		private static void BlurCols(byte* dst, int w, int h, int dstStride, int alpha)
@@ -842,17 +731,6 @@ namespace FontStashSharp
 				dst[0] = 0;
 				dst++;
 			}
-		}
-
-		private static int HashInt(int a)
-		{
-			a += ~(a << 15);
-			a ^= a >> 10;
-			a += a << 3;
-			a ^= a >> 6;
-			a += ~(a << 11);
-			a ^= a >> 16;
-			return a;
 		}
 	}
 }

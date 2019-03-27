@@ -46,7 +46,6 @@ namespace SpriteFontPlus.Samples.TtfBaking
 				texture = Texture2D.FromStream(GraphicsDevice, stream);
 			}
 
-
 			string fontData;
 			using (var stream = TitleContainer.OpenStream("Fonts/test.fnt"))
 			{
@@ -79,7 +78,7 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			GraphicsDevice.Clear(Color.CornflowerBlue);
 
 			// TODO: Add your drawing code here
-			_spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+			_spriteBatch.Begin();
 
 			// Render some text
 			_spriteBatch.DrawString(_font, "The quick brown fox jumps over the lazy dog",

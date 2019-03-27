@@ -5,6 +5,7 @@ Library that extends functionality of the SpriteFont.
 
 # Features
 * Creation of SpriteFont in the run-time from ttf.
+* Creation of SpriteFont in the run-time from AngelCode BMFont(only XML with single texture works for now).
 * DynamicSpriteFont class that renders glyphs on demand to the underlying texture atlas. Also it supports 32-bit characters.
 
 # Adding Reference
@@ -28,6 +29,30 @@ var fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(@"C:\\Windows\\Fonts\ar
 
 SpriteFont font = fontBakeResult.CreateSpriteFont(GraphicsDevice);
 ```
+
+# Loading SpriteFont from AngelCode BMFont
+```c#
+	Texture2D texture;
+	using (var stream = TitleContainer.OpenStream("Fonts/test_0.png"))
+	{
+		texture = Texture2D.FromStream(GraphicsDevice, stream);
+	}
+
+	string fontData;
+	using (var stream = TitleContainer.OpenStream("Fonts/test.fnt"))
+	{
+		using (var reader = new StreamReader(stream))
+		{
+			fontData = reader.ReadToEnd();
+		}
+	}
+
+	_font = BMFontLoader.LoadXml(fontData, texture);
+```
+
+Full sample is here:
+[samples/SpriteFontPlus.Samples.BMFont](samples/SpriteFontPlus.Samples.BMFont)
+
 
 # DynamicSpriteFont
 DynamicSpriteFont renders glyphs on demand to the underlying texture atlas. Thus it doesnt require to explicity specify character ranges that are going to be used during the font creation.

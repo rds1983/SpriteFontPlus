@@ -121,6 +121,7 @@ Full sample is here:
 
 ## Credits
 * [MonoGame](http://www.monogame.net/)
+* [FNA](https://github.com/FNA-XNA/FNA)
 * [Cyotek.Drawing.BitmapFont](https://github.com/cyotek/Cyotek.Drawing.BitmapFont)
 * [stb](https://github.com/nothings/stb)
 * [fontstash](https://github.com/memononen/fontstash)

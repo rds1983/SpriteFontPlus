@@ -10,9 +10,6 @@ namespace SpriteFontPlus.Samples.TtfBaking
 	/// </summary>
 	public class Game1 : Game
 	{
-		private const int FontBitmapWidth = 1024;
-		private const int FontBitmapHeight = 1024;
-
 		GraphicsDeviceManager _graphics;
 		SpriteBatch _spriteBatch;
 

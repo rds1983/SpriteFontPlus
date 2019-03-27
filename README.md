@@ -32,22 +32,22 @@ SpriteFont font = fontBakeResult.CreateSpriteFont(GraphicsDevice);
 
 # Loading SpriteFont from AngelCode BMFont
 ```c#
-	Texture2D texture;
-	using (var stream = TitleContainer.OpenStream("Fonts/test_0.png"))
-	{
-		texture = Texture2D.FromStream(GraphicsDevice, stream);
-	}
+Texture2D texture;
+using (var stream = TitleContainer.OpenStream("Fonts/test_0.png"))
+{
+	texture = Texture2D.FromStream(GraphicsDevice, stream);
+}
 
-	string fontData;
-	using (var stream = TitleContainer.OpenStream("Fonts/test.fnt"))
+string fontData;
+using (var stream = TitleContainer.OpenStream("Fonts/test.fnt"))
+{
+	using (var reader = new StreamReader(stream))
 	{
-		using (var reader = new StreamReader(stream))
-		{
-			fontData = reader.ReadToEnd();
-		}
+		fontData = reader.ReadToEnd();
 	}
+}
 
-	_font = BMFontLoader.LoadXml(fontData, texture);
+_font = BMFontLoader.LoadXml(fontData, texture);
 ```
 
 Full sample is here:

@@ -3,15 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2042
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpriteFontPlus", "..\..\src\SpriteFontPlus\SpriteFontPlus.csproj", "{4BD519DB-5A91-465F-997D-1875D45D6CE0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus", "..\..\src\SpriteFontPlus\SpriteFontPlus.csproj", "{4BD519DB-5A91-465F-997D-1875D45D6CE0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{99076AAC-3723-4B2E-A74B-4772FAE8DD6A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpriteFontPlus.Samples.TtfBaking", "..\..\samples\SpriteFontPlus.Samples.TtfBaking\SpriteFontPlus.Samples.TtfBaking.csproj", "{5528B473-7EEA-43EF-8DE2-6338C5F157D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus.Samples.TtfBaking", "..\..\samples\SpriteFontPlus.Samples.TtfBaking\SpriteFontPlus.Samples.TtfBaking.csproj", "{5528B473-7EEA-43EF-8DE2-6338C5F157D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpriteFontPlus.Samples.BMFont", "..\..\samples\SpriteFontPlus.Samples.BMFont\SpriteFontPlus.Samples.BMFont.csproj", "{1CCD7B6A-C1CC-4357-8874-64C5BD7E258F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus.Samples.BMFont", "..\..\samples\SpriteFontPlus.Samples.BMFont\SpriteFontPlus.Samples.BMFont.csproj", "{1CCD7B6A-C1CC-4357-8874-64C5BD7E258F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpriteFontPlus.Samples.DynamicSpriteFont", "..\..\samples\SpriteFontPlus.Samples.DynamicSpriteFont\SpriteFontPlus.Samples.DynamicSpriteFont.csproj", "{BE4D8499-CDDB-422E-B3CB-2FCC38DF1AD1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus.Samples.DynamicSpriteFont", "..\..\samples\SpriteFontPlus.Samples.DynamicSpriteFont\SpriteFontPlus.Samples.DynamicSpriteFont.csproj", "{BE4D8499-CDDB-422E-B3CB-2FCC38DF1AD1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus.Samples.TextureAtlasResize", "..\..\samples\SpriteFontPlus.Samples.TextureAtlasResize\SpriteFontPlus.Samples.TextureAtlasResize.csproj", "{5D4D66C7-0E3B-4CFF-A6B6-5F94D711FCDB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,19 +37,24 @@ Global
 		{BE4D8499-CDDB-422E-B3CB-2FCC38DF1AD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE4D8499-CDDB-422E-B3CB-2FCC38DF1AD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE4D8499-CDDB-422E-B3CB-2FCC38DF1AD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D4D66C7-0E3B-4CFF-A6B6-5F94D711FCDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D4D66C7-0E3B-4CFF-A6B6-5F94D711FCDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D4D66C7-0E3B-4CFF-A6B6-5F94D711FCDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D4D66C7-0E3B-4CFF-A6B6-5F94D711FCDB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5528B473-7EEA-43EF-8DE2-6338C5F157D2} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
+		{1CCD7B6A-C1CC-4357-8874-64C5BD7E258F} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
+		{BE4D8499-CDDB-422E-B3CB-2FCC38DF1AD1} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
+		{5D4D66C7-0E3B-4CFF-A6B6-5F94D711FCDB} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {35ACDF4E-2CE2-46B1-A19F-35DC131069A1}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Myra.UIEditor\Myra.UIEditor.csproj
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{5528B473-7EEA-43EF-8DE2-6338C5F157D2} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
-		{1CCD7B6A-C1CC-4357-8874-64C5BD7E258F} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
-		{BE4D8499-CDDB-422E-B3CB-2FCC38DF1AD1} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
 	EndGlobalSection
 EndGlobal

@@ -53,6 +53,8 @@ namespace FontStashSharp
 
 		public Texture2D Texture { get; private set; }
 
+		public event EventHandler AtlasFull;
+
 		public void AddWhiteRect(int w, int h)
 		{
 			var x = 0;
@@ -317,27 +319,16 @@ namespace FontStashSharp
 			}
 		}
 
-		public byte[] GetTextureData(out int width, out int height)
-		{
-			width = _params_.Width;
-			height = _params_.Height;
-			return _texData;
-		}
-
-		public void GetAtlasSize(out int width, out int height)
-		{
-			width = _params_.Width;
-			height = _params_.Height;
-		}
-
-		public int ExpandAtlas(int width, int height)
+		public void ExpandAtlas(int width, int height)
 		{
 			var i = 0;
 			var maxy = 0;
 			width = Math.Max(width, _params_.Width);
 			height = Math.Max(height, _params_.Height);
 			if (width == _params_.Width && height == _params_.Height)
-				return 1;
+				return;
+
+			Texture = null;
 
 			var data = new byte[width * height];
 			for (i = 0; i < _params_.Height; i++)
@@ -377,33 +368,40 @@ namespace FontStashSharp
 			_params_.Height = height;
 			_itw = 1.0f / _params_.Width;
 			_ith = 1.0f / _params_.Height;
-			return 1;
 		}
 
-		public int ResetAtlas(int width, int height)
+		public void ResetAtlas(int width, int height)
 		{
-			var i = 0;
-			var j = 0;
-
 			_atlas.Reset(width, height);
-			_texData = new byte[width * height];
-			Array.Clear(_texData, 0, _texData.Length);
 			_dirtyRect[0] = width;
 			_dirtyRect[1] = height;
 			_dirtyRect[2] = 0;
 			_dirtyRect[3] = 0;
-			for (i = 0; i < _fonts.Count; i++)
+
+			for (var i = 0; i < _fonts.Count; i++)
 			{
 				var font = _fonts[i];
 				font.Glyphs.Clear();
 			}
 
+			if (width == _params_.Width && height == _params_.Height)
+				return;
+
+			_texData = new byte[width * height];
+			Array.Clear(_texData, 0, _texData.Length);
+			_colorData = new Color[width * height];
+
+			Texture = null;
 			_params_.Width = width;
 			_params_.Height = height;
 			_itw = 1.0f / _params_.Width;
 			_ith = 1.0f / _params_.Height;
 			AddWhiteRect(2, 2);
-			return 1;
+		}
+
+		public void ResetAtlas()
+		{
+			ResetAtlas(_params_.Width, _params_.Height);
 		}
 
 		private int LoadFont(stbtt_fontinfo font, byte* data, int dataSize)
@@ -462,7 +460,7 @@ namespace FontStashSharp
 			g = font._font.fons__tt_getGlyphIndex(codepoint);
 			if (g == 0)
 			{
-				throw new Exception(string.Format("Could not find glyph for codepoint {0}", g));
+				throw new Exception(string.Format("Could not find glyph for codepoint {0}", codepoint));
 			}
 
 			scale = renderFont._font.fons__tt_getPixelHeightScale(size);
@@ -472,7 +470,19 @@ namespace FontStashSharp
 			if (isBitmapRequired)
 			{
 				if (!_atlas.AddRect(gw, gh, ref gx, ref gy))
-					throw new Exception("FONS_ATLAS_FULL");
+				{
+					var ev = AtlasFull;
+					if (ev != null)
+					{
+						ev(this, EventArgs.Empty);
+					}
+
+					// Try again
+					if (!_atlas.AddRect(gw, gh, ref gx, ref gy))
+					{
+						throw new Exception("FONS_ATLAS_FULL");
+					}
+				}
 			}
 			else
 			{

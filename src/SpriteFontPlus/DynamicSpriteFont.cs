@@ -1,6 +1,7 @@
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace SpriteFontPlus
 {
@@ -10,6 +11,7 @@ namespace SpriteFontPlus
 
 		private readonly FontSystem _fontSystem;
 		private readonly int _defaultFontId;
+
 		public Texture2D Texture
 		{
 			get { return _fontSystem.Texture; }
@@ -24,6 +26,22 @@ namespace SpriteFontPlus
 			set
 			{
 				_fontSystem.Size = value;
+			}
+		}
+
+		/// <summary>
+		/// Blur level(0 - no blur)
+		/// </summary>
+		public float Blur
+		{
+			get
+			{
+				return _fontSystem.BlurValue;
+			}
+
+			set
+			{
+				_fontSystem.BlurValue = value;
 			}
 		}
 
@@ -58,6 +76,21 @@ namespace SpriteFontPlus
 				return _defaultFontId;
 			}
 		}
+
+		public event EventHandler AtlasFull
+		{
+			add
+			{
+				_fontSystem.AtlasFull += value;
+			}
+
+			remove
+			{
+				_fontSystem.AtlasFull -= value;
+			}
+		}
+
+
 
 		private DynamicSpriteFont(byte[] ttf, float defaultSize, int textureWidth, int textureHeight)
 		{
@@ -116,6 +149,21 @@ namespace SpriteFontPlus
 			_fontSystem.TextBounds(position.X, position.Y, text, ref bounds);
 
 			return new Rectangle((int)bounds.X, (int)bounds.Y, (int)(bounds.X2 - bounds.X), (int)(bounds.Y2 - bounds.Y));
+		}
+
+		public void ExpandAtlas(int newWidth, int newHeight)
+		{
+			_fontSystem.ExpandAtlas(newWidth, newHeight);
+		}
+
+		public void ResetAtlas(int width, int height)
+		{
+			_fontSystem.ResetAtlas(width, height);
+		}
+
+		public void ResetAtlas()
+		{
+			_fontSystem.ResetAtlas();
 		}
 
 		public static DynamicSpriteFont FromTtf(byte[] ttf, float defaultSize, int textureWidth = 1024, int textureHeight = 1024)

@@ -42,7 +42,7 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			// TODO: use this.Content to load your game content here
 			_font = DynamicSpriteFont.FromTtf(File.ReadAllBytes(@"Fonts/DroidSans.ttf"), 20, 128, 128);
 
-			_font.AtlasFull += (s, a) =>
+			_font.AtlasFull = () =>
 			{
 				if (_font.Texture.Width < 512)
 				{

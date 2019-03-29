@@ -77,20 +77,18 @@ namespace SpriteFontPlus
 			}
 		}
 
-		public event EventHandler AtlasFull
+		public Action AtlasFull
 		{
-			add
+			get
 			{
-				_fontSystem.AtlasFull += value;
+				return _fontSystem.AtlasFull;
 			}
 
-			remove
+			set
 			{
-				_fontSystem.AtlasFull -= value;
+				_fontSystem.AtlasFull = value;
 			}
 		}
-
-
 
 		private DynamicSpriteFont(byte[] ttf, float defaultSize, int textureWidth, int textureHeight)
 		{

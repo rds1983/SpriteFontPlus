@@ -33,9 +33,18 @@ namespace FontStashSharp
 		public float Spacing;
 		public Vector2 Scale;
 
+		public Texture2D Texture
+		{
+			get; private set;
+		}
+
+		public Action AtlasFull;
+
 		public FontSystem(FontSystemParams p)
 		{
 			_params_ = p;
+
+			AtlasFull = () => ResetAtlas();
 
 			_atlas = new FontAtlas(_params_.Width, _params_.Height, 256);
 			_itw = 1.0f / _params_.Width;
@@ -50,10 +59,6 @@ namespace FontStashSharp
 			AddWhiteRect(2, 2);
 			ClearState();
 		}
-
-		public Texture2D Texture { get; private set; }
-
-		public event EventHandler AtlasFull;
 
 		public void AddWhiteRect(int w, int h)
 		{
@@ -471,10 +476,10 @@ namespace FontStashSharp
 			{
 				if (!_atlas.AddRect(gw, gh, ref gx, ref gy))
 				{
-					var ev = AtlasFull;
-					if (ev != null)
+					var a = AtlasFull;
+					if (a != null)
 					{
-						ev(this, EventArgs.Empty);
+						a();
 					}
 
 					// Try again

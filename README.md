@@ -47,7 +47,7 @@ using (var stream = TitleContainer.OpenStream("Fonts/test.fnt"))
 	}
 }
 
-_font = BMFontLoader.LoadXml(fontData, texture);
+SpriteFont font = BMFontLoader.LoadXml(fontData, texture);
 ```
 
 Full sample is here:
@@ -130,11 +130,14 @@ _font.AtlasFull += (s, a) =>
 	_font.ResetAtlas();
 };
 ```
-And following code expands it 2x:
+
+And following code expands it by 2x times:
+```C#
 _font.AtlasFull += (s, a) =>
 {
 	_font.ExpandAtlas(_font.Texture.Width * 2, _font.Texture.Height * 2);
 };
+```
 
 
 ## Credits

@@ -121,21 +121,13 @@ Full sample is here:
 
 # Dealing with DynamicSpriteFont Atlas Overflow
 
-DynamicSpriteFont fires AtlasFull event when it has no more space to render character glyphs.
+DynamicSpriteFont has special action AtlasFull, that is fired when it has no more space to render character glyphs.
+By default it resets the existing atlas.
+However a user can redefine its behavior.
 
-A user can subscribe to it and either reset or expand the texture atlas.
-
-I.e. following code resets texture atlas when it is full:
+I.e. following code expands texture atlas by 2x times, when it is full:
 ```C#
-_font.AtlasFull += (s, a) =>
-{
-	_font.ResetAtlas();
-};
-```
-
-And following code expands it by 2x times:
-```C#
-_font.AtlasFull += (s, a) =>
+_font.AtlasFull = () =>
 {
 	_font.ExpandAtlas(_font.Texture.Width * 2, _font.Texture.Height * 2);
 };

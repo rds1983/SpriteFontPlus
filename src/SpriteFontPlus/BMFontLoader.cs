@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -9,11 +10,15 @@ namespace SpriteFontPlus
 {
 	public class BMFontLoader
 	{
-		public static SpriteFont LoadXml(string xml, Texture2D texture)
+		public static SpriteFont LoadXml(string xml, Func<string, Texture2D> textureGetter)
 		{
 			var data = new BitmapFont();
 			data.LoadXml(xml);
 
+			if (data.Pages.Length > 1)
+			{
+				throw new NotSupportedException("For now only BMFonts with single texture are supported");
+			}
 #if !XENKO
 			var glyphBounds = new List<Rectangle>();
 			var cropping = new List<Rectangle>();
@@ -34,6 +39,8 @@ namespace SpriteFontPlus
 
 				kerning.Add(new Vector3(0, character.Bounds.Width, character.XAdvance - character.Bounds.Width));
 			}
+
+			var texture = textureGetter(data.Pages[0].FileName);
 
 			var constructorInfo = typeof(SpriteFont).GetTypeInfo().DeclaredConstructors.First();
 			var result = (SpriteFont)constructorInfo.Invoke(new object[]

@@ -52,7 +52,7 @@ namespace SpriteFontPlus.Samples.TtfBaking
 				}
 			}
 
-			_font = BMFontLoader.LoadXml(fontData, texture);
+			_font = BMFontLoader.LoadXml(fontData, name => texture);
 
 			GC.Collect();
 		}

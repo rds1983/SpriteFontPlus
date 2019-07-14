@@ -11,6 +11,10 @@ namespace SpriteFontPlus.Samples.TtfBaking
 	/// </summary>
 	public class Game1 : Game
 	{
+		private const int AtlasesPerRow = 3;
+		private const int AtlasSize = 256;
+		private const int TexturePadding = 16;
+
 		GraphicsDeviceManager _graphics;
 		SpriteBatch _spriteBatch;
 		private DynamicSpriteFont _font;
@@ -21,8 +25,8 @@ namespace SpriteFontPlus.Samples.TtfBaking
 		{
 			_graphics = new GraphicsDeviceManager(this)
 			{
-				PreferredBackBufferWidth = 1200,
-				PreferredBackBufferHeight = 800
+				PreferredBackBufferWidth = 1024,
+				PreferredBackBufferHeight = 768
 			};
 
 			Content.RootDirectory = "Content";
@@ -40,21 +44,7 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 
 			// TODO: use this.Content to load your game content here
-			_font = DynamicSpriteFont.FromTtf(File.ReadAllBytes(@"Fonts/DroidSans.ttf"), 20, 128, 128);
-
-			_font.AtlasFull = () =>
-			{
-				if (_font.Texture.Width < 512)
-				{
-					// Expand atlas size 2x
-					_font.ExpandAtlas(_font.Texture.Width * 2, _font.Texture.Height * 2);
-				}
-				else
-				{
-					// Reset back to 128x128
-					_font.ResetAtlas(128, 128);
-				}
-			};
+			_font = DynamicSpriteFont.FromTtf(File.ReadAllBytes(@"Fonts/DroidSans.ttf"), 20, AtlasSize, AtlasSize);
 
 			_white = new Texture2D(GraphicsDevice, 1, 1);
 			_white.SetData(new[] { Color.White });
@@ -79,9 +69,18 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			_font.Blur = _random.Next(0, 4);
 			_spriteBatch.DrawString(_font, c.ToString(), Vector2.Zero, Color.White);
 
-			_spriteBatch.Draw(_white, new Rectangle(0, 50, _font.Texture.Width, _font.Texture.Height), Color.Green);
-			_spriteBatch.Draw(_font.Texture, new Vector2(0, 50), Color.White);
+			var count = 0;
+			foreach (var texture in _font.Textures)
+			{
+				var x = (count % AtlasesPerRow) * (texture.Width + TexturePadding);
+				var y = 50 + (count / AtlasesPerRow) * (texture.Height + TexturePadding);
 
+				_spriteBatch.Draw(_white, new Rectangle(x, y, texture.Width, texture.Height), Color.Green);
+				_spriteBatch.Draw(texture, new Vector2(x, y), Color.White);
+
+
+				++count;
+			}
 			_spriteBatch.End();
 
 			base.Draw(gameTime);

@@ -380,11 +380,9 @@ namespace FontStashSharp
 						ev(this, EventArgs.Empty);
 					}
 
-					// Try again
-					if (!currentAtlas.AddRect(gw, gh, ref gx, ref gy))
-					{
-						throw new Exception("FONS_ATLAS_FULL");
-					}
+					// This code will force creation of new atlas
+					_currentAtlas = null;
+					currentAtlas = CurrentAtlas;
 				}
 			}
 			else

@@ -6,7 +6,7 @@ Library that extends functionality of the SpriteFont.
 # Features
 * Creation of SpriteFont in the run-time from ttf.
 * Creation of SpriteFont in the run-time from AngelCode BMFont(only XML with single texture works for now).
-* DynamicSpriteFont class that renders glyphs on demand to the underlying texture atlas. Also it supports 32-bit characters.
+* DynamicSpriteFont class that renders glyphs on demand to the underlying texture atlas. Also it supports 32-bit characters and blurry text.
 
 # Adding Reference
 1. `Install-Package SpriteFontPlus.MonoGame` (or `Install-Package SpriteFontPlus.FNA` for FNA)

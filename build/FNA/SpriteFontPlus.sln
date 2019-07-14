@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus.Samples.BMFo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus.Samples.DynamicSpriteFont", "..\..\samples\SpriteFontPlus.Samples.DynamicSpriteFont\SpriteFontPlus.Samples.DynamicSpriteFont.csproj", "{598F5E18-3249-49C5-A0CF-4A6C513C5337}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus.Samples.TextureAtlasResize", "..\..\samples\SpriteFontPlus.Samples.TextureAtlasResize\SpriteFontPlus.Samples.TextureAtlasResize.csproj", "{10ADF7AB-3561-4FDC-A519-C6FEB9189986}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus.Samples.TextureAtlasFull", "..\..\samples\SpriteFontPlus.Samples.TextureAtlasFull\SpriteFontPlus.Samples.TextureAtlasFull.csproj", "{181FDA2C-B2E7-4205-BFC2-E460FB36B2AD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -87,18 +87,18 @@ Global
 		{598F5E18-3249-49C5-A0CF-4A6C513C5337}.Release|x64.Build.0 = Release|Any CPU
 		{598F5E18-3249-49C5-A0CF-4A6C513C5337}.Release|x86.ActiveCfg = Release|Any CPU
 		{598F5E18-3249-49C5-A0CF-4A6C513C5337}.Release|x86.Build.0 = Release|Any CPU
-		{10ADF7AB-3561-4FDC-A519-C6FEB9189986}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{10ADF7AB-3561-4FDC-A519-C6FEB9189986}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{10ADF7AB-3561-4FDC-A519-C6FEB9189986}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{10ADF7AB-3561-4FDC-A519-C6FEB9189986}.Debug|x64.Build.0 = Debug|Any CPU
-		{10ADF7AB-3561-4FDC-A519-C6FEB9189986}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{10ADF7AB-3561-4FDC-A519-C6FEB9189986}.Debug|x86.Build.0 = Debug|Any CPU
-		{10ADF7AB-3561-4FDC-A519-C6FEB9189986}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{10ADF7AB-3561-4FDC-A519-C6FEB9189986}.Release|Any CPU.Build.0 = Release|Any CPU
-		{10ADF7AB-3561-4FDC-A519-C6FEB9189986}.Release|x64.ActiveCfg = Release|Any CPU
-		{10ADF7AB-3561-4FDC-A519-C6FEB9189986}.Release|x64.Build.0 = Release|Any CPU
-		{10ADF7AB-3561-4FDC-A519-C6FEB9189986}.Release|x86.ActiveCfg = Release|Any CPU
-		{10ADF7AB-3561-4FDC-A519-C6FEB9189986}.Release|x86.Build.0 = Release|Any CPU
+		{181FDA2C-B2E7-4205-BFC2-E460FB36B2AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{181FDA2C-B2E7-4205-BFC2-E460FB36B2AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{181FDA2C-B2E7-4205-BFC2-E460FB36B2AD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{181FDA2C-B2E7-4205-BFC2-E460FB36B2AD}.Debug|x64.Build.0 = Debug|Any CPU
+		{181FDA2C-B2E7-4205-BFC2-E460FB36B2AD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{181FDA2C-B2E7-4205-BFC2-E460FB36B2AD}.Debug|x86.Build.0 = Debug|Any CPU
+		{181FDA2C-B2E7-4205-BFC2-E460FB36B2AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{181FDA2C-B2E7-4205-BFC2-E460FB36B2AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{181FDA2C-B2E7-4205-BFC2-E460FB36B2AD}.Release|x64.ActiveCfg = Release|Any CPU
+		{181FDA2C-B2E7-4205-BFC2-E460FB36B2AD}.Release|x64.Build.0 = Release|Any CPU
+		{181FDA2C-B2E7-4205-BFC2-E460FB36B2AD}.Release|x86.ActiveCfg = Release|Any CPU
+		{181FDA2C-B2E7-4205-BFC2-E460FB36B2AD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -107,7 +107,7 @@ Global
 		{C7AC3F94-31CB-4685-A0CB-7B9566D6CCC9} = {8ED83526-FD30-4BA1-90C4-8CE29F53E5FB}
 		{92A1379F-A127-4CF5-A6EF-F44FD2475E8D} = {8ED83526-FD30-4BA1-90C4-8CE29F53E5FB}
 		{598F5E18-3249-49C5-A0CF-4A6C513C5337} = {8ED83526-FD30-4BA1-90C4-8CE29F53E5FB}
-		{10ADF7AB-3561-4FDC-A519-C6FEB9189986} = {8ED83526-FD30-4BA1-90C4-8CE29F53E5FB}
+		{181FDA2C-B2E7-4205-BFC2-E460FB36B2AD} = {8ED83526-FD30-4BA1-90C4-8CE29F53E5FB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A9C9D369-EE58-4E9D-B9FE-63023B644741}

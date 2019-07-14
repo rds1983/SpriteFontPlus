@@ -3,7 +3,7 @@ using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace SpriteFontPlus.Samples.TtfBaking
+namespace SpriteFontPlus.Samples.TextureAtlas
 {
 	/// <summary>
 	/// This is the main type for your game.

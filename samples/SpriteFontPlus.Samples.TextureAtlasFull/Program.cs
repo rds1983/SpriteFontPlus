@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SpriteFontPlus.Samples.TtfBaking
+namespace SpriteFontPlus.Samples.TextureAtlasFull
 {
     /// <summary>
     /// The main class.

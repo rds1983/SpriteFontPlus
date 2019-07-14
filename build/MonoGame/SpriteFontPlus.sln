@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus.Samples.BMFo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus.Samples.DynamicSpriteFont", "..\..\samples\SpriteFontPlus.Samples.DynamicSpriteFont\SpriteFontPlus.Samples.DynamicSpriteFont.csproj", "{BE4D8499-CDDB-422E-B3CB-2FCC38DF1AD1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus.Samples.TextureAtlasResize", "..\..\samples\SpriteFontPlus.Samples.TextureAtlasResize\SpriteFontPlus.Samples.TextureAtlasResize.csproj", "{5D4D66C7-0E3B-4CFF-A6B6-5F94D711FCDB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus.Samples.TextureAtlasFull", "..\..\samples\SpriteFontPlus.Samples.TextureAtlasFull\SpriteFontPlus.Samples.TextureAtlasFull.csproj", "{2E98C783-BDFA-4F26-97F4-3C2475FC95DA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,10 +37,10 @@ Global
 		{BE4D8499-CDDB-422E-B3CB-2FCC38DF1AD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE4D8499-CDDB-422E-B3CB-2FCC38DF1AD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE4D8499-CDDB-422E-B3CB-2FCC38DF1AD1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5D4D66C7-0E3B-4CFF-A6B6-5F94D711FCDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5D4D66C7-0E3B-4CFF-A6B6-5F94D711FCDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5D4D66C7-0E3B-4CFF-A6B6-5F94D711FCDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5D4D66C7-0E3B-4CFF-A6B6-5F94D711FCDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E98C783-BDFA-4F26-97F4-3C2475FC95DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E98C783-BDFA-4F26-97F4-3C2475FC95DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E98C783-BDFA-4F26-97F4-3C2475FC95DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E98C783-BDFA-4F26-97F4-3C2475FC95DA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -49,7 +49,7 @@ Global
 		{5528B473-7EEA-43EF-8DE2-6338C5F157D2} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
 		{1CCD7B6A-C1CC-4357-8874-64C5BD7E258F} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
 		{BE4D8499-CDDB-422E-B3CB-2FCC38DF1AD1} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
-		{5D4D66C7-0E3B-4CFF-A6B6-5F94D711FCDB} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
+		{2E98C783-BDFA-4F26-97F4-3C2475FC95DA} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {35ACDF4E-2CE2-46B1-A19F-35DC131069A1}

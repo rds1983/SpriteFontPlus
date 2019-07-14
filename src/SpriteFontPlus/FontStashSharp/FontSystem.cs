@@ -383,6 +383,12 @@ namespace FontStashSharp
 					// This code will force creation of new atlas
 					_currentAtlas = null;
 					currentAtlas = CurrentAtlas;
+
+					// Try to add again
+					if (!currentAtlas.AddRect(gw, gh, ref gx, ref gy))
+					{
+						throw new Exception(string.Format("Could not add rect to the newly created atlas. gw={0}, gh={1}", gw, gh));
+					}
 				}
 			}
 			else

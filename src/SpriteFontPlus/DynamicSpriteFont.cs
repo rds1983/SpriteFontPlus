@@ -2,19 +2,44 @@ using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace SpriteFontPlus
 {
 	public class DynamicSpriteFont
 	{
+		internal struct TextureEnumerator : IEnumerable<Texture2D>
+		{
+			private readonly FontSystem _font;
+
+			public TextureEnumerator(FontSystem font)
+			{
+				_font = font;
+			}
+
+			public IEnumerator<Texture2D> GetEnumerator()
+			{
+				foreach (var atlas in _font.Atlases)
+				{
+					yield return atlas.Texture;
+				}
+			}
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return GetEnumerator();
+			}
+		}
+
 		private static readonly string DefaultFontName = string.Empty;
 
 		private readonly FontSystem _fontSystem;
 		private readonly int _defaultFontId;
 
-		public Texture2D Texture
+		public IEnumerable<Texture2D> Textures
 		{
-			get { return _fontSystem.Texture; }
+			get { return new TextureEnumerator(_fontSystem); }
 		}
 
 		public float Size
@@ -77,16 +102,16 @@ namespace SpriteFontPlus
 			}
 		}
 
-		public Action AtlasFull
+		public event EventHandler CurrentAtlasFull
 		{
-			get
+			add
 			{
-				return _fontSystem.AtlasFull;
+				_fontSystem.CurrentAtlasFull += value;
 			}
 
-			set
+			remove
 			{
-				_fontSystem.AtlasFull = value;
+				_fontSystem.CurrentAtlasFull -= value;
 			}
 		}
 
@@ -149,19 +174,14 @@ namespace SpriteFontPlus
 			return new Rectangle((int)bounds.X, (int)bounds.Y, (int)(bounds.X2 - bounds.X), (int)(bounds.Y2 - bounds.Y));
 		}
 
-		public void ExpandAtlas(int newWidth, int newHeight)
+		public void Reset(int width, int height)
 		{
-			_fontSystem.ExpandAtlas(newWidth, newHeight);
+			_fontSystem.Reset(width, height);
 		}
 
-		public void ResetAtlas(int width, int height)
+		public void Reset()
 		{
-			_fontSystem.ResetAtlas(width, height);
-		}
-
-		public void ResetAtlas()
-		{
-			_fontSystem.ResetAtlas();
+			_fontSystem.Reset();
 		}
 
 		public static DynamicSpriteFont FromTtf(byte[] ttf, float defaultSize, int textureWidth = 1024, int textureHeight = 1024)

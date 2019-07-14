@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -127,7 +128,8 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			_font.Size = 26;
 			DrawString("Texture:", 300);
 
-			_spriteBatch.Draw(_font.Texture, new Vector2(0, 330), Color.White);
+			var texture = _font.Textures.First();
+			_spriteBatch.Draw(texture, new Vector2(0, 330), Color.White);
 
 			_spriteBatch.End();
 

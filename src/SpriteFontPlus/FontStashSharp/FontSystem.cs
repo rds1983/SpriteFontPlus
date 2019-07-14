@@ -10,20 +10,13 @@ namespace FontStashSharp
 {
 	internal unsafe class FontSystem
 	{
-		public const int FONS_ATLAS_FULL = 1;
-
 		private FontSystemParams _params_ = new FontSystemParams();
-		private FontAtlas _atlas;
-		private Color[] _colors = new Color[1024];
-		private int[] _dirtyRect = new int[4];
+		private readonly List<FontAtlas> _atlases = new List<FontAtlas>();
 		private readonly List<Font> _fonts = new List<Font>();
 		private float _ith;
 		private float _itw;
-		private int _vertsNumber;
-		private Rectangle[] _textureCoords = new Rectangle[1024 * 2];
-		private byte[] _texData;
-		private Color[] _colorData;
-		private Rectangle[] _verts = new Rectangle[1024 * 2];
+		private readonly List<RenderItem> _renderItems = new List<RenderItem>();
+		private FontAtlas _currentAtlas;
 
 		public int FontId;
 		public Alignment Alignment;
@@ -33,55 +26,37 @@ namespace FontStashSharp
 		public float Spacing;
 		public Vector2 Scale;
 
-		public Texture2D Texture
+		public FontAtlas CurrentAtlas
 		{
-			get; private set;
+			get
+			{
+				if (_currentAtlas == null)
+				{
+					_currentAtlas = new FontAtlas(_params_.Width, _params_.Height, 256, _atlases.Count);
+					_atlases.Add(_currentAtlas);
+				}
+
+				return _currentAtlas;
+			}
 		}
 
-		public Action AtlasFull;
+		public List<FontAtlas> Atlases
+		{
+			get
+			{
+				return _atlases;
+			}
+		}
+
+		public event EventHandler CurrentAtlasFull;
 
 		public FontSystem(FontSystemParams p)
 		{
 			_params_ = p;
 
-			AtlasFull = () => ResetAtlas();
-
-			_atlas = new FontAtlas(_params_.Width, _params_.Height, 256);
 			_itw = 1.0f / _params_.Width;
 			_ith = 1.0f / _params_.Height;
-			_texData = new byte[_params_.Width * _params_.Height];
-			_colorData = new Color[_params_.Width * _params_.Height];
-			Array.Clear(_texData, 0, _texData.Length);
-			_dirtyRect[0] = _params_.Width;
-			_dirtyRect[1] = _params_.Height;
-			_dirtyRect[2] = 0;
-			_dirtyRect[3] = 0;
-			AddWhiteRect(2, 2);
 			ClearState();
-		}
-
-		public void AddWhiteRect(int w, int h)
-		{
-			var x = 0;
-			var y = 0;
-			var gx = 0;
-			var gy = 0;
-			if (!_atlas.AddRect(w, h, ref gx, ref gy))
-				return;
-			fixed (byte* dst2 = &_texData[gx + gy * _params_.Width])
-			{
-				var dst = dst2;
-				for (y = 0; y < h; y++)
-				{
-					for (x = 0; x < w; x++) dst[x] = 0xff;
-					dst += _params_.Width;
-				}
-			}
-
-			_dirtyRect[0] = Math.Min(_dirtyRect[0], gx);
-			_dirtyRect[1] = Math.Min(_dirtyRect[1], gy);
-			_dirtyRect[2] = Math.Max(_dirtyRect[2], gx + w);
-			_dirtyRect[3] = Math.Max(_dirtyRect[3], gy + h);
 		}
 
 		public void ClearState()
@@ -96,7 +71,6 @@ namespace FontStashSharp
 
 		public int AddFontMem(string name, byte[] data)
 		{
-			var i = 0;
 			var ascent = 0;
 			var descent = 0;
 			var fh = 0;
@@ -178,25 +152,27 @@ namespace FontStashSharp
 				if (glyph != null)
 				{
 					GetQuad(font, prevGlyphIndex, glyph, scale, Spacing, ref originX, ref originY, &q);
-					if (_vertsNumber + 6 > 1024)
-					{
-						Flush(batch, depth);
-					}
 
 					q.X0 = (int)(q.X0 * Scale.X);
 					q.X1 = (int)(q.X1 * Scale.X);
 					q.Y0 = (int)(q.Y0 * Scale.Y);
 					q.Y1 = (int)(q.Y1 * Scale.Y);
 
-					AddVertex(new Rectangle((int)(x + q.X0),
+					var renderItem = new RenderItem
+					{
+						Atlas = _atlases[glyph.AtlasIndex],
+						_verts = new Rectangle((int)(x + q.X0),
 								(int)(y + q.Y0),
 								(int)(q.X1 - q.X0),
 								(int)(q.Y1 - q.Y0)),
-							new Rectangle((int)(q.S0 * _params_.Width),
+						_textureCoords = new Rectangle((int)(q.S0 * _params_.Width),
 								(int)(q.T0 * _params_.Height),
 								(int)((q.S1 - q.S0) * _params_.Width),
 								(int)((q.T1 - q.T0) * _params_.Height)),
-							Color);
+						_colors = Color
+					};
+
+					_renderItems.Add(renderItem);
 				}
 
 				prevGlyphIndex = glyph != null ? glyph.Index : -1;
@@ -324,64 +300,9 @@ namespace FontStashSharp
 			}
 		}
 
-		public void ExpandAtlas(int width, int height)
+		public void Reset(int width, int height)
 		{
-			var i = 0;
-			var maxy = 0;
-			width = Math.Max(width, _params_.Width);
-			height = Math.Max(height, _params_.Height);
-			if (width == _params_.Width && height == _params_.Height)
-				return;
-
-			Texture = null;
-
-			var data = new byte[width * height];
-			for (i = 0; i < _params_.Height; i++)
-			{
-				fixed (byte* dst = &data[i * width])
-				{
-					fixed (byte* src = &_texData[i * _params_.Width])
-					{
-						CRuntime.memcpy(dst, src, (ulong)_params_.Width);
-						if (width > _params_.Width)
-							CRuntime.memset(dst + _params_.Width, 0, (ulong)(width - _params_.Width));
-					}
-				}
-			}
-
-			if (height > _params_.Height)
-				Array.Clear(data, _params_.Height * width, (height - _params_.Height) * width);
-
-			_texData = data;
-
-			_colorData = new Color[width * height];
-			for(i = 0; i < width * height; ++i)
-			{
-				_colorData[i].R = _texData[i];
-				_colorData[i].G = _texData[i];
-				_colorData[i].B = _texData[i];
-				_colorData[i].A = _texData[i];
-			}
-
-			_atlas.Expand(width, height);
-			for (i = 0; i < _atlas.NodesNumber; i++) maxy = Math.Max(maxy, _atlas.Nodes[i].Y);
-			_dirtyRect[0] = 0;
-			_dirtyRect[1] = 0;
-			_dirtyRect[2] = _params_.Width;
-			_dirtyRect[3] = maxy;
-			_params_.Width = width;
-			_params_.Height = height;
-			_itw = 1.0f / _params_.Width;
-			_ith = 1.0f / _params_.Height;
-		}
-
-		public void ResetAtlas(int width, int height)
-		{
-			_atlas.Reset(width, height);
-			_dirtyRect[0] = width;
-			_dirtyRect[1] = height;
-			_dirtyRect[2] = 0;
-			_dirtyRect[3] = 0;
+			_atlases.Clear();
 
 			for (var i = 0; i < _fonts.Count; i++)
 			{
@@ -392,21 +313,15 @@ namespace FontStashSharp
 			if (width == _params_.Width && height == _params_.Height)
 				return;
 
-			_texData = new byte[width * height];
-			Array.Clear(_texData, 0, _texData.Length);
-			_colorData = new Color[width * height];
-
-			Texture = null;
 			_params_.Width = width;
 			_params_.Height = height;
 			_itw = 1.0f / _params_.Width;
 			_ith = 1.0f / _params_.Height;
-			AddWhiteRect(2, 2);
 		}
 
-		public void ResetAtlas()
+		public void Reset()
 		{
-			ResetAtlas(_params_.Width, _params_.Height);
+			Reset(_params_.Width, _params_.Height);
 		}
 
 		private int LoadFont(stbtt_fontinfo font, byte* data, int dataSize)
@@ -414,23 +329,8 @@ namespace FontStashSharp
 			return stbtt_InitFont(font, data, 0);
 		}
 
-		private void Blur(byte* dst, int w, int h, int dstStride, int blur)
-		{
-			var alpha = 0;
-			float sigma = 0;
-			if (blur < 1)
-				return;
-			sigma = blur * 0.57735f;
-			alpha = (int)((1 << 16) * (1.0f - Math.Exp(-2.3f / (sigma + 1.0f))));
-			BlurRows(dst, w, h, dstStride, alpha);
-			BlurCols(dst, w, h, dstStride, alpha);
-			BlurRows(dst, w, h, dstStride, alpha);
-			BlurCols(dst, w, h, dstStride, alpha);
-		}
-
 		private FontGlyph GetGlyph(Font font, int codepoint, int isize, int iblur, bool isBitmapRequired)
 		{
-			var i = 0;
 			var g = 0;
 			var advance = 0;
 			var lsb = 0;
@@ -442,19 +342,13 @@ namespace FontStashSharp
 			var gh = 0;
 			var gx = 0;
 			var gy = 0;
-			var x = 0;
-			var y = 0;
 			float scale = 0;
 			FontGlyph glyph = null;
-			int h = 0;
 			var size = isize / 10.0f;
-			var pad = 0;
-			var renderFont = font;
 			if (isize < 2)
 				return null;
 			if (iblur > 20)
 				iblur = 20;
-			pad = iblur + 2;
 
 			if (font.TryGetGlyph(codepoint, isize, iblur, out glyph))
 			{
@@ -468,22 +362,26 @@ namespace FontStashSharp
 				throw new Exception(string.Format("Could not find glyph for codepoint {0}", codepoint));
 			}
 
-			scale = renderFont._font.fons__tt_getPixelHeightScale(size);
-			renderFont._font.fons__tt_buildGlyphBitmap(g, size, scale, &advance, &lsb, &x0, &y0, &x1, &y1);
+			scale = font._font.fons__tt_getPixelHeightScale(size);
+			font._font.fons__tt_buildGlyphBitmap(g, size, scale, &advance, &lsb, &x0, &y0, &x1, &y1);
+
+			var pad = FontGlyph.PadFromBlur(iblur);
 			gw = x1 - x0 + pad * 2;
 			gh = y1 - y0 + pad * 2;
+
+			var currentAtlas = CurrentAtlas;
 			if (isBitmapRequired)
 			{
-				if (!_atlas.AddRect(gw, gh, ref gx, ref gy))
+				if (!currentAtlas.AddRect(gw, gh, ref gx, ref gy))
 				{
-					var a = AtlasFull;
-					if (a != null)
+					var ev = CurrentAtlasFull;
+					if (ev != null)
 					{
-						a();
+						ev(this, EventArgs.Empty);
 					}
 
 					// Try again
-					if (!_atlas.AddRect(gw, gh, ref gx, ref gy))
+					if (!currentAtlas.AddRect(gw, gh, ref gx, ref gy))
 					{
 						throw new Exception("FONS_ATLAS_FULL");
 					}
@@ -508,6 +406,7 @@ namespace FontStashSharp
 			}
 
 			glyph.Index = g;
+			glyph.AtlasIndex = currentAtlas.Index;
 			glyph.X0 = gx;
 			glyph.Y0 = gy;
 			glyph.X1 = glyph.X0 + gw;
@@ -517,46 +416,14 @@ namespace FontStashSharp
 			glyph.YOffset = y0 - pad;
 			if (!isBitmapRequired) return glyph;
 
-			fixed (byte* dst = &_texData[glyph.X0 + pad + (glyph.Y0 + pad) * _params_.Width])
-			{
-				renderFont._font.fons__tt_renderGlyphBitmap(dst, gw - pad * 2, gh - pad * 2, _params_.Width, scale,
-					scale, g);
-			}
+			currentAtlas.RenderGlyph(font, glyph, gw, gh, scale);
 
-			fixed (byte* dst = &_texData[glyph.X0 + glyph.Y0 * _params_.Width])
-			{
-				for (y = 0; y < gh; y++)
-				{
-					dst[y * _params_.Width] = 0;
-					dst[gw - 1 + y * _params_.Width] = 0;
-				}
-
-				for (x = 0; x < gw; x++)
-				{
-					dst[x] = 0;
-					dst[x + (gh - 1) * _params_.Width] = 0;
-				}
-			}
-
-			if (iblur > 0)
-			{
-				fixed (byte* bdst = &_texData[glyph.X0 + glyph.Y0 * _params_.Width])
-				{
-					Blur(bdst, gw, gh, _params_.Width, iblur);
-				}
-			}
-
-			_dirtyRect[0] = Math.Min(_dirtyRect[0], glyph.X0);
-			_dirtyRect[1] = Math.Min(_dirtyRect[1], glyph.Y0);
-			_dirtyRect[2] = Math.Max(_dirtyRect[2], glyph.X1);
-			_dirtyRect[3] = Math.Max(_dirtyRect[3], glyph.Y1);
 			return glyph;
 		}
 
 		private void GetQuad(Font font, int prevGlyphIndex, FontGlyph glyph, float scale,
 			float spacing, ref float x, ref float y, FontGlyphSquad* q)
 		{
-
 			if (prevGlyphIndex != -1)
 			{
 				var adv = font._font.fons__tt_getGlyphKernAdvance(prevGlyphIndex, glyph.Index) * scale;
@@ -598,57 +465,25 @@ namespace FontStashSharp
 
 		private void Flush(SpriteBatch batch, float depth)
 		{
-			if (Texture == null) Texture = new Texture2D(batch.GraphicsDevice, _params_.Width, _params_.Height);
-
-			if (_dirtyRect[0] < _dirtyRect[2] && _dirtyRect[1] < _dirtyRect[3])
+			foreach (var atlas in _atlases)
 			{
-				if (_texData != null)
-				{
-					var x = _dirtyRect[0];
-					var y = _dirtyRect[1];
-					var w = _dirtyRect[2] - x;
-					var h = _dirtyRect[3] - y;
-					var sz = w * h;
-					for (var xx = x; xx < x + w; ++xx)
-					{
-						for (var yy = y; yy < y + h; ++yy)
-						{
-							var destPos = yy * _params_.Width + xx;
-
-							var c = _texData[destPos];
-							_colorData[destPos].R = c;
-							_colorData[destPos].G = c;
-							_colorData[destPos].B = c;
-							_colorData[destPos].A = c;
-						}
-					}
-
-					Texture.SetData(_colorData);
-				}
-
-				_dirtyRect[0] = _params_.Width;
-				_dirtyRect[1] = _params_.Height;
-				_dirtyRect[2] = 0;
-				_dirtyRect[3] = 0;
+				atlas.Flush(batch.GraphicsDevice);
 			}
 
-			if (_vertsNumber > 0)
+			for (var i = 0; i < _renderItems.Count; ++i)
 			{
-				for (var i = 0; i < _vertsNumber; ++i)
-				{
-					batch.Draw(Texture, _verts[i], _textureCoords[i], _colors[i], 0f, Vector2.Zero, SpriteEffects.None, depth);
-				}
-
-				_vertsNumber = 0;
+				var renderItem = _renderItems[i];
+				batch.Draw(renderItem.Atlas.Texture,
+					renderItem._verts,
+					renderItem._textureCoords,
+					renderItem._colors,
+					0f,
+					Vector2.Zero,
+					SpriteEffects.None,
+					depth);
 			}
-		}
 
-		private void AddVertex(Rectangle destRect, Rectangle srcRect, Color c)
-		{
-			_verts[_vertsNumber] = destRect;
-			_textureCoords[_vertsNumber] = srcRect;
-			_colors[_vertsNumber] = c;
-			_vertsNumber++;
+			_renderItems.Clear();
 		}
 
 		private float GetVertAlign(Font font, Alignment align, int isize)
@@ -694,58 +529,6 @@ namespace FontStashSharp
 			}
 
 			return result;
-		}
-
-		private static void BlurCols(byte* dst, int w, int h, int dstStride, int alpha)
-		{
-			var x = 0;
-			var y = 0;
-			for (y = 0; y < h; y++)
-			{
-				var z = 0;
-				for (x = 1; x < w; x++)
-				{
-					z += (alpha * ((dst[x] << 7) - z)) >> 16;
-					dst[x] = (byte)(z >> 7);
-				}
-
-				dst[w - 1] = 0;
-				z = 0;
-				for (x = w - 2; x >= 0; x--)
-				{
-					z += (alpha * ((dst[x] << 7) - z)) >> 16;
-					dst[x] = (byte)(z >> 7);
-				}
-
-				dst[0] = 0;
-				dst += dstStride;
-			}
-		}
-
-		private static void BlurRows(byte* dst, int w, int h, int dstStride, int alpha)
-		{
-			var x = 0;
-			var y = 0;
-			for (x = 0; x < w; x++)
-			{
-				var z = 0;
-				for (y = dstStride; y < h * dstStride; y += dstStride)
-				{
-					z += (alpha * ((dst[y] << 7) - z)) >> 16;
-					dst[y] = (byte)(z >> 7);
-				}
-
-				dst[(h - 1) * dstStride] = 0;
-				z = 0;
-				for (y = (h - 2) * dstStride; y >= 0; y -= dstStride)
-				{
-					z += (alpha * ((dst[y] << 7) - z)) >> 16;
-					dst[y] = (byte)(z >> 7);
-				}
-
-				dst[0] = 0;
-				dst++;
-			}
 		}
 	}
 }

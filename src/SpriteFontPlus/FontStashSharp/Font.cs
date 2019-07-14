@@ -44,6 +44,5 @@ namespace FontStashSharp
 			var key = BuildKey(codePoint, size, blur);
 			_glyphs[key] = glyph;
 		}
-
 	}
 }

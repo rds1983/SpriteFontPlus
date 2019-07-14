@@ -120,21 +120,6 @@ It would render following:
 Full sample is here:
 [samples/SpriteFontPlus.Samples.DynamicSpriteFont](samples/SpriteFontPlus.Samples.DynamicSpriteFont)
 
-# Dealing with DynamicSpriteFont Atlas Overflow
-
-DynamicSpriteFont has special action AtlasFull, that is fired when it has no more space to render character glyphs.
-By default it resets the existing atlas.
-However a user can redefine its behavior.
-
-I.e. following code expands texture atlas by 2x times, when it is full:
-```C#
-_font.AtlasFull = () =>
-{
-	_font.ExpandAtlas(_font.Texture.Width * 2, _font.Texture.Height * 2);
-};
-```
-
-
 ## Credits
 * [MonoGame](http://www.monogame.net/)
 * [FNA](https://github.com/FNA-XNA/FNA)

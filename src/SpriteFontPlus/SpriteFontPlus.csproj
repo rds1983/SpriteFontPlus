@@ -13,6 +13,7 @@
     <Version>1.0.0.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>$(DefineConstants);STBSHARP_INTERNAL</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(DefineConstants.Contains('MONOGAME'))">
@@ -44,5 +45,11 @@
   <ItemGroup Condition="$(DefineConstants.Contains('XENKO'))">
     <PackageReference Include="Xenko.Engine" Version="3.1.0.1-beta01-0349" PrivateAssets="contentfiles;analyzers" />
     <PackageReference Include="Xenko.Core" Version="3.1.0.1-beta01-0349" PrivateAssets="contentfiles;analyzers" />
-  </ItemGroup>  
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\deps\StbTrueTypeSharp\src\StbTrueTypeSharp\CRuntime.cs" Link="StbTrueTypeSharp\CRuntime.cs" />
+    <Compile Include="..\..\deps\StbTrueTypeSharp\src\StbTrueTypeSharp\StbTrueType.cs" Link="StbTrueTypeSharp\StbTrueType.cs" />
+    <Compile Include="..\..\deps\StbTrueTypeSharp\src\StbTrueTypeSharp\StbTrueType.Generated.cs" Link="StbTrueTypeSharp\StbTrueType.Generated.cs" />
+  </ItemGroup>
 </Project>

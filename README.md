@@ -39,6 +39,9 @@ var fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(@"C:\\Windows\\Fonts\ar
 
 SpriteFont font = fontBakeResult.CreateSpriteFont(GraphicsDevice);
 ```
+Full sample is here:
+[samples/SpriteFontPlus.Samples.TtfBaking](samples/SpriteFontPlus.Samples.TtfBaking)
+
 
 # Loading SpriteFont from AngelCode BMFont
 ```c#

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SpriteFontPlus.Samples.TtfBaking
+namespace SpriteFontPlus.Samples.BMFont
 {
     /// <summary>
     /// The main class.

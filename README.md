@@ -9,10 +9,20 @@ Library that extends functionality of the SpriteFont.
 * DynamicSpriteFont class that renders glyphs on demand to the underlying texture atlas. Also it supports 32-bit characters and blurry text.
 
 # Adding Reference
-1. `Install-Package SpriteFontPlus.MonoGame` (or `Install-Package SpriteFontPlus.FNA` for FNA)
+There are two ways of referencing SpriteFontPlus in the project:
+1. Through nuget: `install-package SpriteFontPlus.MonoGame` for MonoGame(or `install-package SpriteFontPlus.FNA` for FNA)
+2. As submodule:
+    
+    a. `git submodule add https://github.com/rds1983/SpriteFontPlus.git`
+    
+    b. Copy SolutionDefines.targets from SpriteFontPlus/build/MonoGame(or SpriteFontPlus/build/FNA) to your solution folder.
 
+      * If FNA is used, SolutionDefines.targets needs to be edited and FNAProj variable should be updated to the location of FNA.csproj next to the SpriteFontPlus.csproj location.
+    
+    c. Add SpriteFontPlus/src/SpriteFontPlus/SpriteFontPlus.csproj to the solution.
+    
 # Loading SpriteFont from a ttf
-2. Following code creates a SpriteFont from a ttf:
+Following code creates a SpriteFont from a ttf:
 ```c#
 var fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(@"C:\\Windows\\Fonts\arial.ttf"),
 	25,

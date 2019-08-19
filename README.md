@@ -15,7 +15,9 @@ There are two ways of referencing SpriteFontPlus in the project:
     
     a. `git submodule add https://github.com/rds1983/SpriteFontPlus.git`
     
-    b. Copy SolutionDefines.targets from SpriteFontPlus/build/MonoGame(or SpriteFontPlus/build/FNA) to your solution folder.
+    b. `git submodule update --init --recursive`
+    
+    c. Copy SolutionDefines.targets from SpriteFontPlus/build/MonoGame(or SpriteFontPlus/build/FNA) to your solution folder.
 
       * If FNA is used, SolutionDefines.targets needs to be edited and FNAProj variable should be updated to the location of FNA.csproj next to the SpriteFontPlus.csproj location.
     

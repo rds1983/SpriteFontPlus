@@ -21,7 +21,7 @@ There are two ways of referencing SpriteFontPlus in the project:
 
       * If FNA is used, SolutionDefines.targets needs to be edited and FNAProj variable should be updated to the location of FNA.csproj next to the SpriteFontPlus.csproj location.
     
-    c. Add SpriteFontPlus/src/SpriteFontPlus/SpriteFontPlus.csproj to the solution.
+    d. Add SpriteFontPlus/src/SpriteFontPlus/SpriteFontPlus.csproj to the solution.
     
 # Loading SpriteFont from a ttf
 Following code creates a SpriteFont from a ttf:

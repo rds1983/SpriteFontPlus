@@ -135,6 +135,11 @@ It would render following:
 Full sample is here:
 [samples/SpriteFontPlus.Samples.DynamicSpriteFont](samples/SpriteFontPlus.Samples.DynamicSpriteFont)
 
+## Building From Source Code
+1. Clone this repo.
+2. `git submodule update --init --recursive`
+3. Open a solution from the "build" folder.
+
 ## Credits
 * [MonoGame](http://www.monogame.net/)
 * [FNA](https://github.com/FNA-XNA/FNA)

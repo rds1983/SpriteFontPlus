@@ -51,5 +51,6 @@
     <Compile Include="..\..\deps\StbTrueTypeSharp\src\StbTrueTypeSharp\CRuntime.cs" Link="StbTrueTypeSharp\CRuntime.cs" />
     <Compile Include="..\..\deps\StbTrueTypeSharp\src\StbTrueTypeSharp\StbTrueType.cs" Link="StbTrueTypeSharp\StbTrueType.cs" />
     <Compile Include="..\..\deps\StbTrueTypeSharp\src\StbTrueTypeSharp\StbTrueType.Generated.cs" Link="StbTrueTypeSharp\StbTrueType.Generated.cs" />
+    <Compile Include="..\..\deps\BMFontToSpriteFont\**\*.cs" LinkBase="BMFontToSpriteFont" />
   </ItemGroup>
 </Project>

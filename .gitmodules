@@ -1,3 +1,9 @@
 [submodule "deps/StbTrueTypeSharp"]
 	path = deps/StbTrueTypeSharp
 	url = https://github.com/StbSharp/StbTrueTypeSharp.git
+[submodule "deps/FNA"]
+	path = deps/FNA
+	url = https://github.com/rds1983/FNA.git
+[submodule "deps/BMFontToSpriteFont"]
+	path = deps/BMFontToSpriteFont
+	url = https://github.com/rds1983/BMFontToSpriteFont.git

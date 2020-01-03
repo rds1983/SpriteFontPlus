@@ -52,7 +52,7 @@ namespace SpriteFontPlus.Samples.BMFont
 				}
 			}
 
-			_font = BMFontLoader.LoadXml(fontData, name => texture);
+			_font = BMFontLoader.LoadXml(fontData, name => new TextureWithOffset(texture));
 
 			GC.Collect();
 		}

@@ -18,7 +18,7 @@ namespace SpriteFontPlus.Samples.TtfBaking
 		private int _fontIdJapanese, _fontIdEmojis;
 		private Texture2D _white;
 		private bool _drawBackground = false;
-		private bool _wasSpaceDown;
+		private bool _wasSpaceDown, _wasEnterDown;
 
 		public Game1()
 		{
@@ -60,13 +60,20 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			var state = Keyboard.GetState();
 
 			var isSpaceDown = state.IsKeyDown(Keys.Space);
-
 			if (isSpaceDown && !_wasSpaceDown)
 			{
 				_drawBackground = !_drawBackground;
 			}
 
 			_wasSpaceDown = isSpaceDown;
+
+			var isEnterDown = state.IsKeyDown(Keys.Enter);
+			if (isEnterDown && !_wasEnterDown)
+			{
+				_font.UseKernings = !_font.UseKernings;
+			}
+
+			_wasEnterDown = isEnterDown;
 		}
 
 		private void DrawString(string text, int y, Color color)
@@ -111,25 +118,25 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			DrawString("Sævör grét áðan því úlpan var ónýt, P: Pchnąć w tę łódź jeża lub osiem skrzyń fig", 90);
 
 			_font.Size = 26;
-			DrawString("Příliš žluťoučký kůň úpěl ďábelské kódy, R: В чащах юга жил-был цитрус? Да, но фальшивый экземпляр! ёъ.", 120);
+			DrawString("Příliš žluťoučký kůň úpěl ďábelské kódy,\nR: В чащах юга жил-был цитрус?\nДа, но фальшивый экземпляр! ёъ.", 120);
 
 			_font.Size = 28;
-			DrawString("kilómetros y frío, añoraba,\nP: vôo à noite, F: Les naïfs ægithales\nhâtifs pondant à Noël où", 150);
+			DrawString("kilómetros y frío, añoraba,\nP: vôo à noite, F: Les naïfs ægithales\nhâtifs pondant à Noël où", 210);
 
 			_font.FontId = _fontIdJapanese;
 			_font.Size = 30;
-			DrawString("いろはにほへど", 250);
+			DrawString("いろはにほへど", 310);
 
 			_font.FontId = _fontIdEmojis;
 			_font.Size = 32;
-			DrawString("🙌📦👏🔥👍😻😂🎉💻😍🚀😁🙈🇧🇪👩😉🍻🎶🏆👀👉👶💕😎😱🌌🌻🍺🏀👇👯💁💝💩😃😅🙏🚄🇫🌧🌾🍀🍁🍓🍕🎾🏈", 280, Color.Gold);
+			DrawString("🙌📦👏🔥👍😻😂🎉💻😍🚀😁🙈🇧🇪👩😉🍻🎶🏆👀👉👶💕😎😱🌌🌻🍺🏀👇👯💁💝💩😃😅🙏🚄🇫🌧🌾🍀🍁🍓🍕🎾🏈", 340, Color.Gold);
 
 			_font.FontId = _font.DefaultFontId;
 			_font.Size = 26;
-			DrawString("Texture:", 320);
+			DrawString("Texture:", 380);
 
 			var texture = _font.Textures.First();
-			_spriteBatch.Draw(texture, new Vector2(0, 350), Color.White);
+			_spriteBatch.Draw(texture, new Vector2(0, 410), Color.White);
 
 			_spriteBatch.End();
 

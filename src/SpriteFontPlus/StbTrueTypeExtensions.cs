@@ -30,10 +30,5 @@ namespace SpriteFontPlus
 		{
 			stbtt_MakeGlyphBitmap(font, output, (int)(outWidth), (int)(outHeight), (int)(outStride), (float)(scaleX), (float)(scaleY), (int)(glyph));
 		}
-
-		public static int fons__tt_getGlyphKernAdvance(this stbtt_fontinfo font, int glyph1, int glyph2)
-		{
-			return (int)(stbtt_GetGlyphKernAdvance(font, (int)(glyph1), (int)(glyph2)));
-		}
 	}
 }

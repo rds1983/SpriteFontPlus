@@ -24,6 +24,7 @@ namespace FontStashSharp
 		public float BlurValue;
 		public float Spacing;
 		public Vector2 Scale;
+		public bool UseKernings = true;
 
 		public FontAtlas CurrentAtlas
 		{
@@ -155,6 +156,7 @@ namespace FontStashSharp
 				{
 					originX = 0.0f;
 					originY += lineHeight;
+					prevGlyphIndex = -1;
 					continue;
 				}
 
@@ -228,6 +230,7 @@ namespace FontStashSharp
 				{
 					x = startx;
 					y += lineHeight;
+					prevGlyphIndex = -1;
 					continue;
 				}
 
@@ -451,7 +454,11 @@ namespace FontStashSharp
 		{
 			if (prevGlyphIndex != -1)
 			{
-				var adv = font._font.fons__tt_getGlyphKernAdvance(prevGlyphIndex, glyph.Index) * scale;
+				float adv = 0;
+				if (UseKernings)
+				{
+					adv = font.GetKerning(prevGlyphIndex, glyph.Index) * scale;
+				}
 				x += (int)(adv + spacing + 0.5f);
 			}
 

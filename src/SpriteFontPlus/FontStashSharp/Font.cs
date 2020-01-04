@@ -14,6 +14,7 @@ namespace FontStashSharp
 		public float Ascender;
 		public float Descender;
 		public float LineHeight;
+		private readonly Dictionary<ulong, int> _kernings = new Dictionary<ulong, int>();
 
 		public Dictionary<ulong, FontGlyph> Glyphs
 		{
@@ -43,6 +44,22 @@ namespace FontStashSharp
 		{
 			var key = BuildKey(codePoint, size, blur);
 			_glyphs[key] = glyph;
+		}
+
+		public int GetKerning(int glyphIndex1, int glyphIndex2)
+		{
+			ulong key = (uint)glyphIndex1 << 32;
+			key |= (uint)glyphIndex2;
+
+			int result;
+			if (_kernings.TryGetValue(key, out result))
+			{
+				return result;
+			}
+			result = stbtt_GetGlyphKernAdvance(_font, glyphIndex1, glyphIndex2);
+			_kernings[key] = result;
+
+			return result;
 		}
 	}
 }

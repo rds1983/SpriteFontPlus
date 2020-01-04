@@ -102,6 +102,19 @@ namespace SpriteFontPlus
 			}
 		}
 
+		public bool UseKernings
+		{
+			get
+			{
+				return _fontSystem.UseKernings;
+			}
+
+			set
+			{
+				_fontSystem.UseKernings = value;
+			}
+		}
+
 		public event EventHandler CurrentAtlasFull
 		{
 			add

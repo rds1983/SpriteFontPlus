@@ -1,5 +1,5 @@
 # SpriteFontPlus
-[![NuGet](https://img.shields.io/nuget/v/SpriteFontPlus.MonoGame.svg)](https://www.nuget.org/packages/SpriteFontPlus.MonoGame/) [![Build status](https://ci.appveyor.com/api/projects/status/2mbacxymarcxq4we?svg=true)](https://ci.appveyor.com/project/RomanShapiro/spritefontplus)
+[![NuGet](https://img.shields.io/nuget/v/SpriteFontPlus.svg)](https://www.nuget.org/packages/SpriteFontPlus/) [![Build status](https://ci.appveyor.com/api/projects/status/2mbacxymarcxq4we?svg=true)](https://ci.appveyor.com/project/RomanShapiro/spritefontplus)
 
 Library that extends functionality of the SpriteFont.
 
@@ -10,8 +10,8 @@ Library that extends functionality of the SpriteFont.
 
 # Adding Reference
 There are two ways of referencing SpriteFontPlus in the project:
-1. Through nuget: `install-package SpriteFontPlus.MonoGame` for MonoGame(or `install-package SpriteFontPlus.FNA` for FNA)
-2. As submodule:
+1. Through nuget(works only for MonoGame): `install-package SpriteFontPlus`
+2. As submodule(works for both MonoGame and FNA):
     
     a. `git submodule add https://github.com/rds1983/SpriteFontPlus.git`
     

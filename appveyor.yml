@@ -1,4 +1,4 @@
-version: 0.7.0.{build}
+version: 0.7.1.{build}
 configuration: Release
 dotnet_csproj:
   patch: true
@@ -12,14 +12,11 @@ build_script:
 - cmd: >-
     build_all.bat
 artifacts:
-  - path: src/SpriteFontPlus/bin/MonoGame/Release/SpriteFontPlus.MonoGame.$(appveyor_build_version).nupkg
-    name: SpriteFontPlus.MonoGame.nupkg
-
-  - path: src/SpriteFontPlus/bin/FNA/Release/SpriteFontPlus.FNA.$(appveyor_build_version).nupkg
-    name: SpriteFontPlus.FNA.nupkg
+  - path: src/SpriteFontPlus/bin/MonoGame/Release/SpriteFontPlus.$(appveyor_build_version).nupkg
+    name: SpriteFontPlus.nupkg
 
   - path: SpriteFontPlus.$(appveyor_build_version).zip
-    name: ZipPackage    
+    name: ZipPackage
 deploy:
   - provider: GitHub
     release: $(appveyor_build_version)

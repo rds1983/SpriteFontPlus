@@ -114,15 +114,15 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			DrawString("Příliš žluťoučký kůň úpěl ďábelské kódy, R: В чащах юга жил-был цитрус? Да, но фальшивый экземпляр! ёъ.", 120);
 
 			_font.Size = 28;
-			DrawString("kilómetros y frío, añoraba, P: vôo à noite, F: Les naïfs ægithales hâtifs pondant à Noël où", 150);
+			DrawString("kilómetros y frío, añoraba,\nP: vôo à noite, F: Les naïfs ægithales\nhâtifs pondant à Noël où", 150);
 
 			_font.FontId = _fontIdJapanese;
 			_font.Size = 30;
-			DrawString("いろはにほへど", 180);
+			DrawString("いろはにほへど", 250);
 
 			_font.FontId = _fontIdEmojis;
 			_font.Size = 32;
-			DrawString("🙌📦👏🔥👍😻😂🎉💻😍🚀😁🙈🇧🇪👩😉🍻🎶🏆👀👉👶💕😎😱🌌🌻🍺🏀👇👯💁💝💩😃😅🙏🚄🇫🌧🌾🍀🍁🍓🍕🎾🏈", 220, Color.Gold);
+			DrawString("🙌📦👏🔥👍😻😂🎉💻😍🚀😁🙈🇧🇪👩😉🍻🎶🏆👀👉👶💕😎😱🌌🌻🍺🏀👇👯💁💝💩😃😅🙏🚄🇫🌧🌾🍀🍁🍓🍕🎾🏈", 280, Color.Gold);
 
 			_font.FontId = _font.DefaultFontId;
 			_font.Size = 26;

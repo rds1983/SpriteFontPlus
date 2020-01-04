@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SpriteFontPlus;
-using StbTrueTypeSharp;
 using static StbTrueTypeSharp.StbTrueType;
 
 namespace FontStashSharp
@@ -110,6 +109,9 @@ namespace FontStashSharp
 		{
 			if (str.IsNullOrEmpty) return 0.0f;
 
+			float ascenter, descenter, lineHeight;
+			VertMetrics(out ascenter, out descenter, out lineHeight);
+
 			FontGlyph glyph = null;
 			var q = new FontGlyphSquad();
 			var prevGlyphIndex = -1;
@@ -148,6 +150,14 @@ namespace FontStashSharp
 			for (int i = 0; i < str.Length; i += char.IsSurrogatePair(str.String, i + str.Location) ? 2 : 1)
 			{
 				var codepoint = char.ConvertToUtf32(str.String, i + str.Location);
+
+				if (codepoint == '\n')
+				{
+					originX = 0.0f;
+					originY += lineHeight;
+					continue;
+				}
+
 				glyph = GetGlyph(font, codepoint, isize, iblur, true);
 				if (glyph != null)
 				{
@@ -184,6 +194,9 @@ namespace FontStashSharp
 
 		public float TextBounds(float x, float y, StringSegment str, ref Bounds bounds)
 		{
+			float ascenter, descenter, lineHeight;
+			VertMetrics(out ascenter, out descenter, out lineHeight);
+
 			var q = new FontGlyphSquad();
 			FontGlyph glyph = null;
 			var prevGlyphIndex = -1;
@@ -210,6 +223,14 @@ namespace FontStashSharp
 			for (int i = 0; i < str.Length; i += char.IsSurrogatePair(str.String, i + str.Location) ? 2 : 1)
 			{
 				var codepoint = char.ConvertToUtf32(str.String, i + str.Location);
+
+				if (codepoint == '\n')
+				{
+					x = startx;
+					y += lineHeight;
+					continue;
+				}
+
 				glyph = GetGlyph(font, codepoint, isize, iblur, false);
 				if (glyph != null)
 				{
@@ -359,7 +380,7 @@ namespace FontStashSharp
 			g = font._font.fons__tt_getGlyphIndex(codepoint);
 			if (g == 0)
 			{
-				throw new Exception(string.Format("Could not find glyph for codepoint {0}", codepoint));
+				return null;
 			}
 
 			scale = font._font.fons__tt_getPixelHeightScale(size);

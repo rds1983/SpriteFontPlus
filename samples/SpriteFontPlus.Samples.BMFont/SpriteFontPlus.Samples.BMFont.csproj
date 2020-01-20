@@ -10,12 +10,12 @@
   </PropertyGroup>
   
   <PropertyGroup Condition="$(DefineConstants.Contains('MONOGAME'))">
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net45</TargetFramework>
     <OutputPath>bin\MonoGame\$(Configuration)</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(DefineConstants.Contains('FNA'))">
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <OutputPath>bin\FNA\$(Configuration)</OutputPath>
   </PropertyGroup>
   
@@ -28,7 +28,7 @@
   </ItemGroup>
   
   <ItemGroup Condition="$(DefineConstants.Contains('MONOGAME'))">
-    <PackageReference Include="MonoGame.Framework.DesktopGL.Core" Version="3.8.0.2" Condition="$(DefineConstants.Contains('MONOGAME'))" />
+    <PackageReference Include="MonoGame.Framework.DesktopGL.Core" Version="3.7.1.189" Condition="$(DefineConstants.Contains('MONOGAME'))" />
   </ItemGroup>
 
   <ItemGroup>

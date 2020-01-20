@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$(SolutionDir)SolutionDefines.targets" />
 
   <PropertyGroup>
@@ -16,6 +16,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);STBSHARP_INTERNAL</DefineConstants>
+    
   </PropertyGroup>
 
   <PropertyGroup Condition="$(DefineConstants.Contains('MONOGAME'))">

@@ -25,7 +25,8 @@ namespace FontStashSharp
 		public float Spacing;
 		public Vector2 Scale;
 		public bool UseKernings = true;
-
+		public bool TryFallback = false;
+		
 		public FontAtlas CurrentAtlas
 		{
 			get
@@ -161,6 +162,19 @@ namespace FontStashSharp
 				}
 
 				glyph = GetGlyph(font, codepoint, isize, iblur, true);
+				if (glyph == null && TryFallback)
+				{
+					for (int j = 0; j < _fonts.Count; j++)
+					{
+						if(FontId == j) continue;
+						
+						Font f = _fonts[j];
+
+						glyph = GetGlyph(f, codepoint, isize, iblur, true);
+						
+						if(glyph != null) break;
+					}
+				}
 				if (glyph != null)
 				{
 					GetQuad(font, prevGlyphIndex, glyph, scale, Spacing, ref originX, ref originY, &q);
@@ -235,6 +249,19 @@ namespace FontStashSharp
 				}
 
 				glyph = GetGlyph(font, codepoint, isize, iblur, false);
+				if (glyph == null && TryFallback)
+				{
+					for (int j = 0; j < _fonts.Count; j++)
+					{
+						if(FontId == j) continue;
+						
+						Font f = _fonts[j];
+
+						glyph = GetGlyph(f, codepoint, isize, iblur, false);
+						
+						if(glyph != null) break;
+					}
+				}
 				if (glyph != null)
 				{
 					GetQuad(font, prevGlyphIndex, glyph, scale, Spacing, ref x, ref y, &q);

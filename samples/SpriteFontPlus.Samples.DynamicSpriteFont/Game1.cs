@@ -134,7 +134,8 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			_font.FontId = _font.DefaultFontId;
 			_font.Size = 26;
 			DrawString("Texture:", 380);
-
+			
+			
 			var texture = _font.Textures.First();
 			_spriteBatch.Draw(texture, new Vector2(0, 410), Color.White);
 

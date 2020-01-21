@@ -115,6 +115,20 @@ namespace SpriteFontPlus
 			}
 		}
 
+		public bool TryFallback
+		{
+			get
+			{
+				return _fontSystem.TryFallback;
+				
+			}
+			set
+			{
+				_fontSystem.TryFallback = value;
+				
+			}
+		}
+		
 		public event EventHandler CurrentAtlasFull
 		{
 			add

@@ -144,15 +144,7 @@ namespace SpriteFontPlus
 
 		private DynamicSpriteFont(byte[] ttf, float defaultSize, int textureWidth, int textureHeight)
 		{
-			var fontParams = new FontSystemParams
-			{
-				Width = textureWidth,
-				Height = textureHeight,
-				IsAlignmentTopLeft = true
-			};
-
-			_fontSystem = new FontSystem(fontParams);
-			_fontSystem.Alignment = Alignment.Top;
+			_fontSystem = new FontSystem(textureWidth, textureHeight);
 
 			_defaultFontId = _fontSystem.AddFontMem(DefaultFontName, ttf);
 			Size = defaultSize;

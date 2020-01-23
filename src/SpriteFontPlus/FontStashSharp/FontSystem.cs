@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SpriteFontPlus;
-using static StbTrueTypeSharp.StbTrueType;
 
 namespace FontStashSharp
 {
@@ -36,6 +35,14 @@ namespace FontStashSharp
 				}
 
 				return _currentAtlas;
+			}
+		}
+
+		private Font CurrentFont
+		{
+			get
+			{
+				return _fonts[FontId];
 			}
 		}
 
@@ -73,27 +80,7 @@ namespace FontStashSharp
 
 		public int AddFontMem(string name, byte[] data)
 		{
-			var ascent = 0;
-			var descent = 0;
-			var fh = 0;
-			var lineGap = 0;
-			var font = new Font
-			{
-				Name = name,
-				Data = data
-			};
-			fixed (byte* ptr = data)
-			{
-				if (LoadFont(font._font, ptr, data.Length) == 0)
-					return -1;
-			}
-
-			font._font.fons__tt_getFontVMetrics(&ascent, &descent, &lineGap);
-			fh = ascent - descent;
-			font.Ascent = ascent;
-			font.Ascender = ascent / (float)fh;
-			font.Descender = descent / (float)fh;
-			font.LineHeight = (fh + lineGap) / (float)fh;
+			var font = Font.FromMemory(name, data);
 
 			_fonts.Add(font);
 			return _fonts.Count - 1;
@@ -112,9 +99,6 @@ namespace FontStashSharp
 		{
 			if (str.IsNullOrEmpty) return 0.0f;
 
-			float ascender, descender, lineHeight;
-			VertMetrics(out ascender, out descender, out lineHeight);
-
 			FontGlyph glyph = null;
 			var q = new FontGlyphSquad();
 			var prevGlyphIndex = -1;
@@ -122,7 +106,6 @@ namespace FontStashSharp
 			var iblur = (int)BlurValue;
 			float scale = 0;
 			Font font;
-			float width = 0;
 			if (FontId < 0 || FontId >= _fonts.Count)
 				return x;
 			font = _fonts[FontId];
@@ -133,7 +116,9 @@ namespace FontStashSharp
 			float originX = 0.0f;
 			float originY = 0.0f;
 
-			originY += ascender;
+			var ascent = CurrentFont.GetAscent(Size);
+			var lineHeight = CurrentFont.GetLineHeight(Size);
+			originY += ascent;
 			for (int i = 0; i < str.Length; i += char.IsSurrogatePair(str.String, i + str.Location) ? 2 : 1)
 			{
 				var codepoint = char.ConvertToUtf32(str.String, i + str.Location);
@@ -195,9 +180,6 @@ namespace FontStashSharp
 
 		public float TextBounds(float x, float y, StringSegment str, ref Bounds bounds)
 		{
-			float ascender, descender, lineHeight;
-			VertMetrics(out ascender, out descender, out lineHeight);
-
 			var q = new FontGlyphSquad();
 			FontGlyph glyph = null;
 			var prevGlyphIndex = -1;
@@ -217,7 +199,11 @@ namespace FontStashSharp
 			if (font.Data == null)
 				return 0;
 			scale = font._font.fons__tt_getPixelHeightScale(isize / 10.0f);
-			y += ascender;
+
+			var ascent = CurrentFont.GetAscent(Size);
+			var lineHeight = CurrentFont.GetLineHeight(Size);
+
+			y += ascent;
 			minx = maxx = x;
 			miny = maxy = y;
 			startx = x;
@@ -273,23 +259,6 @@ namespace FontStashSharp
 			return advance;
 		}
 
-		public void VertMetrics(out float ascender, out float descender, out float lineh)
-		{
-			ascender = descender = lineh = 0;
-			Font font;
-			int isize = 0;
-			if (FontId < 0 || FontId >= _fonts.Count)
-				return;
-			font = _fonts[FontId];
-			isize = (int)(Size * 10.0f);
-			if (font.Data == null)
-				return;
-
-			ascender = font.Ascender * isize / 10.0f;
-			descender = font.Descender * isize / 10.0f;
-			lineh = font.LineHeight * isize / 10.0f;
-		}
-
 		public void Reset(int width, int height)
 		{
 			Atlases.Clear();
@@ -311,11 +280,6 @@ namespace FontStashSharp
 		public void Reset()
 		{
 			Reset(_size.X, _size.Y);
-		}
-
-		private int LoadFont(stbtt_fontinfo font, byte* data, int dataSize)
-		{
-			return stbtt_InitFont(font, data, 0);
 		}
 
 		private FontGlyph GetGlyph(Font font, int codepoint, int isize, int iblur, bool isBitmapRequired)

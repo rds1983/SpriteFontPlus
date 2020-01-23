@@ -1,28 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using static StbTrueTypeSharp.StbTrueType;
 
 namespace FontStashSharp
 {
 	internal class Font
 	{
-		private readonly Dictionary<ulong, FontGlyph> _glyphs = new Dictionary<ulong, FontGlyph>();
+		private float AscentBase, DescentBase, LineHeightBase;
 
 		public stbtt_fontinfo _font = new stbtt_fontinfo();
 		public string Name;
 		public byte[] Data;
-		public float Ascent;
-		public float Ascender;
-		public float Descender;
-		public float LineHeight;
 		private readonly Dictionary<ulong, int> _kernings = new Dictionary<ulong, int>();
 
-		public Dictionary<ulong, FontGlyph> Glyphs
-		{
-			get
-			{
-				return _glyphs;
-			}
-		}
+		public Dictionary<ulong, FontGlyph> Glyphs { get; } = new Dictionary<ulong, FontGlyph>();
 
 		private ulong BuildKey(int codePoint, int size, int blur)
 		{
@@ -37,13 +28,13 @@ namespace FontStashSharp
 		{
 			var key = BuildKey(codePoint, size, blur);
 
-			return _glyphs.TryGetValue(key, out glyph);
+			return Glyphs.TryGetValue(key, out glyph);
 		}
 
 		public void SetGlyph(int codePoint, int size, int blur, FontGlyph glyph)
 		{
 			var key = BuildKey(codePoint, size, blur);
-			_glyphs[key] = glyph;
+			Glyphs[key] = glyph;
 		}
 
 		public int GetKerning(int glyphIndex1, int glyphIndex2)
@@ -60,6 +51,45 @@ namespace FontStashSharp
 			_kernings[key] = result;
 
 			return result;
+		}
+
+		public float GetAscent(float size)
+		{
+			return AscentBase * size;
+		}
+
+		public float GetDescent(float size)
+		{
+			return DescentBase * size;
+		}
+
+		public float GetLineHeight(float size)
+		{
+			return LineHeightBase * size;
+		}
+
+		public static unsafe Font FromMemory(string name, byte[] data)
+		{
+			var font = new Font
+			{
+				Name = name,
+				Data = data
+			};
+			fixed (byte* ptr = data)
+			{
+				if (stbtt_InitFont(font._font, ptr, 0) == 0)
+					throw new Exception(string.Format("stbtt_InitFont failed. name={0}", name));
+			}
+
+			int ascent, descent, lineGap;
+			stbtt_GetFontVMetrics(font._font , &ascent, &descent, &lineGap);
+
+			var fh = ascent - descent;
+			font.AscentBase = ascent / (float)fh;
+			font.DescentBase = descent / (float)fh;
+			font.LineHeightBase = (fh + lineGap) / (float)fh;
+
+			return font;
 		}
 	}
 }

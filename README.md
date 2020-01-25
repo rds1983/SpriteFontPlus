@@ -10,7 +10,7 @@ Library that extends functionality of the SpriteFont.
 
 # Adding Reference
 There are two ways of referencing SpriteFontPlus in the project:
-1. Through nuget(works only for MonoGame): `install-package SpriteFontPlus`
+1. Through nuget(works only for MonoGame): `install-package SpriteFontPlus` or `dotnet add <csproj path> package SpriteFontPlus` for .NET Core
 2. As submodule(works for both MonoGame and FNA):
     
     a. `git submodule add https://github.com/rds1983/SpriteFontPlus.git`

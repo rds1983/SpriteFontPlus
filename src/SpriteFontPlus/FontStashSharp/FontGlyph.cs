@@ -1,9 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace FontStashSharp
 {
 	internal class FontGlyph
 	{
+		private readonly Dictionary<int, int> _kernings = new Dictionary<int, int>();
+
 		public Font Font;
 		public FontAtlas Atlas;
 		public int Codepoint;
@@ -21,6 +24,19 @@ namespace FontStashSharp
 			{
 				return PadFromBlur(Blur);
 			}
+		}
+
+		public int GetKerning(FontGlyph nextGlyph)
+		{
+			int result;
+			if (_kernings.TryGetValue(nextGlyph.Index, out result))
+			{
+				return result;
+			}
+			result = StbTrueTypeSharp.StbTrueType.stbtt_GetGlyphKernAdvance(Font._font, Index, nextGlyph.Index);
+			_kernings[nextGlyph.Index] = result;
+
+			return result;
 		}
 
 		public static int PadFromBlur(int blur)

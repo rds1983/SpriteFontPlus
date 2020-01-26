@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using static StbTrueTypeSharp.StbTrueType;
 
 namespace FontStashSharp
@@ -13,25 +12,7 @@ namespace FontStashSharp
 		public float LineHeight { get; private set; }
 		public float Scale { get; private set; }
 
-
 		public stbtt_fontinfo _font = new stbtt_fontinfo();
-		private readonly Dictionary<ulong, int> _kernings = new Dictionary<ulong, int>();
-
-		public int GetKerning(int glyphIndex1, int glyphIndex2)
-		{
-			ulong key = (uint)glyphIndex1 << 32;
-			key |= (uint)glyphIndex2;
-
-			int result;
-			if (_kernings.TryGetValue(key, out result))
-			{
-				return result;
-			}
-			result = stbtt_GetGlyphKernAdvance(_font, glyphIndex1, glyphIndex2);
-			_kernings[key] = result;
-
-			return result;
-		}
 
 		public void Recalculate(float size)
 		{

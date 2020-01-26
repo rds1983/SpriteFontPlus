@@ -65,7 +65,6 @@ namespace SpriteFontPlus.Samples.TextureAtlasFull
 			var c = (char)_random.Next(32, 100);
 
 			_font.Size = _random.Next(20, 40);
-			_font.Blur = _random.Next(0, 4);
 			_spriteBatch.DrawString(_font, c.ToString(), Vector2.Zero, Color.White);
 
 			var count = 0;

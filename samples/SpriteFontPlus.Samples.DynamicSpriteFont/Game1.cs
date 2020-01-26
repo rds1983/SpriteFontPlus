@@ -15,7 +15,6 @@ namespace SpriteFontPlus.Samples.TtfBaking
 		GraphicsDeviceManager _graphics;
 		SpriteBatch _spriteBatch;
 		private DynamicSpriteFont _font;
-		private int _fontIdJapanese, _fontIdEmojis;
 		private Texture2D _white;
 		private bool _drawBackground = false;
 		private bool _wasSpaceDown, _wasEnterDown;
@@ -44,8 +43,8 @@ namespace SpriteFontPlus.Samples.TtfBaking
 
 			// TODO: use this.Content to load your game content here
 			_font = DynamicSpriteFont.FromTtf(File.ReadAllBytes(@"Fonts/DroidSans.ttf"), 20);
-			_fontIdJapanese = _font.AddTtf("Japanese", File.ReadAllBytes(@"Fonts/DroidSansJapanese.ttf"));
-			_fontIdEmojis = _font.AddTtf("Emojis", File.ReadAllBytes(@"Fonts/Symbola-Emoji.ttf"));
+			_font.AddTtf(File.ReadAllBytes(@"Fonts/DroidSansJapanese.ttf"));
+			_font.AddTtf(File.ReadAllBytes(@"Fonts/Symbola-Emoji.ttf"));
 
 			_white = new Texture2D(GraphicsDevice, 1, 1);
 			_white.SetData(new[] { Color.White });
@@ -103,7 +102,6 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			// TODO: Add your drawing code here
 			_spriteBatch.Begin();
 
-			_font.FontId = _font.DefaultFontId;
 			// Render some text
 			_font.Size = 18;
 			DrawString("The quick brown fox jumps over the lazy dog", 0);
@@ -123,15 +121,12 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			_font.Size = 28;
 			DrawString("kilómetros y frío, añoraba,\nP: vôo à noite, F: Les naïfs ægithales\nhâtifs pondant à Noël où", 210);
 
-			_font.FontId = _fontIdJapanese;
 			_font.Size = 30;
 			DrawString("いろはにほへど", 310);
 
-			_font.FontId = _fontIdEmojis;
 			_font.Size = 32;
 			DrawString("🙌📦👏🔥👍😻😂🎉💻😍🚀😁🙈🇧🇪👩😉🍻🎶🏆👀👉👶💕😎😱🌌🌻🍺🏀👇👯💁💝💩😃😅🙏🚄🇫🌧🌾🍀🍁🍓🍕🎾🏈", 340, Color.Gold);
 
-			_font.FontId = _font.DefaultFontId;
 			_font.Size = 26;
 			DrawString("Texture:", 380);
 			

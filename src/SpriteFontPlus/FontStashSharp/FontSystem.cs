@@ -2,23 +2,44 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SpriteFontPlus;
 
 namespace FontStashSharp
 {
 	internal unsafe class FontSystem
 	{
+		private readonly Dictionary<int, Dictionary<int, FontGlyph>> _glyphs = new Dictionary<int, Dictionary<int, FontGlyph>>();
+
 		private readonly List<Font> _fonts = new List<Font>();
 		private float _ith;
 		private float _itw;
-		private readonly List<RenderItem> _renderItems = new List<RenderItem>();
 		private FontAtlas _currentAtlas;
 		private Point _size;
+		private int _fontSize;
 
-		public int FontId;
-		public float Size;
+		public int FontSize
+		{
+			get
+			{
+				return _fontSize;
+			}
+
+			set
+			{
+				if (value == _fontSize)
+				{
+					return;
+				}
+
+				_fontSize = value;
+				foreach (var f in _fonts)
+				{
+					f.Recalculate(_fontSize);
+				}
+			}
+		}
+
 		public Color Color;
-		public float BlurValue;
+		public readonly int Blur;
 		public float Spacing;
 		public Vector2 Scale;
 		public bool UseKernings = true;
@@ -38,19 +59,11 @@ namespace FontStashSharp
 			}
 		}
 
-		private Font CurrentFont
-		{
-			get
-			{
-				return _fonts[FontId];
-			}
-		}
-
 		public List<FontAtlas> Atlases { get; } = new List<FontAtlas>();
 
 		public event EventHandler CurrentAtlasFull;
 
-		public FontSystem(int width, int height)
+		public FontSystem(int width, int height, int blur = 0)
 		{
 			if (width <= 0)
 			{
@@ -62,6 +75,13 @@ namespace FontStashSharp
 				throw new ArgumentOutOfRangeException(nameof(height));
 			}
 
+			if (blur < 0 || blur > 20)
+			{
+				throw new ArgumentOutOfRangeException(nameof(blur));
+			}
+
+			Blur = blur;
+
 			_size = new Point(width, height);
 
 			_itw = 1.0f / _size.X;
@@ -71,182 +91,179 @@ namespace FontStashSharp
 
 		public void ClearState()
 		{
-			Size = 12.0f;
+			FontSize = 12;
 			Color = Color.White;
-			FontId = 0;
-			BlurValue = 0;
 			Spacing = 0;
 		}
 
-		public int AddFontMem(string name, byte[] data)
+		public void AddFontMem(byte[] data)
 		{
-			var font = Font.FromMemory(name, data);
+			var font = Font.FromMemory(data);
 
+			font.Recalculate(FontSize);
 			_fonts.Add(font);
-			return _fonts.Count - 1;
 		}
 
-		public int? GetFontByName(string name)
+		private Dictionary<int, FontGlyph> GetGlyphsCollection(int size)
 		{
-			var i = 0;
-			for (i = 0; i < _fonts.Count; i++)
-				if (_fonts[i].Name == name)
-					return i;
-			return null;
+			Dictionary<int, FontGlyph> result;
+			if (_glyphs.TryGetValue(size, out result))
+			{
+				return result;
+			}
+
+			result = new Dictionary<int, FontGlyph>();
+			_glyphs[size] = result;
+			return result;
 		}
 
-		public float DrawText(SpriteBatch batch, float x, float y, StringSegment str, float depth)
+		public float DrawText(SpriteBatch batch, float x, float y, string str, float depth)
 		{
-			if (str.IsNullOrEmpty) return 0.0f;
+			if (string.IsNullOrEmpty(str)) return 0.0f;
 
-			FontGlyph glyph = null;
+			var glyphs = GetGlyphsCollection(FontSize);
+
+			// Determine ascent and lineHeight from first character
+			float ascent = 0, lineHeight = 0;
+			for (int i = 0; i < str.Length; i += char.IsSurrogatePair(str, i) ? 2 : 1)
+			{
+				var codepoint = char.ConvertToUtf32(str, i);
+
+				var glyph = GetGlyph(batch.GraphicsDevice, glyphs, codepoint, true);
+				if (glyph == null)
+				{
+					continue;
+				}
+
+				ascent = glyph.Font.Ascent;
+				lineHeight = glyph.Font.LineHeight;
+				break;
+			}
+
 			var q = new FontGlyphSquad();
-			var prevGlyphIndex = -1;
-			var isize = (int)(Size * 10.0f);
-			var iblur = (int)BlurValue;
-			float scale = 0;
-			Font font;
-			if (FontId < 0 || FontId >= _fonts.Count)
-				return x;
-			font = _fonts[FontId];
-			if (font.Data == null)
-				return x;
-			scale = font._font.fons__tt_getPixelHeightScale(isize / 10.0f);
 
 			float originX = 0.0f;
 			float originY = 0.0f;
 
-			var ascent = CurrentFont.GetAscent(Size);
-			var lineHeight = CurrentFont.GetLineHeight(Size);
 			originY += ascent;
-			for (int i = 0; i < str.Length; i += char.IsSurrogatePair(str.String, i + str.Location) ? 2 : 1)
+
+			FontGlyph prevGlyph = null;
+			for (int i = 0; i < str.Length; i += char.IsSurrogatePair(str, i) ? 2 : 1)
 			{
-				var codepoint = char.ConvertToUtf32(str.String, i + str.Location);
+				var codepoint = char.ConvertToUtf32(str, i);
 
 				if (codepoint == '\n')
 				{
 					originX = 0.0f;
 					originY += lineHeight;
-					prevGlyphIndex = -1;
+					prevGlyph = null;
 					continue;
 				}
 
-				glyph = GetGlyph(font, codepoint, isize, iblur, true);
-				if (glyph == null && TryFallback)
+				var glyph = GetGlyph(batch.GraphicsDevice, glyphs, codepoint, true);
+				if (glyph == null)
 				{
-					for (int j = 0; j < _fonts.Count; j++)
-					{
-						if (FontId == j) continue;
-
-						Font f = _fonts[j];
-
-						glyph = GetGlyph(f, codepoint, isize, iblur, true);
-
-						if (glyph != null) break;
-					}
-				}
-				if (glyph != null)
-				{
-					GetQuad(font, prevGlyphIndex, glyph, scale, Spacing, ref originX, ref originY, &q);
-
-					q.X0 = (int)(q.X0 * Scale.X);
-					q.X1 = (int)(q.X1 * Scale.X);
-					q.Y0 = (int)(q.Y0 * Scale.Y);
-					q.Y1 = (int)(q.Y1 * Scale.Y);
-
-					var renderItem = new RenderItem
-					{
-						Atlas = Atlases[glyph.AtlasIndex],
-						_verts = new Rectangle((int)(x + q.X0),
-								(int)(y + q.Y0),
-								(int)(q.X1 - q.X0),
-								(int)(q.Y1 - q.Y0)),
-						_textureCoords = new Rectangle((int)(q.S0 * _size.X),
-								(int)(q.T0 * _size.Y),
-								(int)((q.S1 - q.S0) * _size.X),
-								(int)((q.T1 - q.T0) * _size.Y)),
-						_colors = Color
-					};
-
-					_renderItems.Add(renderItem);
+					continue;
 				}
 
-				prevGlyphIndex = glyph != null ? glyph.Index : -1;
+				GetQuad(glyph, prevGlyph, Spacing, ref originX, ref originY, &q);
+
+				q.X0 = (int)(q.X0 * Scale.X);
+				q.X1 = (int)(q.X1 * Scale.X);
+				q.Y0 = (int)(q.Y0 * Scale.Y);
+				q.Y1 = (int)(q.Y1 * Scale.Y);
+
+				var destRect = new Rectangle((int)(x + q.X0),
+											(int)(y + q.Y0),
+											(int)(q.X1 - q.X0),
+											(int)(q.Y1 - q.Y0));
+
+				var sourceRect = new Rectangle((int)(q.S0 * _size.X),
+											(int)(q.T0 * _size.Y),
+											(int)((q.S1 - q.S0) * _size.X),
+											(int)((q.T1 - q.T0) * _size.Y));
+
+				batch.Draw(glyph.Atlas.Texture,
+					destRect,
+					sourceRect,
+					Color,
+					0f,
+					Vector2.Zero,
+					SpriteEffects.None,
+					depth);
+
+				prevGlyph = glyph;
 			}
 
-			Flush(batch, depth);
 			return x;
 		}
 
-		public float TextBounds(float x, float y, StringSegment str, ref Bounds bounds)
+		public float TextBounds(float x, float y, string str, ref Bounds bounds)
 		{
+			if (string.IsNullOrEmpty(str)) return 0.0f;
+
+			var glyphs = GetGlyphsCollection(FontSize);
+
+			// Determine ascent and lineHeight from first character
+			float ascent = 0, lineHeight = 0;
+			for (int i = 0; i < str.Length; i += char.IsSurrogatePair(str, i) ? 2 : 1)
+			{
+				var codepoint = char.ConvertToUtf32(str, i);
+
+				var glyph = GetGlyph(null, glyphs, codepoint, false);
+				if (glyph == null)
+				{
+					continue;
+				}
+
+				ascent = glyph.Font.Ascent;
+				lineHeight = glyph.Font.LineHeight;
+				break;
+			}
+
+
 			var q = new FontGlyphSquad();
-			FontGlyph glyph = null;
-			var prevGlyphIndex = -1;
-			var isize = (int)(Size * 10.0f);
-			var iblur = (int)BlurValue;
-			float scale = 0;
-			Font font;
 			float startx = 0;
 			float advance = 0;
-			float minx = 0;
-			float miny = 0;
-			float maxx = 0;
-			float maxy = 0;
-			if (FontId < 0 || FontId >= _fonts.Count)
-				return 0;
-			font = _fonts[FontId];
-			if (font.Data == null)
-				return 0;
-			scale = font._font.fons__tt_getPixelHeightScale(isize / 10.0f);
-
-			var ascent = CurrentFont.GetAscent(Size);
-			var lineHeight = CurrentFont.GetLineHeight(Size);
 
 			y += ascent;
+
+			float minx, maxx, miny, maxy;
 			minx = maxx = x;
 			miny = maxy = y;
 			startx = x;
-			for (int i = 0; i < str.Length; i += char.IsSurrogatePair(str.String, i + str.Location) ? 2 : 1)
+
+			FontGlyph prevGlyph = null;
+
+			for (int i = 0; i < str.Length; i += char.IsSurrogatePair(str, i) ? 2 : 1)
 			{
-				var codepoint = char.ConvertToUtf32(str.String, i + str.Location);
+				var codepoint = char.ConvertToUtf32(str, i);
 
 				if (codepoint == '\n')
 				{
 					x = startx;
 					y += lineHeight;
-					prevGlyphIndex = -1;
+					prevGlyph = null;
 					continue;
 				}
 
-				glyph = GetGlyph(font, codepoint, isize, iblur, false);
-				if (glyph == null && TryFallback)
+				var glyph = GetGlyph(null, glyphs, codepoint, false);
+				if (glyph == null)
 				{
-					for (int j = 0; j < _fonts.Count; j++)
-					{
-						if (FontId == j) continue;
-
-						Font f = _fonts[j];
-
-						glyph = GetGlyph(f, codepoint, isize, iblur, false);
-
-						if (glyph != null) break;
-					}
-				}
-				if (glyph != null)
-				{
-					GetQuad(font, prevGlyphIndex, glyph, scale, Spacing, ref x, ref y, &q);
-					if (q.X0 < minx)
-						minx = q.X0;
-					if (x > maxx)
-						maxx = x;
-					if (q.Y0 < miny)
-						miny = q.Y0;
-					if (q.Y1 > maxy)
-						maxy = q.Y1;
+					continue;
 				}
 
-				prevGlyphIndex = glyph != null ? glyph.Index : -1;
+				GetQuad(glyph, prevGlyph, Spacing, ref x, ref y, &q);
+				if (q.X0 < minx)
+					minx = q.X0;
+				if (x > maxx)
+					maxx = x;
+				if (q.Y0 < miny)
+					miny = q.Y0;
+				if (q.Y1 > maxy)
+					maxy = q.Y1;
+
+				prevGlyph = glyph;
 			}
 
 			advance = x - startx;
@@ -263,11 +280,7 @@ namespace FontStashSharp
 		{
 			Atlases.Clear();
 
-			for (var i = 0; i < _fonts.Count; i++)
-			{
-				var font = _fonts[i];
-				font.Glyphs.Clear();
-			}
+			_glyphs.Clear();
 
 			if (width == _size.X && height == _size.Y)
 				return;
@@ -282,111 +295,113 @@ namespace FontStashSharp
 			Reset(_size.X, _size.Y);
 		}
 
-		private FontGlyph GetGlyph(Font font, int codepoint, int isize, int iblur, bool isBitmapRequired)
+		private int GetCodepointIndex(int codepoint, out Font font)
 		{
-			var g = 0;
-			var advance = 0;
-			var lsb = 0;
-			var x0 = 0;
-			var y0 = 0;
-			var x1 = 0;
-			var y1 = 0;
-			var gw = 0;
-			var gh = 0;
-			var gx = 0;
-			var gy = 0;
-			float scale = 0;
-			FontGlyph glyph = null;
-			var size = isize / 10.0f;
-			if (isize < 2)
-				return null;
-			if (iblur > 20)
-				iblur = 20;
+			font = null;
 
-			if (font.TryGetGlyph(codepoint, isize, iblur, out glyph))
+			int g = 0;
+			foreach (var f in _fonts)
 			{
-				if (!isBitmapRequired || glyph.X0 >= 0 && glyph.Y0 >= 0)
-					return glyph;
-
+				g = f.GetGlyphIndex(codepoint);
+				if (g != 0)
+				{
+					font = f;
+					break;
+				}
 			}
-			g = font._font.fons__tt_getGlyphIndex(codepoint);
+
+			return g;
+		}
+
+		private FontGlyph GetGlyphWithoutBitmap(Dictionary<int, FontGlyph> glyphs, int codepoint)
+		{
+			FontGlyph glyph = null;
+			if (glyphs.TryGetValue(codepoint, out glyph))
+			{
+				return glyph;
+			}
+
+			Font font;
+			var g = GetCodepointIndex(codepoint, out font);
 			if (g == 0)
 			{
 				return null;
 			}
 
-			scale = font._font.fons__tt_getPixelHeightScale(size);
-			font._font.fons__tt_buildGlyphBitmap(g, size, scale, &advance, &lsb, &x0, &y0, &x1, &y1);
+			int advance, lsb, x0, y0, x1, y1;
+			font.BuildGlyphBitmap(g, FontSize, font.Scale, &advance, &lsb, &x0, &y0, &x1, &y1);
 
-			var pad = FontGlyph.PadFromBlur(iblur);
-			gw = x1 - x0 + pad * 2;
-			gh = y1 - y0 + pad * 2;
+			var pad = FontGlyph.PadFromBlur(Blur);
+			var gw = x1 - x0 + pad * 2;
+			var gh = y1 - y0 + pad * 2;
 
-			var currentAtlas = CurrentAtlas;
-			if (isBitmapRequired)
+			glyph = new FontGlyph
 			{
-				if (!currentAtlas.AddRect(gw, gh, ref gx, ref gy))
-				{
-					var ev = CurrentAtlasFull;
-					if (ev != null)
-					{
-						ev(this, EventArgs.Empty);
-					}
+				Font = font,
+				Codepoint = codepoint,
+				Size = FontSize,
+				Blur = Blur,
+				Index = g,
+				Bounds = new Rectangle(0, 0, gw, gh),
+				XAdvance = (int)(font.Scale * advance * 10.0f),
+				XOffset = x0 - pad,
+				YOffset = y0 - pad
+			};
 
-					// This code will force creation of new atlas
-					_currentAtlas = null;
-					currentAtlas = CurrentAtlas;
-
-					// Try to add again
-					if (!currentAtlas.AddRect(gw, gh, ref gx, ref gy))
-					{
-						throw new Exception(string.Format("Could not add rect to the newly created atlas. gw={0}, gh={1}", gw, gh));
-					}
-				}
-			}
-			else
-			{
-				gx = -1;
-				gy = -1;
-			}
-
-			if (glyph == null)
-			{
-				glyph = new FontGlyph
-				{
-					Codepoint = codepoint,
-					Size = isize,
-					Blur = iblur
-				};
-
-				font.SetGlyph(codepoint, isize, iblur, glyph);
-			}
-
-			glyph.Index = g;
-			glyph.AtlasIndex = currentAtlas.Index;
-			glyph.X0 = gx;
-			glyph.Y0 = gy;
-			glyph.X1 = glyph.X0 + gw;
-			glyph.Y1 = glyph.Y0 + gh;
-			glyph.XAdvance = (int)(scale * advance * 10.0f);
-			glyph.XOffset = x0 - pad;
-			glyph.YOffset = y0 - pad;
-			if (!isBitmapRequired) return glyph;
-
-			currentAtlas.RenderGlyph(font, glyph, gw, gh, scale);
+			glyphs[codepoint] = glyph;
 
 			return glyph;
 		}
 
-		private void GetQuad(Font font, int prevGlyphIndex, FontGlyph glyph, float scale,
+		private FontGlyph GetGlyph(GraphicsDevice graphicsDevice, Dictionary<int, FontGlyph> glyphs, int codepoint, bool isBitmapRequired)
+		{
+			var glyph = GetGlyphWithoutBitmap(glyphs, codepoint);
+			if (glyph == null)
+			{
+				return null;
+			}
+
+			if (!isBitmapRequired || glyph.Atlas != null)
+				return glyph;
+
+			var currentAtlas = CurrentAtlas;
+			int gx = 0, gy = 0;
+			var gw = glyph.Bounds.Width;
+			var gh = glyph.Bounds.Height;
+			if (!currentAtlas.AddRect(gw, gh, ref gx, ref gy))
+			{
+				CurrentAtlasFull?.Invoke(this, EventArgs.Empty);
+
+				// This code will force creation of new atlas
+				_currentAtlas = null;
+				currentAtlas = CurrentAtlas;
+
+				// Try to add again
+				if (!currentAtlas.AddRect(gw, gh, ref gx, ref gy))
+				{
+					throw new Exception(string.Format("Could not add rect to the newly created atlas. gw={0}, gh={1}", gw, gh));
+				}
+			}
+
+			glyph.Bounds.X = gx;
+			glyph.Bounds.Y = gy;
+
+			currentAtlas.RenderGlyph(graphicsDevice, glyph);
+
+			glyph.Atlas = currentAtlas;
+
+			return glyph;
+		}
+
+		private void GetQuad(FontGlyph glyph, FontGlyph prevGlyph,
 			float spacing, ref float x, ref float y, FontGlyphSquad* q)
 		{
-			if (prevGlyphIndex != -1)
+			if (prevGlyph != null)
 			{
 				float adv = 0;
-				if (UseKernings)
+				if (UseKernings && glyph.Font == prevGlyph.Font)
 				{
-					adv = font.GetKerning(prevGlyphIndex, glyph.Index) * scale;
+					adv = glyph.Font.GetKerning(prevGlyph.Index, glyph.Index) * glyph.Font.Scale;
 				}
 				x += (int)(adv + spacing + 0.5f);
 			}
@@ -398,37 +413,14 @@ namespace FontStashSharp
 			ry = y + glyph.YOffset;
 			q->X0 = rx;
 			q->Y0 = ry;
-			q->X1 = rx + (glyph.X1 - glyph.X0);
-			q->Y1 = ry + (glyph.Y1 - glyph.Y0);
-			q->S0 = glyph.X0 * _itw;
-			q->T0 = glyph.Y0 * _ith;
-			q->S1 = glyph.X1 * _itw;
-			q->T1 = glyph.Y1 * _ith;
+			q->X1 = rx + glyph.Bounds.Width;
+			q->Y1 = ry + glyph.Bounds.Height;
+			q->S0 = glyph.Bounds.X * _itw;
+			q->T0 = glyph.Bounds.Y * _ith;
+			q->S1 = glyph.Bounds.Right * _itw;
+			q->T1 = glyph.Bounds.Bottom * _ith;
 
 			x += (int)(glyph.XAdvance / 10.0f + 0.5f);
-		}
-
-		private void Flush(SpriteBatch batch, float depth)
-		{
-			foreach (var atlas in Atlases)
-			{
-				atlas.Flush(batch.GraphicsDevice);
-			}
-
-			for (var i = 0; i < _renderItems.Count; ++i)
-			{
-				var renderItem = _renderItems[i];
-				batch.Draw(renderItem.Atlas.Texture,
-					renderItem._verts,
-					renderItem._textureCoords,
-					renderItem._colors,
-					0f,
-					Vector2.Zero,
-					SpriteEffects.None,
-					depth);
-			}
-
-			_renderItems.Clear();
 		}
 	}
 }

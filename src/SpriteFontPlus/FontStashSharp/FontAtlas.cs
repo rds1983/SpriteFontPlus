@@ -1,16 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SpriteFontPlus;
 using System;
 
 namespace FontStashSharp
 {
 	internal unsafe class FontAtlas
 	{
-		private byte[] _texData;
-		private Color[] _colorData;
-		private int[] _dirtyRect = new int[4];
-
 		public int Width
 		{
 			get; private set;
@@ -52,40 +47,6 @@ namespace FontStashSharp
 			Nodes[0].Y = 0;
 			Nodes[0].Width = w;
 			NodesNumber++;
-
-			_texData = new byte[w * h];
-			_colorData = new Color[w * h];
-			Array.Clear(_texData, 0, _texData.Length);
-
-			_dirtyRect[0] = Width;
-			_dirtyRect[1] = Height;
-			_dirtyRect[2] = 0;
-			_dirtyRect[3] = 0;
-		}
-
-		public void AddWhiteRect(int w, int h)
-		{
-			var x = 0;
-			var y = 0;
-			var gx = 0;
-			var gy = 0;
-			if (!AddRect(w, h, ref gx, ref gy))
-				return;
-			fixed (byte* dst2 = &_texData[gx + gy * Width])
-			{
-				var dst = dst2;
-				for (y = 0; y < h; y++)
-				{
-					for (x = 0; x < w; x++)
-						dst[x] = 0xff;
-					dst += Width;
-				}
-			}
-
-			_dirtyRect[0] = Math.Min(_dirtyRect[0], gx);
-			_dirtyRect[1] = Math.Min(_dirtyRect[1], gy);
-			_dirtyRect[2] = Math.Max(_dirtyRect[2], gx + w);
-			_dirtyRect[3] = Math.Max(_dirtyRect[3], gy + h);
 		}
 
 		public void InsertNode(int idx, int x, int y, int w)
@@ -224,44 +185,47 @@ namespace FontStashSharp
 			return true;
 		}
 
-		public void RenderGlyph(Font renderFont, FontGlyph glyph, int gw, int gh, float scale)
+		public void RenderGlyph(GraphicsDevice device, FontGlyph glyph)
 		{
 			var pad = glyph.Pad;
 
+			// Render glyph to byte buffer
+			var buffer = new byte[glyph.Bounds.Width * glyph.Bounds.Height];
+			Array.Clear(buffer, 0, buffer.Length);
+
 			var g = glyph.Index;
-			fixed (byte* dst = &_texData[glyph.X0 + pad + (glyph.Y0 + pad) * Width])
+			fixed (byte* dst = &buffer[pad + pad * glyph.Bounds.Width])
 			{
-				renderFont._font.fons__tt_renderGlyphBitmap(dst, gw - pad * 2, gh - pad * 2, Width, scale,
-					scale, g);
-			}
-
-			fixed (byte* dst = &_texData[glyph.X0 + glyph.Y0 * Width])
-			{
-				for (var y = 0; y < gh; y++)
-				{
-					dst[y * Width] = 0;
-					dst[gw - 1 + y * Width] = 0;
-				}
-
-				for (var x = 0; x < gw; x++)
-				{
-					dst[x] = 0;
-					dst[x + (gh - 1) * Width] = 0;
-				}
+				glyph.Font.RenderGlyphBitmap(dst, 
+					glyph.Bounds.Width - pad * 2, 
+					glyph.Bounds.Height - pad * 2,
+					glyph.Bounds.Width, 
+					g);
 			}
 
 			if (glyph.Blur > 0)
 			{
-				fixed (byte* bdst = &_texData[glyph.X0 + glyph.Y0 * Width])
+				fixed (byte* bdst = &buffer[0])
 				{
-					Blur(bdst, gw, gh, Width, glyph.Blur);
+					Blur(bdst, glyph.Bounds.Width, glyph.Bounds.Height, glyph.Bounds.Width, glyph.Blur);
 				}
 			}
 
-			_dirtyRect[0] = Math.Min(_dirtyRect[0], glyph.X0);
-			_dirtyRect[1] = Math.Min(_dirtyRect[1], glyph.Y0);
-			_dirtyRect[2] = Math.Max(_dirtyRect[2], glyph.X1);
-			_dirtyRect[3] = Math.Max(_dirtyRect[3], glyph.Y1);
+			// Byte buffer to RGBA
+			var colorBuffer = new Color[glyph.Bounds.Width * glyph.Bounds.Height];
+			for (var i = 0; i < colorBuffer.Length; ++i)
+			{
+				var c = buffer[i];
+				colorBuffer[i].R = colorBuffer[i].G = colorBuffer[i].B = colorBuffer[i].A = c;
+			}
+
+			// Write to texture
+			if (Texture == null)
+			{
+				Texture = new Texture2D(device, Width, Height);
+			}
+
+			Texture.SetData(0, glyph.Bounds, colorBuffer, 0, colorBuffer.Length);
 		}
 
 		private void Blur(byte* dst, int w, int h, int dstStride, int blur)
@@ -327,44 +291,6 @@ namespace FontStashSharp
 
 				dst[0] = 0;
 				dst++;
-			}
-		}
-
-		public void Flush(GraphicsDevice graphicsDevice)
-		{
-			if (Texture == null)
-				Texture = new Texture2D(graphicsDevice, Width, Height);
-
-			if (_dirtyRect[0] < _dirtyRect[2] && _dirtyRect[1] < _dirtyRect[3])
-			{
-				if (_texData != null)
-				{
-					var x = _dirtyRect[0];
-					var y = _dirtyRect[1];
-					var w = _dirtyRect[2] - x;
-					var h = _dirtyRect[3] - y;
-					var sz = w * h;
-					for (var xx = x; xx < x + w; ++xx)
-					{
-						for (var yy = y; yy < y + h; ++yy)
-						{
-							var destPos = yy * Width + xx;
-
-							var c = _texData[destPos];
-							_colorData[destPos].R = c;
-							_colorData[destPos].G = c;
-							_colorData[destPos].B = c;
-							_colorData[destPos].A = c;
-						}
-					}
-
-					Texture.SetData(_colorData);
-				}
-
-				_dirtyRect[0] = Width;
-				_dirtyRect[1] = Height;
-				_dirtyRect[2] = 0;
-				_dirtyRect[3] = 0;
 			}
 		}
 	}

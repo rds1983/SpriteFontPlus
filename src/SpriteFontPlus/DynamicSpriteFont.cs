@@ -32,41 +32,22 @@ namespace SpriteFontPlus
 			}
 		}
 
-		private static readonly string DefaultFontName = string.Empty;
-
 		private readonly FontSystem _fontSystem;
-		private readonly int _defaultFontId;
 
 		public IEnumerable<Texture2D> Textures
 		{
 			get { return new TextureEnumerator(_fontSystem); }
 		}
 
-		public float Size
+		public int Size
 		{
 			get
 			{
-				return _fontSystem.Size;
+				return _fontSystem.FontSize;
 			}
 			set
 			{
-				_fontSystem.Size = value;
-			}
-		}
-
-		/// <summary>
-		/// Blur level(0 - no blur)
-		/// </summary>
-		public float Blur
-		{
-			get
-			{
-				return _fontSystem.BlurValue;
-			}
-
-			set
-			{
-				_fontSystem.BlurValue = value;
+				_fontSystem.FontSize = value;
 			}
 		}
 
@@ -79,26 +60,6 @@ namespace SpriteFontPlus
 			set
 			{
 				_fontSystem.Spacing = value;
-			}
-		}
-
-		public int FontId
-		{
-			get
-			{
-				return _fontSystem.FontId;
-			}
-			set
-			{
-				_fontSystem.FontId = value;
-			}
-		}
-
-		public int DefaultFontId
-		{
-			get
-			{
-				return _defaultFontId;
 			}
 		}
 
@@ -142,12 +103,14 @@ namespace SpriteFontPlus
 			}
 		}
 
-		private DynamicSpriteFont(byte[] ttf, float defaultSize, int textureWidth, int textureHeight)
+		private DynamicSpriteFont(byte[] ttf, int defaultSize, int textureWidth, int textureHeight, int blur)
 		{
-			_fontSystem = new FontSystem(textureWidth, textureHeight);
+			_fontSystem = new FontSystem(textureWidth, textureHeight, blur)
+			{
+				FontSize = defaultSize
+			};
 
-			_defaultFontId = _fontSystem.AddFontMem(DefaultFontName, ttf);
-			Size = defaultSize;
+			_fontSystem.AddFontMem(ttf);
 		}
 
 		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color color)
@@ -167,14 +130,9 @@ namespace SpriteFontPlus
 			return result;
 		}
 
-		public int AddTtf(string name, byte[] ttf)
+		public void AddTtf(byte[] ttf)
 		{
-			return _fontSystem.AddFontMem(name, ttf);
-		}
-
-		public int? GetFontIdByName(string name)
-		{
-			return _fontSystem.GetFontByName(name);
+			_fontSystem.AddFontMem(ttf);
 		}
 
 		public Vector2 MeasureString(string text)
@@ -203,9 +161,9 @@ namespace SpriteFontPlus
 			_fontSystem.Reset();
 		}
 
-		public static DynamicSpriteFont FromTtf(byte[] ttf, float defaultSize, int textureWidth = 1024, int textureHeight = 1024)
+		public static DynamicSpriteFont FromTtf(byte[] ttf, int defaultSize, int textureWidth = 1024, int textureHeight = 1024, int blur = 0)
 		{
-			return new DynamicSpriteFont(ttf, defaultSize, textureWidth, textureHeight);
+			return new DynamicSpriteFont(ttf, defaultSize, textureWidth, textureHeight, blur);
 		}
 	}
 }

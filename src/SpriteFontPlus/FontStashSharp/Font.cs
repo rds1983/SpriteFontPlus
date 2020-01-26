@@ -7,35 +7,15 @@ namespace FontStashSharp
 	internal class Font
 	{
 		private float AscentBase, DescentBase, LineHeightBase;
+		
+		public float Ascent { get; private set; }
+		public float Descent { get; private set; }
+		public float LineHeight { get; private set; }
+		public float Scale { get; private set; }
+
 
 		public stbtt_fontinfo _font = new stbtt_fontinfo();
-		public string Name;
-		public byte[] Data;
 		private readonly Dictionary<ulong, int> _kernings = new Dictionary<ulong, int>();
-
-		public Dictionary<ulong, FontGlyph> Glyphs { get; } = new Dictionary<ulong, FontGlyph>();
-
-		private ulong BuildKey(int codePoint, int size, int blur)
-		{
-			ulong result = (uint)codePoint << 32;
-			result |= (ulong)size << 16;
-			result |= (ushort)blur;
-
-			return result;
-		}
-
-		public bool TryGetGlyph(int codePoint, int size, int blur, out FontGlyph glyph)
-		{
-			var key = BuildKey(codePoint, size, blur);
-
-			return Glyphs.TryGetValue(key, out glyph);
-		}
-
-		public void SetGlyph(int codePoint, int size, int blur, FontGlyph glyph)
-		{
-			var key = BuildKey(codePoint, size, blur);
-			Glyphs[key] = glyph;
-		}
 
 		public int GetKerning(int glyphIndex1, int glyphIndex2)
 		{
@@ -53,32 +33,37 @@ namespace FontStashSharp
 			return result;
 		}
 
-		public float GetAscent(float size)
+		public void Recalculate(float size)
 		{
-			return AscentBase * size;
+			Ascent = AscentBase * size;
+			Descent = DescentBase * size;
+			LineHeight = LineHeightBase * size;
+			Scale = stbtt_ScaleForPixelHeight(_font, size);
 		}
 
-		public float GetDescent(float size)
+		public int GetGlyphIndex(int codepoint)
 		{
-			return DescentBase * size;
+			return stbtt_FindGlyphIndex(_font, codepoint);
 		}
 
-		public float GetLineHeight(float size)
+		public unsafe void BuildGlyphBitmap(int glyph, float size, float scale, int* advance, int* lsb, int* x0, int* y0, int* x1, int* y1)
 		{
-			return LineHeightBase * size;
+			stbtt_GetGlyphHMetrics(_font, glyph, advance, lsb);
+			stbtt_GetGlyphBitmapBox(_font, glyph, scale, scale, x0, y0, x1, y1);
 		}
 
-		public static unsafe Font FromMemory(string name, byte[] data)
+		public unsafe void RenderGlyphBitmap(byte* output, int outWidth, int outHeight, int outStride, int glyph)
 		{
-			var font = new Font
-			{
-				Name = name,
-				Data = data
-			};
+			stbtt_MakeGlyphBitmap(_font, output, outWidth, outHeight, outStride, Scale, Scale, glyph);
+		}
+
+		public static unsafe Font FromMemory(byte[] data)
+		{
+			var font = new Font();
 			fixed (byte* ptr = data)
 			{
 				if (stbtt_InitFont(font._font, ptr, 0) == 0)
-					throw new Exception(string.Format("stbtt_InitFont failed. name={0}", name));
+					throw new Exception("stbtt_InitFont failed");
 			}
 
 			int ascent, descent, lineGap;

@@ -42,9 +42,16 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 
 			// TODO: use this.Content to load your game content here
-			_font = DynamicSpriteFont.FromTtf(File.ReadAllBytes(@"Fonts/DroidSans.ttf"), 20);
+			using (var stream = File.OpenRead(@"Fonts/DroidSans.ttf"))
+			{
+				_font = DynamicSpriteFont.FromTtf(stream, 20);
+			}
+
 			_font.AddTtf(File.ReadAllBytes(@"Fonts/DroidSansJapanese.ttf"));
-			_font.AddTtf(File.ReadAllBytes(@"Fonts/Symbola-Emoji.ttf"));
+			using (var stream = File.OpenRead(@"Fonts/Symbola-Emoji.ttf"))
+			{
+				_font.AddTtf(stream);
+			}
 
 			_white = new Texture2D(GraphicsDevice, 1, 1);
 			_white.SetData(new[] { Color.White });
@@ -104,28 +111,10 @@ namespace SpriteFontPlus.Samples.TtfBaking
 
 			// Render some text
 			_font.Size = 18;
-			DrawString("The quick brown fox jumps over the lazy dog", 0);
-
-			_font.Size = 20;
-			DrawString("Üben quält finſteren Jagdſchloß höfliche Bäcker größeren, N: Blåbærsyltetøy", 30);
-
-			_font.Size = 22;
-			DrawString("Høj bly gom vandt fræk sexquiz på wc, S: bäckasiner söka", 60);
-
-			_font.Size = 24;
-			DrawString("Sævör grét áðan því úlpan var ónýt, P: Pchnąć w tę łódź jeża lub osiem skrzyń fig", 90);
-
-			_font.Size = 26;
-			DrawString("Příliš žluťoučký kůň úpěl ďábelské kódy,\nR: В чащах юга жил-был цитрус?\nДа, но фальшивый экземпляр! ёъ.", 120);
-
-			_font.Size = 28;
-			DrawString("kilómetros y frío, añoraba,\nP: vôo à noite, F: Les naïfs ægithales\nhâtifs pondant à Noël où", 210);
+			DrawString("The quick いろは brown\nfox にほへ jumps over\nt🙌h📦e l👏a👏zy dog", 0);
 
 			_font.Size = 30;
-			DrawString("いろはにほへど", 310);
-
-			_font.Size = 32;
-			DrawString("🙌📦👏🔥👍😻😂🎉💻😍🚀😁🙈🇧🇪👩😉🍻🎶🏆👀👉👶💕😎😱🌌🌻🍺🏀👇👯💁💝💩😃😅🙏🚄🇫🌧🌾🍀🍁🍓🍕🎾🏈", 340, Color.Gold);
+			DrawString("The quick いろは brown\nfox にほへ jumps over\nt🙌h📦e l👏a👏zy dog", 80, Color.Bisque);
 
 			_font.Size = 26;
 			DrawString("Texture:", 380);

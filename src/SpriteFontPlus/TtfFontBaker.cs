@@ -1,12 +1,21 @@
-﻿using StbTrueTypeSharp;
+﻿using SpriteFontPlus.Utility;
+using StbTrueTypeSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace SpriteFontPlus
 {
 	public static unsafe class TtfFontBaker
 	{
+		public static TtfFontBakerResult Bake(Stream ttfStream, float fontPixelHeight,
+			int bitmapWidth, int bitmapHeight,
+			IEnumerable<CharacterRange> characterRanges)
+		{
+			return Bake(ttfStream.ToByteArray(), fontPixelHeight, bitmapWidth, bitmapHeight, characterRanges);
+		}
+
 		public static TtfFontBakerResult Bake(byte[] ttf, float fontPixelHeight,
 			int bitmapWidth, int bitmapHeight,
 			IEnumerable<CharacterRange> characterRanges)
@@ -15,11 +24,11 @@ namespace SpriteFontPlus
 			{
 				throw new ArgumentNullException(nameof(ttf));
 			}
-			
+
 			if (fontPixelHeight <= 0)
 			{
 				throw new ArgumentOutOfRangeException(nameof(fontPixelHeight));
-			}		
+			}
 
 			if (bitmapWidth <= 0)
 			{
@@ -29,7 +38,7 @@ namespace SpriteFontPlus
 			if (bitmapHeight <= 0)
 			{
 				throw new ArgumentOutOfRangeException(nameof(bitmapHeight));
-			}			
+			}
 
 			if (characterRanges == null)
 			{
@@ -74,9 +83,9 @@ namespace SpriteFontPlus
 					var cd = new StbTrueType.stbtt_packedchar[range.End - range.Start + 1];
 					fixed (StbTrueType.stbtt_packedchar* chardataPtr = cd)
 					{
-						StbTrueType.stbtt_PackFontRange(pc, ttfPtr, 0, fontPixelHeight, 
+						StbTrueType.stbtt_PackFontRange(pc, ttfPtr, 0, fontPixelHeight,
 							range.Start,
-							range.End - range.Start + 1, 
+							range.End - range.Start + 1,
 							chardataPtr);
 					}
 
@@ -95,8 +104,8 @@ namespace SpriteFontPlus
 							YOffset = (int)Math.Round(yOff),
 							XAdvance = (int)Math.Round(cd[i].xadvance)
 						};
-						
-						glyphs[(char) (i + range.Start)] = glyphInfo;
+
+						glyphs[(char)(i + range.Start)] = glyphInfo;
 					}
 				}
 			}

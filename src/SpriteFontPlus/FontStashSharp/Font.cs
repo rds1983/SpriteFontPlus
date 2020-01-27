@@ -13,6 +13,7 @@ namespace FontStashSharp
 		public float Scale { get; private set; }
 
 		public stbtt_fontinfo _font = new stbtt_fontinfo();
+		private byte[] _data;
 
 		public void Recalculate(float size)
 		{
@@ -40,7 +41,11 @@ namespace FontStashSharp
 
 		public static unsafe Font FromMemory(byte[] data)
 		{
-			var font = new Font();
+			var font = new Font
+			{
+				_data = data
+			};
+
 			fixed (byte* ptr = data)
 			{
 				if (stbtt_InitFont(font._font, ptr, 0) == 0)

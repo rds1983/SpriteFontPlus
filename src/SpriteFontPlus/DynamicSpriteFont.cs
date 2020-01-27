@@ -1,9 +1,11 @@
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SpriteFontPlus.Utility;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SpriteFontPlus
 {
@@ -89,7 +91,6 @@ namespace SpriteFontPlus
 			}
 		}
 
-
 		public event EventHandler CurrentAtlasFull
 		{
 			add
@@ -135,6 +136,11 @@ namespace SpriteFontPlus
 			_fontSystem.AddFontMem(ttf);
 		}
 
+		public void AddTtf(Stream ttfStream)
+		{
+			AddTtf(ttfStream.ToByteArray());
+		}
+
 		public Vector2 MeasureString(string text)
 		{
 			Bounds bounds = new Bounds();
@@ -164,6 +170,11 @@ namespace SpriteFontPlus
 		public static DynamicSpriteFont FromTtf(byte[] ttf, int defaultSize, int textureWidth = 1024, int textureHeight = 1024, int blur = 0)
 		{
 			return new DynamicSpriteFont(ttf, defaultSize, textureWidth, textureHeight, blur);
+		}
+
+		public static DynamicSpriteFont FromTtf(Stream ttfStream, int defaultSize, int textureWidth = 1024, int textureHeight = 1024, int blur = 0)
+		{
+			return FromTtf(ttfStream.ToByteArray(), defaultSize, textureWidth, textureHeight, blur);
 		}
 	}
 }

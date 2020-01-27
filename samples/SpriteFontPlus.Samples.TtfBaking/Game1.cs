@@ -38,21 +38,25 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			// Create a new SpriteBatch, which can be used to draw textures.
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 
-			// TODO: use this.Content to load your game content here
-			var fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes("Fonts/DroidSans.ttf"),
-				25,
-				FontBitmapWidth,
-				FontBitmapHeight,
-				new[]
-				{
+			TtfFontBakerResult fontBakeResult;
+			using (var stream = File.OpenRead("Fonts/DroidSans.ttf"))
+			{
+				// TODO: use this.Content to load your game content here
+				fontBakeResult = TtfFontBaker.Bake(stream,
+					25,
+					FontBitmapWidth,
+					FontBitmapHeight,
+					new[]
+					{
 					CharacterRange.BasicLatin,
 					CharacterRange.Latin1Supplement,
 					CharacterRange.LatinExtendedA,
 					CharacterRange.Cyrillic
-				}
-			);
+					}
+				);
 
-			_font = fontBakeResult.CreateSpriteFont(GraphicsDevice);
+				_font = fontBakeResult.CreateSpriteFont(GraphicsDevice);
+			}
 			
 			fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes("Fonts/DroidSansJapanese.ttf"),
 				25,

@@ -43,7 +43,8 @@ namespace FontStashSharp
 		public float Spacing;
 		public Vector2 Scale;
 		public bool UseKernings = true;
-		public bool TryFallback = false;
+
+		public int? DefaultCharacter = ' ';
 
 		public FontAtlas CurrentAtlas
 		{
@@ -51,7 +52,7 @@ namespace FontStashSharp
 			{
 				if (_currentAtlas == null)
 				{
-					_currentAtlas = new FontAtlas(_size.X, _size.Y, 256, Atlases.Count);
+					_currentAtlas = new FontAtlas(_size.X, _size.Y, 256);
 					Atlases.Add(_currentAtlas);
 				}
 
@@ -129,7 +130,7 @@ namespace FontStashSharp
 			{
 				var codepoint = char.ConvertToUtf32(str, i);
 
-				var glyph = GetGlyph(batch.GraphicsDevice, glyphs, codepoint, true);
+				var glyph = GetGlyph(batch.GraphicsDevice, glyphs, codepoint);
 				if (glyph == null)
 				{
 					continue;
@@ -160,7 +161,7 @@ namespace FontStashSharp
 					continue;
 				}
 
-				var glyph = GetGlyph(batch.GraphicsDevice, glyphs, codepoint, true);
+				var glyph = GetGlyph(batch.GraphicsDevice, glyphs, codepoint);
 				if (glyph == null)
 				{
 					continue;
@@ -210,7 +211,7 @@ namespace FontStashSharp
 			{
 				var codepoint = char.ConvertToUtf32(str, i);
 
-				var glyph = GetGlyph(null, glyphs, codepoint, false);
+				var glyph = GetGlyph(null, glyphs, codepoint);
 				if (glyph == null)
 				{
 					continue;
@@ -247,7 +248,7 @@ namespace FontStashSharp
 					continue;
 				}
 
-				var glyph = GetGlyph(null, glyphs, codepoint, false);
+				var glyph = GetGlyph(null, glyphs, codepoint);
 				if (glyph == null)
 				{
 					continue;
@@ -353,7 +354,7 @@ namespace FontStashSharp
 			return glyph;
 		}
 
-		private FontGlyph GetGlyph(GraphicsDevice graphicsDevice, Dictionary<int, FontGlyph> glyphs, int codepoint, bool isBitmapRequired)
+		private FontGlyph GetGlyphInternal(GraphicsDevice graphicsDevice, Dictionary<int, FontGlyph> glyphs, int codepoint)
 		{
 			var glyph = GetGlyphWithoutBitmap(glyphs, codepoint);
 			if (glyph == null)
@@ -361,7 +362,7 @@ namespace FontStashSharp
 				return null;
 			}
 
-			if (!isBitmapRequired || glyph.Atlas != null)
+			if (graphicsDevice == null || glyph.Atlas != null)
 				return glyph;
 
 			var currentAtlas = CurrentAtlas;
@@ -393,8 +394,18 @@ namespace FontStashSharp
 			return glyph;
 		}
 
-		private void GetQuad(FontGlyph glyph, FontGlyph prevGlyph,
-			float spacing, ref float x, ref float y, FontGlyphSquad* q)
+		private FontGlyph GetGlyph(GraphicsDevice graphicsDevice, Dictionary<int, FontGlyph> glyphs, int codepoint)
+		{
+			var result = GetGlyphInternal(graphicsDevice, glyphs, codepoint);
+			if (result == null && DefaultCharacter != null)
+			{
+				result = GetGlyphInternal(graphicsDevice, glyphs, DefaultCharacter.Value);
+			}
+
+			return result;
+		}
+
+		private void GetQuad(FontGlyph glyph, FontGlyph prevGlyph, float spacing, ref float x, ref float y, FontGlyphSquad* q)
 		{
 			if (prevGlyph != null)
 			{

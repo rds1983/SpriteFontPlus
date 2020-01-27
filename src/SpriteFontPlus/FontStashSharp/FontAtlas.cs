@@ -31,17 +31,11 @@ namespace FontStashSharp
 			get; set;
 		}
 
-		public int Index
-		{
-			get; private set;
-		}
-
-		public FontAtlas(int w, int h, int count, int index)
+		public FontAtlas(int w, int h, int count)
 		{
 			Width = w;
 			Height = h;
 			Nodes = new FontAtlasNode[count];
-			Index = index;
 			count = 0;
 			Nodes[0].X = 0;
 			Nodes[0].Y = 0;

@@ -76,20 +76,20 @@ namespace SpriteFontPlus
 			}
 		}
 
-		public bool TryFallback
+		public int? DefaultCharacter
 		{
 			get
 			{
-				return _fontSystem.TryFallback;
-				
+				return _fontSystem.DefaultCharacter;
 			}
+
 			set
 			{
-				_fontSystem.TryFallback = value;
-				
+				_fontSystem.DefaultCharacter = value;
 			}
 		}
-		
+
+
 		public event EventHandler CurrentAtlasFull
 		{
 			add

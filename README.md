@@ -81,6 +81,7 @@ Following code creates DynamicSpriteFont from 3 different ttfs:
 ```			
 
 Now it's possible to draw text using glyphs from all those fonts, using Size property to change the font size. 
+
 I.e. consider following code:
 ```c#
 	_spriteBatch.Begin();

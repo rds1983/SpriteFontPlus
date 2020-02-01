@@ -75,7 +75,7 @@ DynamicSpriteFont renders glyphs on demand to the underlying texture atlas. Thus
 
 Following code creates DynamicSpriteFont from 3 different ttfs:
 ```c#
-	DynamicSpriteFont.FromTtf(File.ReadAllBytes(@"Fonts/DroidSans.ttf"), 20);
+	_font = DynamicSpriteFont.FromTtf(File.ReadAllBytes(@"Fonts/DroidSans.ttf"), 20);
 	_font.AddTtf(File.ReadAllBytes(@"Fonts/DroidSansJapanese.ttf"));
 	_font.AddTtf(File.ReadAllBytes(@"Fonts/Symbola-Emoji.ttf"));
 ```			

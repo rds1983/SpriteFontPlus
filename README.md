@@ -19,7 +19,7 @@ There are two ways of referencing SpriteFontPlus in the project:
     
     c. Copy SolutionDefines.targets from SpriteFontPlus/build/MonoGame(or SpriteFontPlus/build/FNA) to your solution folder.
 
-      * If FNA is used, SolutionDefines.targets needs to be edited and FNAProj variable should be updated to the location of FNA.csproj next to the SpriteFontPlus.csproj location.
+      * If FNA is used, SolutionDefines.targets needs to be edited and FNAProj variable should be updated to the location of FNA.csproj.
     
     d. Add SpriteFontPlus/src/SpriteFontPlus/SpriteFontPlus.csproj to the solution.
     

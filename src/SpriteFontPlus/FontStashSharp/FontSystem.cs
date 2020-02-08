@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace FontStashSharp
 {
-	internal unsafe class FontSystem
+	internal class FontSystem
 	{
 		private readonly Dictionary<int, Dictionary<int, FontGlyph>> _glyphs = new Dictionary<int, Dictionary<int, FontGlyph>>();
 
@@ -167,7 +167,7 @@ namespace FontStashSharp
 					continue;
 				}
 
-				GetQuad(glyph, prevGlyph, Spacing, ref originX, ref originY, &q);
+				GetQuad(glyph, prevGlyph, Spacing, ref originX, ref originY, ref q);
 
 				q.X0 = (int)(q.X0 * Scale.X);
 				q.X1 = (int)(q.X1 * Scale.X);
@@ -254,7 +254,7 @@ namespace FontStashSharp
 					continue;
 				}
 
-				GetQuad(glyph, prevGlyph, Spacing, ref x, ref y, &q);
+				GetQuad(glyph, prevGlyph, Spacing, ref x, ref y, ref q);
 				if (q.X0 < minx)
 					minx = q.X0;
 				if (x > maxx)
@@ -329,8 +329,8 @@ namespace FontStashSharp
 				return null;
 			}
 
-			int advance, lsb, x0, y0, x1, y1;
-			font.BuildGlyphBitmap(g, FontSize, font.Scale, &advance, &lsb, &x0, &y0, &x1, &y1);
+			int advance = 0, lsb = 0, x0 = 0, y0 = 0, x1 = 0, y1 = 0;
+			font.BuildGlyphBitmap(g, FontSize, font.Scale, ref advance, ref lsb, ref x0, ref y0, ref x1, ref y1);
 
 			var pad = FontGlyph.PadFromBlur(Blur);
 			var gw = x1 - x0 + pad * 2;
@@ -405,7 +405,7 @@ namespace FontStashSharp
 			return result;
 		}
 
-		private void GetQuad(FontGlyph glyph, FontGlyph prevGlyph, float spacing, ref float x, ref float y, FontGlyphSquad* q)
+		private void GetQuad(FontGlyph glyph, FontGlyph prevGlyph, float spacing, ref float x, ref float y, ref FontGlyphSquad q)
 		{
 			if (prevGlyph != null)
 			{
@@ -423,14 +423,14 @@ namespace FontStashSharp
 
 			rx = x + glyph.XOffset;
 			ry = y + glyph.YOffset;
-			q->X0 = rx;
-			q->Y0 = ry;
-			q->X1 = rx + glyph.Bounds.Width;
-			q->Y1 = ry + glyph.Bounds.Height;
-			q->S0 = glyph.Bounds.X * _itw;
-			q->T0 = glyph.Bounds.Y * _ith;
-			q->S1 = glyph.Bounds.Right * _itw;
-			q->T1 = glyph.Bounds.Bottom * _ith;
+			q.X0 = rx;
+			q.Y0 = ry;
+			q.X1 = rx + glyph.Bounds.Width;
+			q.Y1 = ry + glyph.Bounds.Height;
+			q.S0 = glyph.Bounds.X * _itw;
+			q.T0 = glyph.Bounds.Y * _ith;
+			q.S1 = glyph.Bounds.Right * _itw;
+			q.T1 = glyph.Bounds.Bottom * _ith;
 
 			x += (int)(glyph.XAdvance / 10.0f + 0.5f);
 		}

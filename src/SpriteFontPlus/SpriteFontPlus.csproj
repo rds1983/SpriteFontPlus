@@ -14,9 +14,7 @@
     <RootNamespace>SpriteFontPlus</RootNamespace>
     <Version>1.0.0.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);STBSHARP_INTERNAL</DefineConstants>
-    
   </PropertyGroup>
 
   <PropertyGroup Condition="$(DefineConstants.Contains('MONOGAME'))">
@@ -36,9 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\deps\StbTrueTypeSharp\src\StbTrueTypeSharp\CRuntime.cs" Link="StbTrueTypeSharp\CRuntime.cs" />
-    <Compile Include="..\..\deps\StbTrueTypeSharp\src\StbTrueTypeSharp\StbTrueType.cs" Link="StbTrueTypeSharp\StbTrueType.cs" />
-    <Compile Include="..\..\deps\StbTrueTypeSharp\src\StbTrueTypeSharp\StbTrueType.Generated.cs" Link="StbTrueTypeSharp\StbTrueType.Generated.cs" />
+    <Compile Include="..\..\deps\SafeStbTrueTypeSharp\src\StbTrueTypeSharp\**\*.cs" LinkBase="SafeStbTrueTypeSharp" />
     <Compile Include="..\..\deps\BMFontToSpriteFont\**\*.cs" LinkBase="BMFontToSpriteFont" />
   </ItemGroup>
 </Project>

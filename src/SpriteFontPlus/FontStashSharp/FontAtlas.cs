@@ -1,10 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StbTrueTypeSharp;
 using System;
 
 namespace FontStashSharp
 {
-	internal unsafe class FontAtlas
+	internal class FontAtlas
 	{
 		public int Width
 		{
@@ -188,21 +189,16 @@ namespace FontStashSharp
 			Array.Clear(buffer, 0, buffer.Length);
 
 			var g = glyph.Index;
-			fixed (byte* dst = &buffer[pad + pad * glyph.Bounds.Width])
-			{
+			FakePtr<byte> dst = new FakePtr<byte>(buffer, pad + pad * glyph.Bounds.Width);
 				glyph.Font.RenderGlyphBitmap(dst, 
 					glyph.Bounds.Width - pad * 2, 
 					glyph.Bounds.Height - pad * 2,
 					glyph.Bounds.Width, 
 					g);
-			}
 
 			if (glyph.Blur > 0)
 			{
-				fixed (byte* bdst = &buffer[0])
-				{
-					Blur(bdst, glyph.Bounds.Width, glyph.Bounds.Height, glyph.Bounds.Width, glyph.Blur);
-				}
+				Blur(buffer, glyph.Bounds.Width, glyph.Bounds.Height, glyph.Bounds.Width, glyph.Blur);
 			}
 
 			// Byte buffer to RGBA
@@ -222,7 +218,7 @@ namespace FontStashSharp
 			Texture.SetData(0, glyph.Bounds, colorBuffer, 0, colorBuffer.Length);
 		}
 
-		private void Blur(byte* dst, int w, int h, int dstStride, int blur)
+		private void Blur(byte[] dst, int w, int h, int dstStride, int blur)
 		{
 			var alpha = 0;
 			float sigma = 0;
@@ -230,13 +226,14 @@ namespace FontStashSharp
 				return;
 			sigma = blur * 0.57735f;
 			alpha = (int)((1 << 16) * (1.0f - Math.Exp(-2.3f / (sigma + 1.0f))));
-			BlurRows(dst, w, h, dstStride, alpha);
-			BlurCols(dst, w, h, dstStride, alpha);
-			BlurRows(dst, w, h, dstStride, alpha);
-			BlurCols(dst, w, h, dstStride, alpha);
+			var ptr = new FakePtr<byte>(dst);
+			BlurRows(ptr, w, h, dstStride, alpha);
+			BlurCols(ptr, w, h, dstStride, alpha);
+			BlurRows(ptr, w, h, dstStride, alpha);
+			BlurCols(ptr, w, h, dstStride, alpha);
 		}
 
-		private static void BlurCols(byte* dst, int w, int h, int dstStride, int alpha)
+		private static void BlurCols(FakePtr<byte> dst, int w, int h, int dstStride, int alpha)
 		{
 			var x = 0;
 			var y = 0;
@@ -262,7 +259,7 @@ namespace FontStashSharp
 			}
 		}
 
-		private static void BlurRows(byte* dst, int w, int h, int dstStride, int alpha)
+		private static void BlurRows(FakePtr<byte> dst, int w, int h, int dstStride, int alpha)
 		{
 			var x = 0;
 			var y = 0;

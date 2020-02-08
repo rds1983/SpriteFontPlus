@@ -7,9 +7,8 @@
     <Authors>SpriteFontPlusTeam</Authors>
     <Product>SpriteFontPlus</Product>
     <Description>Library extending functionality of the SpriteFont.</Description>
-    <PackageLicense>https://github.com/rds1983/SpriteFontPlus#license</PackageLicense>
+    <PackageLicense>https://github.com/rds1983/SpriteFontPlus/blob/master/LICENSE</PackageLicense>
     <PackageProjectUrl>https://github.com/rds1983/SpriteFontPlus</PackageProjectUrl>
-    <NoWarn>NU1701</NoWarn>
     <AssemblyName>SpriteFontPlus</AssemblyName>
     <RootNamespace>SpriteFontPlus</RootNamespace>
     <Version>1.0.0.0</Version>

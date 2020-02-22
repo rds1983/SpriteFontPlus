@@ -1,6 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(SolutionDir)SolutionDefines.targets" />
-
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
     <PackageId>SpriteFontPlus</PackageId>
@@ -13,27 +11,16 @@
     <RootNamespace>SpriteFontPlus</RootNamespace>
     <Version>1.0.0.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <DefineConstants>$(DefineConstants);STBSHARP_INTERNAL</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="$(DefineConstants.Contains('MONOGAME'))">
+    <DefineConstants>$(DefineConstants);STBSHARP_INTERNAL;MONOGAME</DefineConstants>
     <OutputPath>bin\MonoGame\$(Configuration)</OutputPath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="$(DefineConstants.Contains('FNA'))">
-    <OutputPath>bin\FNA\$(Configuration)</OutputPath>
-  </PropertyGroup>
-  
-  <ItemGroup Condition="$(DefineConstants.Contains('MONOGAME'))">
+  <ItemGroup>
     <PackageReference Include="MonoGame.Framework.Portable" PrivateAssets="All" Version="3.6.0.1625" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(DefineConstants.Contains('FNA'))">
-    <ProjectReference Include="$(FNAProj)" />
-  </ItemGroup>
-
   <ItemGroup>
-    <Compile Include="..\..\deps\SafeStbTrueTypeSharp\src\StbTrueTypeSharp\**\*.cs" LinkBase="SafeStbTrueTypeSharp" />
-    <Compile Include="..\..\deps\BMFontToSpriteFont\**\*.cs" LinkBase="BMFontToSpriteFont" />
+    <Compile Include="..\deps\SafeStbTrueTypeSharp\src\**\*.cs" LinkBase="SafeStbTrueTypeSharp" />
+    <Compile Include="..\deps\BMFontToSpriteFont\**\*.cs" LinkBase="BMFontToSpriteFont" />
   </ItemGroup>
 </Project>

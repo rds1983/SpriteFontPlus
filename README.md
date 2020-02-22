@@ -19,7 +19,7 @@ There are two ways of referencing SpriteFontPlus in the project:
     
     c. Add src/SpriteFontPlus.MonoGame.csproj or src/SpriteFontPlus.FNA.csproj to the solution.
 
-      * If FNA is used, then the folder structure is expected to be following: [[/images/FolderStructure.png]]
+      * If FNA is used, then the folder structure is expected to be following: ![Folder Structure](/images/FolderStructure.png)
             
 # Loading SpriteFont from a ttf
 Following code creates a SpriteFont from a ttf:

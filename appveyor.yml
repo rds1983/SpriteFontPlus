@@ -14,7 +14,7 @@ build_script:
 
     build_all.bat
 artifacts:
-  - path: src/SpriteFontPlus/bin/MonoGame/Release/SpriteFontPlus.$(appveyor_build_version).nupkg
+  - path: src/bin/MonoGame/Release/SpriteFontPlus.$(appveyor_build_version).nupkg
     name: SpriteFontPlus.nupkg
 
   - path: SpriteFontPlus.$(appveyor_build_version).zip

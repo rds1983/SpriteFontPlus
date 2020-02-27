@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+    <TargetFramework>net45</TargetFramework>
     <PackageId>SpriteFontPlus</PackageId>
     <Authors>SpriteFontPlusTeam</Authors>
     <Product>SpriteFontPlus</Product>
@@ -20,6 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\FNA\FNA.Core.csproj" />
+    <ProjectReference Include="..\..\FNA\FNA.csproj" />
   </ItemGroup>
 </Project>

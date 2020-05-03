@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StbTrueTypeSharp;
 using System;
 
 namespace FontStashSharp
@@ -182,24 +181,21 @@ namespace FontStashSharp
 
 		public void RenderGlyph(GraphicsDevice device, FontGlyph glyph)
 		{
-			var pad = glyph.Pad;
+			if (glyph.Bounds.Width == 0 || glyph.Bounds.Height == 0)
+			{
+				return;
+			}
 
 			// Render glyph to byte buffer
 			var buffer = new byte[glyph.Bounds.Width * glyph.Bounds.Height];
 			Array.Clear(buffer, 0, buffer.Length);
 
 			var g = glyph.Index;
-			FakePtr<byte> dst = new FakePtr<byte>(buffer, pad + pad * glyph.Bounds.Width);
-				glyph.Font.RenderGlyphBitmap(dst, 
-					glyph.Bounds.Width - pad * 2, 
-					glyph.Bounds.Height - pad * 2,
-					glyph.Bounds.Width, 
-					g);
-
-			if (glyph.Blur > 0)
-			{
-				Blur(buffer, glyph.Bounds.Width, glyph.Bounds.Height, glyph.Bounds.Width, glyph.Blur);
-			}
+			glyph.Font.RenderGlyphBitmap(buffer,
+				glyph.Bounds.Width,
+				glyph.Bounds.Height,
+				glyph.Bounds.Width,
+				g);
 
 			// Byte buffer to RGBA
 			var colorBuffer = new Color[glyph.Bounds.Width * glyph.Bounds.Height];
@@ -216,73 +212,6 @@ namespace FontStashSharp
 			}
 
 			Texture.SetData(0, glyph.Bounds, colorBuffer, 0, colorBuffer.Length);
-		}
-
-		private void Blur(byte[] dst, int w, int h, int dstStride, int blur)
-		{
-			var alpha = 0;
-			float sigma = 0;
-			if (blur < 1)
-				return;
-			sigma = blur * 0.57735f;
-			alpha = (int)((1 << 16) * (1.0f - Math.Exp(-2.3f / (sigma + 1.0f))));
-			var ptr = new FakePtr<byte>(dst);
-			BlurRows(ptr, w, h, dstStride, alpha);
-			BlurCols(ptr, w, h, dstStride, alpha);
-			BlurRows(ptr, w, h, dstStride, alpha);
-			BlurCols(ptr, w, h, dstStride, alpha);
-		}
-
-		private static void BlurCols(FakePtr<byte> dst, int w, int h, int dstStride, int alpha)
-		{
-			var x = 0;
-			var y = 0;
-			for (y = 0; y < h; y++)
-			{
-				var z = 0;
-				for (x = 1; x < w; x++)
-				{
-					z += (alpha * ((dst[x] << 7) - z)) >> 16;
-					dst[x] = (byte)(z >> 7);
-				}
-
-				dst[w - 1] = 0;
-				z = 0;
-				for (x = w - 2; x >= 0; x--)
-				{
-					z += (alpha * ((dst[x] << 7) - z)) >> 16;
-					dst[x] = (byte)(z >> 7);
-				}
-
-				dst[0] = 0;
-				dst += dstStride;
-			}
-		}
-
-		private static void BlurRows(FakePtr<byte> dst, int w, int h, int dstStride, int alpha)
-		{
-			var x = 0;
-			var y = 0;
-			for (x = 0; x < w; x++)
-			{
-				var z = 0;
-				for (y = dstStride; y < h * dstStride; y += dstStride)
-				{
-					z += (alpha * ((dst[y] << 7) - z)) >> 16;
-					dst[y] = (byte)(z >> 7);
-				}
-
-				dst[(h - 1) * dstStride] = 0;
-				z = 0;
-				for (y = (h - 2) * dstStride; y >= 0; y -= dstStride)
-				{
-					z += (alpha * ((dst[y] << 7) - z)) >> 16;
-					dst[y] = (byte)(z >> 7);
-				}
-
-				dst[0] = 0;
-				dst++;
-			}
 		}
 	}
 }

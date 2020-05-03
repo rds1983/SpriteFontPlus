@@ -13,6 +13,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <DefineConstants>$(DefineConstants);STBSHARP_INTERNAL;MONOGAME</DefineConstants>
     <OutputPath>bin\MonoGame\$(Configuration)</OutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\deps\SafeStbTrueTypeSharp\src\**\*.cs" LinkBase="SafeStbTrueTypeSharp" />
+    <Compile Include="..\deps\StbTrueTypeSharp\src\**\*.cs" LinkBase="StbTrueTypeSharp" />
     <Compile Include="..\deps\BMFontToSpriteFont\**\*.cs" LinkBase="BMFontToSpriteFont" />
   </ItemGroup>
 </Project>

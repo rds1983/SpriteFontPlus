@@ -1,6 +1,6 @@
 [submodule "deps/BMFontToSpriteFont"]
 	path = deps/BMFontToSpriteFont
 	url = https://github.com/rds1983/BMFontToSpriteFont.git
-[submodule "deps/SafeStbTrueTypeSharp"]
-	path = deps/SafeStbTrueTypeSharp
-	url = https://github.com/StbSharp/SafeStbTrueTypeSharp.git
+[submodule "deps/StbTrueTypeSharp"]
+	path = deps/StbTrueTypeSharp
+	url = git@github.com:StbSharp/StbTrueTypeSharp.git

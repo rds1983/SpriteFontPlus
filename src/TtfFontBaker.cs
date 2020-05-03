@@ -16,7 +16,7 @@ namespace SpriteFontPlus
 			return Bake(ttfStream.ToByteArray(), fontPixelHeight, bitmapWidth, bitmapHeight, characterRanges);
 		}
 
-		public static TtfFontBakerResult Bake(byte[] ttf, float fontPixelHeight,
+		public unsafe static TtfFontBakerResult Bake(byte[] ttf, float fontPixelHeight,
 			int bitmapWidth, int bitmapHeight,
 			IEnumerable<CharacterRange> characterRanges)
 		{
@@ -53,58 +53,70 @@ namespace SpriteFontPlus
 			byte[] pixels;
 			var glyphs = new Dictionary<int, GlyphInfo>();
 			StbTrueType.stbtt_fontinfo fontInfo = new StbTrueType.stbtt_fontinfo();
-			if (StbTrueType.stbtt_InitFont(fontInfo, ttf, 0) == 0)
+			fixed (byte* ttfPtr = ttf)
 			{
-				throw new Exception("Failed to init font.");
+				if (StbTrueType.stbtt_InitFont(fontInfo, ttfPtr, 0) == 0)
+				{
+					throw new Exception("Failed to init font.");
+				}
 			}
 
 			float scaleFactor = StbTrueType.stbtt_ScaleForPixelHeight(fontInfo, fontPixelHeight);
 
 			int ascent, descent, lineGap;
-			StbTrueType.stbtt_GetFontVMetrics(fontInfo, out ascent, out descent, out lineGap);
+			StbTrueType.stbtt_GetFontVMetrics(fontInfo, &ascent, &descent, &lineGap);
 
 			pixels = new byte[bitmapWidth * bitmapHeight];
 			StbTrueType.stbtt_pack_context pc = new StbTrueType.stbtt_pack_context();
-			StbTrueType.stbtt_PackBegin(pc, pixels, bitmapWidth,
-				bitmapHeight, bitmapWidth, 1);
 
-			foreach (var range in characterRanges)
+			fixed (byte* ttfPtr = ttf)
+			fixed (byte* pixelsPtr = pixels)
 			{
-				if (range.Start > range.End)
+				StbTrueType.stbtt_PackBegin(pc, pixelsPtr, bitmapWidth,
+					bitmapHeight, bitmapWidth, 1, null);
+
+				foreach (var range in characterRanges)
 				{
-					continue;
-				}
-
-				var cd = new StbTrueType.stbtt_packedchar[range.End - range.Start + 1];
-				for (var i = 0; i < cd.Length; ++i)
-				{
-					cd[i] = new StbTrueType.stbtt_packedchar();
-				}
-
-				StbTrueType.stbtt_PackFontRange(pc, ttf, 0, fontPixelHeight,
-					range.Start,
-					range.End - range.Start + 1,
-					cd);
-
-				for (var i = 0; i < cd.Length; ++i)
-				{
-					var yOff = cd[i].yoff;
-					yOff += ascent * scaleFactor;
-
-					var glyphInfo = new GlyphInfo
+					if (range.Start > range.End)
 					{
-						X = cd[i].x0,
-						Y = cd[i].y0,
-						Width = cd[i].x1 - cd[i].x0,
-						Height = cd[i].y1 - cd[i].y0,
-						XOffset = (int)cd[i].xoff,
-						YOffset = (int)Math.Round(yOff),
-						XAdvance = (int)Math.Round(cd[i].xadvance)
-					};
+						continue;
+					}
 
-					glyphs[(char)(i + range.Start)] = glyphInfo;
+					var cd = new StbTrueType.stbtt_packedchar[range.End - range.Start + 1];
+					for (var i = 0; i < cd.Length; ++i)
+					{
+						cd[i] = new StbTrueType.stbtt_packedchar();
+					}
+
+					fixed (StbTrueType.stbtt_packedchar* cdPtr = cd)
+					{
+						StbTrueType.stbtt_PackFontRange(pc, ttfPtr, 0, fontPixelHeight,
+							range.Start,
+							range.End - range.Start + 1,
+							cdPtr);
+					}
+
+					for (var i = 0; i < cd.Length; ++i)
+					{
+						var yOff = cd[i].yoff;
+						yOff += ascent * scaleFactor;
+
+						var glyphInfo = new GlyphInfo
+						{
+							X = cd[i].x0,
+							Y = cd[i].y0,
+							Width = cd[i].x1 - cd[i].x0,
+							Height = cd[i].y1 - cd[i].y0,
+							XOffset = (int)cd[i].xoff,
+							YOffset = (int)Math.Round(yOff),
+							XAdvance = (int)Math.Round(cd[i].xadvance)
+						};
+
+						glyphs[(char)(i + range.Start)] = glyphInfo;
+					}
 				}
 			}
+
 
 			return new TtfFontBakerResult(glyphs, fontPixelHeight, pixels, bitmapWidth, bitmapHeight);
 		}

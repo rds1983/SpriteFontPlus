@@ -12,17 +12,16 @@ namespace FontStashSharp
 		public int Codepoint;
 		public int Index;
 		public int Size;
-		public int Blur;
 		public Rectangle Bounds;
 		public int XAdvance;
 		public int XOffset;
 		public int YOffset;
 
-		public int Pad
+		public bool IsEmpty
 		{
 			get
 			{
-				return PadFromBlur(Blur);
+				return Bounds.Width == 0 || Bounds.Height == 0;
 			}
 		}
 
@@ -37,11 +36,6 @@ namespace FontStashSharp
 			_kernings[nextGlyph.Index] = result;
 
 			return result;
-		}
-
-		public static int PadFromBlur(int blur)
-		{
-			return blur + 2;
 		}
 	}
 }

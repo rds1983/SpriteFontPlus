@@ -12,10 +12,11 @@
     <Version>1.0.0.0</Version>
     <DefineConstants>$(DefineConstants);STBSHARP_INTERNAL;FNA</DefineConstants>
     <OutputPath>bin\FNA\$(Configuration)</OutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\deps\SafeStbTrueTypeSharp\src\**\*.cs" LinkBase="SafeStbTrueTypeSharp" />
+    <Compile Include="..\deps\StbTrueTypeSharp\src\**\*.cs" LinkBase="StbTrueTypeSharp" />
     <Compile Include="..\deps\BMFontToSpriteFont\**\*.cs" LinkBase="BMFontToSpriteFont" />
   </ItemGroup>
 

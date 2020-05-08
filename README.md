@@ -112,3 +112,4 @@ Full sample is here:
 * [Cyotek.Drawing.BitmapFont](https://github.com/cyotek/Cyotek.Drawing.BitmapFont)
 * [stb](https://github.com/nothings/stb)
 * [fontstash](https://github.com/memononen/fontstash)
+* [bartwe's fork of SpriteFontPlus](https://github.com/bartwe/SpriteFontPlus)

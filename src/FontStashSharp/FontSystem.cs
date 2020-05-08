@@ -447,10 +447,6 @@ namespace FontStashSharp
 
 		bool StringBuilderIsSurrogatePair(StringBuilder sb, int index)
 		{
-			if (sb == null)
-				throw new ArgumentNullException(nameof(sb));
-			if (index < 0 || index > sb.Length)
-				throw new ArgumentOutOfRangeException(nameof(index));
 			if (index + 1 < sb.Length)
 				return char.IsSurrogatePair(sb[index], sb[index + 1]);
 			return false;
@@ -458,16 +454,8 @@ namespace FontStashSharp
 
 		int StringBuilderConvertToUtf32(StringBuilder sb, int index)
 		{
-			if (sb == null)
-				throw new ArgumentNullException(nameof(sb));
-			if (index < 0 || index > sb.Length)
-				throw new ArgumentOutOfRangeException(nameof(index));
-
 			if (!char.IsHighSurrogate(sb[index]))
 				return sb[index];
-
-			if (index >= sb.Length - 1)
-				throw new Exception("Invalid High Surrogate.");
 
 			return char.ConvertToUtf32(sb[index], sb[index + 1]);
 		}

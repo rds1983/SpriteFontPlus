@@ -18,6 +18,22 @@ namespace SpriteFontPlus.Samples.TtfBaking
 		private Texture2D _white;
 		private bool _drawBackground = false;
 		private bool _wasSpaceDown, _wasEnterDown;
+		private static readonly Color[] _colors = new Color[]
+		{
+			Color.Red,
+			Color.Blue,
+			Color.Green,
+			Color.Aquamarine,
+			Color.Azure,
+			Color.Chartreuse,
+			Color.Lavender,
+			Color.OldLace,
+			Color.PaleGreen,
+			Color.SaddleBrown,
+			Color.IndianRed,
+			Color.ForestGreen,
+			Color.Khaki
+		};
 
 		public Game1()
 		{
@@ -82,6 +98,17 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			_wasEnterDown = isEnterDown;
 		}
 
+		private void DrawString(string text, int y, Color[] glyphColors)
+		{
+			if (_drawBackground)
+			{
+				var size = _font.MeasureString(text);
+				_spriteBatch.Draw(_white, new Rectangle(0, y, (int)size.X, (int)size.Y), Color.Green);
+			}
+
+			_spriteBatch.DrawString(_font, text, new Vector2(0, y), glyphColors);
+		}
+
 		private void DrawString(string text, int y, Color color)
 		{
 			if (_drawBackground)
@@ -115,6 +142,10 @@ namespace SpriteFontPlus.Samples.TtfBaking
 
 			_font.Size = 30;
 			DrawString("The quick いろは brown\nfox にほへ jumps over\nt🙌h📦e l👏a👏zy dog", 80, Color.Bisque);
+
+			_font.Size = 30;
+			DrawString("Colored Text", 200, _colors);
+
 
 			_font.Size = 26;
 			DrawString("Texture:", 380);

@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace SpriteFontPlus
 {
@@ -131,6 +132,23 @@ namespace SpriteFontPlus
 			return result;
 		}
 
+		public float DrawString(SpriteBatch batch, StringBuilder text, Vector2 pos, Color color)
+		{
+			return DrawString(batch, text, pos, color, Vector2.One);
+		}
+
+		public float DrawString(SpriteBatch batch, StringBuilder text, Vector2 pos, Color color, Vector2 scale, float depth = 0f)
+		{
+			_fontSystem.Color = color;
+			_fontSystem.Scale = scale;
+
+			var result = _fontSystem.DrawText(batch, pos.X, pos.Y, text, depth);
+
+			_fontSystem.Scale = Vector2.One;
+
+			return result;
+		}
+
 		public void AddTtf(byte[] ttf)
 		{
 			_fontSystem.AddFontMem(ttf);
@@ -149,7 +167,23 @@ namespace SpriteFontPlus
 			return new Vector2(bounds.X2, bounds.Y2);
 		}
 
+		public Vector2 MeasureString(StringBuilder text)
+		{
+			Bounds bounds = new Bounds();
+			_fontSystem.TextBounds(0, 0, text, ref bounds);
+
+			return new Vector2(bounds.X2, bounds.Y2);
+		}
+
 		public Rectangle GetTextBounds(Vector2 position, string text)
+		{
+			Bounds bounds = new Bounds();
+			_fontSystem.TextBounds(position.X, position.Y, text, ref bounds);
+
+			return new Rectangle((int)bounds.X, (int)bounds.Y, (int)(bounds.X2 - bounds.X), (int)(bounds.Y2 - bounds.Y));
+		}
+
+		public Rectangle GetTextBounds(Vector2 position, StringBuilder text)
 		{
 			Bounds bounds = new Bounds();
 			_fontSystem.TextBounds(position.X, position.Y, text, ref bounds);

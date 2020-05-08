@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -202,6 +203,90 @@ namespace FontStashSharp
 			return x;
 		}
 
+		public float DrawText(SpriteBatch batch, float x, float y, StringBuilder str, float depth)
+		{
+			if (str == null || str.Length == 0) return 0.0f;
+
+			var glyphs = GetGlyphsCollection(FontSize);
+
+			// Determine ascent and lineHeight from first character
+			float ascent = 0, lineHeight = 0;
+			for (int i = 0; i < str.Length; i += StringBuilderIsSurrogatePair(str, i) ? 2 : 1)
+			{
+				var codepoint = StringBuilderConvertToUtf32(str, i);
+
+				var glyph = GetGlyph(batch.GraphicsDevice, glyphs, codepoint);
+				if (glyph == null)
+				{
+					continue;
+				}
+
+				ascent = glyph.Font.Ascent;
+				lineHeight = glyph.Font.LineHeight;
+				break;
+			}
+
+			var q = new FontGlyphSquad();
+
+			float originX = 0.0f;
+			float originY = 0.0f;
+
+			originY += ascent;
+
+			FontGlyph prevGlyph = null;
+			for (int i = 0; i < str.Length; i += StringBuilderIsSurrogatePair(str, i) ? 2 : 1)
+			{
+				var codepoint = StringBuilderConvertToUtf32(str, i);
+
+				if (codepoint == '\n')
+				{
+					originX = 0.0f;
+					originY += lineHeight;
+					prevGlyph = null;
+					continue;
+				}
+
+				var glyph = GetGlyph(batch.GraphicsDevice, glyphs, codepoint);
+				if (glyph == null)
+				{
+					continue;
+				}
+
+				if (!glyph.IsEmpty)
+				{
+					GetQuad(glyph, prevGlyph, Spacing, ref originX, ref originY, ref q);
+
+					q.X0 = (int)(q.X0 * Scale.X);
+					q.X1 = (int)(q.X1 * Scale.X);
+					q.Y0 = (int)(q.Y0 * Scale.Y);
+					q.Y1 = (int)(q.Y1 * Scale.Y);
+
+					var destRect = new Rectangle((int)(x + q.X0),
+												(int)(y + q.Y0),
+												(int)(q.X1 - q.X0),
+												(int)(q.Y1 - q.Y0));
+
+					var sourceRect = new Rectangle((int)(q.S0 * _size.X),
+												(int)(q.T0 * _size.Y),
+												(int)((q.S1 - q.S0) * _size.X),
+												(int)((q.T1 - q.T0) * _size.Y));
+
+					batch.Draw(glyph.Atlas.Texture,
+						destRect,
+						sourceRect,
+						Color,
+						0f,
+						Vector2.Zero,
+						SpriteEffects.None,
+						depth);
+				}
+
+				prevGlyph = glyph;
+			}
+
+			return x;
+		}
+
 		public float TextBounds(float x, float y, string str, ref Bounds bounds)
 		{
 			if (string.IsNullOrEmpty(str)) return 0.0f;
@@ -213,6 +298,83 @@ namespace FontStashSharp
 			for (int i = 0; i < str.Length; i += char.IsSurrogatePair(str, i) ? 2 : 1)
 			{
 				var codepoint = char.ConvertToUtf32(str, i);
+
+				var glyph = GetGlyph(null, glyphs, codepoint);
+				if (glyph == null)
+				{
+					continue;
+				}
+
+				ascent = glyph.Font.Ascent;
+				lineHeight = glyph.Font.LineHeight;
+				break;
+			}
+
+
+			var q = new FontGlyphSquad();
+			y += ascent;
+
+			float minx, maxx, miny, maxy;
+			minx = maxx = x;
+			miny = maxy = y;
+			float startx = x;
+
+			FontGlyph prevGlyph = null;
+
+			for (int i = 0; i < str.Length; i += char.IsSurrogatePair(str, i) ? 2 : 1)
+			{
+				var codepoint = char.ConvertToUtf32(str, i);
+
+				if (codepoint == '\n')
+				{
+					x = startx;
+					y += lineHeight;
+					prevGlyph = null;
+					continue;
+				}
+
+				var glyph = GetGlyph(null, glyphs, codepoint);
+				if (glyph == null)
+				{
+					continue;
+				}
+
+				if (!glyph.IsEmpty)
+				{
+					GetQuad(glyph, prevGlyph, Spacing, ref x, ref y, ref q);
+					if (q.X0 < minx)
+						minx = q.X0;
+					if (x > maxx)
+						maxx = x;
+					if (q.Y0 < miny)
+						miny = q.Y0;
+					if (q.Y1 > maxy)
+						maxy = q.Y1;
+				}
+
+				prevGlyph = glyph;
+			}
+
+			float advance = x - startx;
+			bounds.X = minx;
+			bounds.Y = miny;
+			bounds.X2 = maxx;
+			bounds.Y2 = maxy;
+
+			return advance;
+		}
+
+		public float TextBounds(float x, float y, StringBuilder str, ref Bounds bounds)
+		{
+			if (str == null || str.Length == 0) return 0.0f;
+
+			var glyphs = GetGlyphsCollection(FontSize);
+
+			// Determine ascent and lineHeight from first character
+			float ascent = 0, lineHeight = 0;
+			for (int i = 0; i < str.Length; i += StringBuilderIsSurrogatePair(str, i) ? 2 : 1)
+			{
+				var codepoint = StringBuilderConvertToUtf32(str, i);
 
 				var glyph = GetGlyph(null, glyphs, codepoint);
 				if (glyph == null)
@@ -239,9 +401,9 @@ namespace FontStashSharp
 
 			FontGlyph prevGlyph = null;
 
-			for (int i = 0; i < str.Length; i += char.IsSurrogatePair(str, i) ? 2 : 1)
+			for (int i = 0; i < str.Length; i += StringBuilderIsSurrogatePair(str, i) ? 2 : 1)
 			{
-				var codepoint = char.ConvertToUtf32(str, i);
+				var codepoint = StringBuilderConvertToUtf32(str, i);
 
 				if (codepoint == '\n')
 				{
@@ -281,6 +443,33 @@ namespace FontStashSharp
 			bounds.Y2 = maxy;
 
 			return advance;
+		}
+
+		bool StringBuilderIsSurrogatePair(StringBuilder sb, int index)
+		{
+			if (sb == null)
+				throw new ArgumentNullException(nameof(sb));
+			if (index < 0 || index > sb.Length)
+				throw new ArgumentOutOfRangeException(nameof(index));
+			if (index + 1 < sb.Length)
+				return char.IsSurrogatePair(sb[index], sb[index + 1]);
+			return false;
+		}
+
+		int StringBuilderConvertToUtf32(StringBuilder sb, int index)
+		{
+			if (sb == null)
+				throw new ArgumentNullException(nameof(sb));
+			if (index < 0 || index > sb.Length)
+				throw new ArgumentOutOfRangeException(nameof(index));
+
+			if (!char.IsHighSurrogate(sb[index]))
+				return sb[index];
+
+			if (index >= sb.Length - 1)
+				throw new Exception("Invalid High Surrogate.");
+
+			return char.ConvertToUtf32(sb[index], sb[index + 1]);
 		}
 
 		public void Reset(int width, int height)

@@ -3,4 +3,4 @@
 	url = https://github.com/rds1983/BMFontToSpriteFont.git
 [submodule "deps/StbTrueTypeSharp"]
 	path = deps/StbTrueTypeSharp
-	url = git@github.com:StbSharp/StbTrueTypeSharp.git
+	url = https://github.com/StbSharp/StbTrueTypeSharp.git

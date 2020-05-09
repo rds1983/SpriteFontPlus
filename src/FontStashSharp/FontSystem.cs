@@ -117,7 +117,7 @@ namespace FontStashSharp
 			return result;
 		}
 
-		private void PreDraw(SpriteBatch batch, string str, out Dictionary<int, FontGlyph> glyphs, out float ascent, out float lineHeight)
+		private void PreDraw(string str, out Dictionary<int, FontGlyph> glyphs, out float ascent, out float lineHeight)
 		{
 			glyphs = GetGlyphsCollection(FontSize);
 
@@ -128,7 +128,7 @@ namespace FontStashSharp
 			{
 				var codepoint = char.ConvertToUtf32(str, i);
 
-				var glyph = GetGlyph(batch.GraphicsDevice, glyphs, codepoint);
+				var glyph = GetGlyph(null, glyphs, codepoint);
 				if (glyph == null)
 				{
 					continue;
@@ -146,7 +146,7 @@ namespace FontStashSharp
 
 			Dictionary<int, FontGlyph> glyphs;
 			float ascent, lineHeight;
-			PreDraw(batch, str, out glyphs, out ascent, out lineHeight);
+			PreDraw(str, out glyphs, out ascent, out lineHeight);
 
 			float originX = 0.0f;
 			float originY = 0.0f;
@@ -213,7 +213,7 @@ namespace FontStashSharp
 
 			Dictionary<int, FontGlyph> glyphs;
 			float ascent, lineHeight;
-			PreDraw(batch, str, out glyphs, out ascent, out lineHeight);
+			PreDraw(str, out glyphs, out ascent, out lineHeight);
 
 			float originX = 0.0f;
 			float originY = 0.0f;
@@ -278,7 +278,7 @@ namespace FontStashSharp
 			return x;
 		}
 
-		private void PreDraw(SpriteBatch batch, StringBuilder str, out Dictionary<int, FontGlyph> glyphs, out float ascent, out float lineHeight)
+		private void PreDraw(StringBuilder str, out Dictionary<int, FontGlyph> glyphs, out float ascent, out float lineHeight)
 		{
 			glyphs = GetGlyphsCollection(FontSize);
 
@@ -289,7 +289,7 @@ namespace FontStashSharp
 			{
 				var codepoint = StringBuilderConvertToUtf32(str, i);
 
-				var glyph = GetGlyph(batch.GraphicsDevice, glyphs, codepoint);
+				var glyph = GetGlyph(null, glyphs, codepoint);
 				if (glyph == null)
 				{
 					continue;
@@ -307,7 +307,7 @@ namespace FontStashSharp
 
 			Dictionary<int, FontGlyph> glyphs;
 			float ascent, lineHeight;
-			PreDraw(batch, str, out glyphs, out ascent, out lineHeight);
+			PreDraw(str, out glyphs, out ascent, out lineHeight);
 
 			float originX = 0.0f;
 			float originY = 0.0f;
@@ -374,7 +374,7 @@ namespace FontStashSharp
 
 			Dictionary<int, FontGlyph> glyphs;
 			float ascent, lineHeight;
-			PreDraw(batch, str, out glyphs, out ascent, out lineHeight);
+			PreDraw(str, out glyphs, out ascent, out lineHeight);
 
 			float originX = 0.0f;
 			float originY = 0.0f;
@@ -443,25 +443,9 @@ namespace FontStashSharp
 		{
 			if (string.IsNullOrEmpty(str)) return 0.0f;
 
-			var glyphs = GetGlyphsCollection(FontSize);
-
-			// Determine ascent and lineHeight from first character
-			float ascent = 0, lineHeight = 0;
-			for (int i = 0; i < str.Length; i += char.IsSurrogatePair(str, i) ? 2 : 1)
-			{
-				var codepoint = char.ConvertToUtf32(str, i);
-
-				var glyph = GetGlyph(null, glyphs, codepoint);
-				if (glyph == null)
-				{
-					continue;
-				}
-
-				ascent = glyph.Font.Ascent;
-				lineHeight = glyph.Font.LineHeight;
-				break;
-			}
-
+			Dictionary<int, FontGlyph> glyphs;
+			float ascent, lineHeight;
+			PreDraw(str, out glyphs, out ascent, out lineHeight);
 
 			var q = new FontGlyphSquad();
 			y += ascent;
@@ -492,17 +476,14 @@ namespace FontStashSharp
 				}
 
 				GetQuad(glyph, prevGlyph, Spacing, ref x, ref y, ref q);
-				if (!glyph.IsEmpty)
-				{
-					if (q.X0 < minx)
-						minx = q.X0;
-					if (x > maxx)
-						maxx = x;
-					if (q.Y0 < miny)
-						miny = q.Y0;
-					if (q.Y1 > maxy)
-						maxy = q.Y1;
-				}
+				if (q.X0 < minx)
+					minx = q.X0;
+				if (x > maxx)
+					maxx = x;
+				if (q.Y0 < miny)
+					miny = q.Y0;
+				if (q.Y1 > maxy)
+					maxy = q.Y1;
 
 				prevGlyph = glyph;
 			}
@@ -520,25 +501,9 @@ namespace FontStashSharp
 		{
 			if (str == null || str.Length == 0) return 0.0f;
 
-			var glyphs = GetGlyphsCollection(FontSize);
-
-			// Determine ascent and lineHeight from first character
-			float ascent = 0, lineHeight = 0;
-			for (int i = 0; i < str.Length; i += StringBuilderIsSurrogatePair(str, i) ? 2 : 1)
-			{
-				var codepoint = StringBuilderConvertToUtf32(str, i);
-
-				var glyph = GetGlyph(null, glyphs, codepoint);
-				if (glyph == null)
-				{
-					continue;
-				}
-
-				ascent = glyph.Font.Ascent;
-				lineHeight = glyph.Font.LineHeight;
-				break;
-			}
-
+			Dictionary<int, FontGlyph> glyphs;
+			float ascent, lineHeight;
+			PreDraw(str, out glyphs, out ascent, out lineHeight);
 
 			var q = new FontGlyphSquad();
 			y += ascent;
@@ -569,17 +534,14 @@ namespace FontStashSharp
 				}
 
 				GetQuad(glyph, prevGlyph, Spacing, ref x, ref y, ref q);
-				if (!glyph.IsEmpty)
-				{
-					if (q.X0 < minx)
-						minx = q.X0;
-					if (x > maxx)
-						maxx = x;
-					if (q.Y0 < miny)
-						miny = q.Y0;
-					if (q.Y1 > maxy)
-						maxy = q.Y1;
-				}
+				if (q.X0 < minx)
+					minx = q.X0;
+				if (x > maxx)
+					maxx = x;
+				if (q.Y0 < miny)
+					miny = q.Y0;
+				if (q.Y1 > maxy)
+					maxy = q.Y1;
 
 				prevGlyph = glyph;
 			}

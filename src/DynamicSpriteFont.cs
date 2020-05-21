@@ -113,71 +113,77 @@ namespace SpriteFontPlus
 			};
 
 			_fontSystem.AddFontMem(ttf);
-		}
+        }
 
-		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color color)
-		{
-			return DrawString(batch, text, pos, color, Vector2.One);
-		}
 
-		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color color, Vector2 scale, float depth = 0f)
-		{
-			_fontSystem.Scale = scale;
 
-			var result = _fontSystem.DrawText(batch, pos.X, pos.Y, text, color, depth);
+        public float DrawString(
+            SpriteBatch batch,
+            CharSourceUnion charSource,
+            Vector2 pos,
+            ColorSourceUnion colorSource
+        ) =>
+            DrawString(batch: batch, charSource: charSource, pos: pos, colorSource: colorSource, scale: Vector2.One);
+		
+        public float DrawString(SpriteBatch batch, CharSourceUnion charSource, Vector2 pos, ColorSourceUnion colorSource, Vector2 scale, float depth = 0f)
+        {
+            _fontSystem.Scale = scale;
+
+            float result;
+
+            if (charSource.IsStringSource && colorSource.IsColor)
+            {
+                result = _fontSystem.DrawText(
+                    batch: batch,
+                    x: pos.X,
+                    y: pos.Y,
+                    str: charSource.String,
+                    color: colorSource.Color,
+                    depth: depth
+                );
+            }
+			else if (charSource.IsStringSource && colorSource.IsGlyphColors)
+            {
+                result = _fontSystem.DrawText(
+                    batch: batch,
+                    x: pos.X,
+                    y: pos.Y,
+                    str: charSource.String,
+                    glyphColors: colorSource.GlyphColors,
+                    depth: depth
+                );
+            }
+            else if (charSource.IsStringBuilderSource && colorSource.IsColor)
+            {
+				result = _fontSystem.DrawText(
+                    batch: batch,
+                    x: pos.X,
+                    y: pos.Y,
+                    str: charSource.StringBuilder,
+                    color: colorSource.Color,
+                    depth: depth
+                );
+			}
+            else if (charSource.IsStringBuilderSource && colorSource.IsGlyphColors)
+            {
+                result = _fontSystem.DrawText(
+                    batch: batch,
+                    x: pos.X,
+                    y: pos.Y,
+                    str: charSource.StringBuilder,
+                    glyphColors: colorSource.GlyphColors,
+                    depth: depth
+                );
+			}
+            else
+            {
+                throw new ArgumentException("char source is invalid state", "charSource");
+            }
 
 			_fontSystem.Scale = Vector2.One;
 
-			return result;
-		}
-
-		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color[] glyphColors)
-		{
-			return DrawString(batch, text, pos, glyphColors, Vector2.One);
-		}
-
-		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color[] glyphColors, Vector2 scale, float depth = 0f)
-		{
-			_fontSystem.Scale = scale;
-
-			var result = _fontSystem.DrawText(batch, pos.X, pos.Y, text, glyphColors, depth);
-
-			_fontSystem.Scale = Vector2.One;
-
-			return result;
-		}
-
-		public float DrawString(SpriteBatch batch, StringBuilder text, Vector2 pos, Color color)
-		{
-			return DrawString(batch, text, pos, color, Vector2.One);
-		}
-
-		public float DrawString(SpriteBatch batch, StringBuilder text, Vector2 pos, Color color, Vector2 scale, float depth = 0f)
-		{
-			_fontSystem.Scale = scale;
-
-			var result = _fontSystem.DrawText(batch, pos.X, pos.Y, text, color, depth);
-
-			_fontSystem.Scale = Vector2.One;
-
-			return result;
-		}
-
-		public float DrawString(SpriteBatch batch, StringBuilder text, Vector2 pos, Color[] glyphColors)
-		{
-			return DrawString(batch, text, pos, glyphColors, Vector2.One);
-		}
-
-		public float DrawString(SpriteBatch batch, StringBuilder text, Vector2 pos, Color[] glyphColors, Vector2 scale, float depth = 0f)
-		{
-			_fontSystem.Scale = scale;
-
-			var result = _fontSystem.DrawText(batch, pos.X, pos.Y, text, glyphColors, depth);
-
-			_fontSystem.Scale = Vector2.One;
-
-			return result;
-		}
+            return result;
+        }
 
 		public void AddTtf(byte[] ttf)
 		{

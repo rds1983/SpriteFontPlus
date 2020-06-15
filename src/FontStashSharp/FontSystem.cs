@@ -555,6 +555,96 @@ namespace FontStashSharp
 			return advance;
 		}
 
+		public List<Rectangle> GetGlyphRects(float x, float y, string str){
+			List<Rectangle> Rects = new List<Rectangle>();
+			if (string.IsNullOrEmpty(str)) return Rects;
+
+			Dictionary<int, FontGlyph> glyphs;
+			float ascent, lineHeight;
+			PreDraw(str, out glyphs, out ascent, out lineHeight);
+
+			var q = new FontGlyphSquad();
+			y += ascent;
+
+			float minx, maxx, miny, maxy;
+			minx = maxx = x;
+			miny = maxy = y;
+			float startx = x;
+
+			FontGlyph prevGlyph = null;
+
+			for (int i = 0; i < str.Length; i += char.IsSurrogatePair(str, i) ? 2 : 1)
+			{
+				var codepoint = char.ConvertToUtf32(str, i);
+
+				if (codepoint == '\n')
+				{
+					x = startx;
+					y += lineHeight;
+					prevGlyph = null;
+					continue;
+				}
+
+				var glyph = GetGlyph(null, glyphs, codepoint);
+				if (glyph == null)
+				{
+					continue;
+				}
+
+				GetQuad(glyph, prevGlyph, Spacing, ref x, ref y, ref q);
+
+				Rects.Add(new Rectangle((int)q.X0, (int)q.Y0, (int)(q.X1-q.X0), (int)(q.Y1-q.Y0)));
+				prevGlyph = glyph;
+			}
+
+			return Rects;
+		}
+
+		public List<Rectangle> GetGlyphRects(float x, float y, StringBuilder str){
+			List<Rectangle> Rects = new List<Rectangle>();
+			if (str == null || str.Length == 0) return Rects;
+
+			Dictionary<int, FontGlyph> glyphs;
+			float ascent, lineHeight;
+			PreDraw(str, out glyphs, out ascent, out lineHeight);
+
+			var q = new FontGlyphSquad();
+			y += ascent;
+
+			float minx, maxx, miny, maxy;
+			minx = maxx = x;
+			miny = maxy = y;
+			float startx = x;
+
+			FontGlyph prevGlyph = null;
+
+			for (int i = 0; i < str.Length; i += StringBuilderIsSurrogatePair(str, i) ? 2 : 1)
+			{
+				var codepoint = StringBuilderConvertToUtf32(str, i);
+
+				if (codepoint == '\n')
+				{
+					x = startx;
+					y += lineHeight;
+					prevGlyph = null;
+					continue;
+				}
+
+				var glyph = GetGlyph(null, glyphs, codepoint);
+				if (glyph == null)
+				{
+					continue;
+				}
+
+				GetQuad(glyph, prevGlyph, Spacing, ref x, ref y, ref q);
+
+				Rects.Add(new Rectangle((int)q.X0, (int)q.Y0, (int)(q.X1-q.X0), (int)(q.Y1-q.Y0)));
+				prevGlyph = glyph;
+			}
+
+			return Rects;
+		}
+
 		bool StringBuilderIsSurrogatePair(StringBuilder sb, int index)
 		{
 			if (index + 1 < sb.Length)

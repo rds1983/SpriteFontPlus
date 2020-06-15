@@ -221,6 +221,14 @@ namespace SpriteFontPlus
 			return new Rectangle((int)bounds.X, (int)bounds.Y, (int)(bounds.X2 - bounds.X), (int)(bounds.Y2 - bounds.Y));
 		}
 
+		public List<Rectangle> GetGlyphRects(Vector2 position, string text){
+			return _fontSystem.GetGlyphRects(position.X, position.Y, text);
+		}
+
+		public List<Rectangle> GetGlyphRects(Vector2 position, StringBuilder text){
+			return _fontSystem.GetGlyphRects(position.X, position.Y, text);
+		}
+
 		public void Reset(int width, int height)
 		{
 			_fontSystem.Reset(width, height);

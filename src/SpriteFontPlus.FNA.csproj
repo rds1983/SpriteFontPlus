@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net45</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
     <PackageId>SpriteFontPlus</PackageId>
     <Authors>SpriteFontPlusTeam</Authors>
     <Product>SpriteFontPlus</Product>

@@ -41,6 +41,7 @@ namespace FontStashSharp
 
 		public readonly int Blur;
 		public float Spacing;
+		public float LineSpacing = 0f;
 		public Vector2 Scale;
 		public bool UseKernings = true;
 
@@ -135,7 +136,7 @@ namespace FontStashSharp
 				}
 
 				ascent = glyph.Font.Ascent;
-				lineHeight = glyph.Font.LineHeight;
+				lineHeight = glyph.Font.LineHeight + LineSpacing;
 				break;
 			}
 		}
@@ -296,7 +297,7 @@ namespace FontStashSharp
 				}
 
 				ascent = glyph.Font.Ascent;
-				lineHeight = glyph.Font.LineHeight;
+				lineHeight = glyph.Font.LineHeight + LineSpacing;
 				break;
 			}
 		}

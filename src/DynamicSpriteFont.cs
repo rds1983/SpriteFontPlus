@@ -66,6 +66,18 @@ namespace SpriteFontPlus
 			}
 		}
 
+		public float LineSpacing
+		{
+			get
+			{
+				return _fontSystem.LineSpacing;
+			}
+			set
+			{
+				_fontSystem.LineSpacing = value;
+			}
+		}
+
 		public bool UseKernings
 		{
 			get

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SpriteFontPlus;
 
 namespace FontStashSharp
 {
@@ -141,7 +142,7 @@ namespace FontStashSharp
 			}
 		}
 
-		public float DrawText(SpriteBatch batch, float x, float y, string str, Color color, float depth)
+		public float DrawText(IGlyphRenderer batch, float x, float y, string str, Color color, float depth)
 		{
 			if (string.IsNullOrEmpty(str)) return 0.0f;
 
@@ -208,7 +209,7 @@ namespace FontStashSharp
 			return x;
 		}
 
-		public float DrawText(SpriteBatch batch, float x, float y, string str, Color[] glyphColors, float depth)
+		public float DrawText(IGlyphRenderer batch, float x, float y, string str, Color[] glyphColors, float depth)
 		{
 			if (string.IsNullOrEmpty(str)) return 0.0f;
 
@@ -302,7 +303,7 @@ namespace FontStashSharp
 			}
 		}
 
-		public float DrawText(SpriteBatch batch, float x, float y, StringBuilder str, Color color, float depth)
+		public float DrawText(IGlyphRenderer batch, float x, float y, StringBuilder str, Color color, float depth)
 		{
 			if (str == null || str.Length == 0) return 0.0f;
 
@@ -369,7 +370,7 @@ namespace FontStashSharp
 			return x;
 		}
 
-		public float DrawText(SpriteBatch batch, float x, float y, StringBuilder str, Color[] glyphColors, float depth)
+		public float DrawText(IGlyphRenderer batch, float x, float y, StringBuilder str, Color[] glyphColors, float depth)
 		{
 			if (str == null || str.Length == 0) return 0.0f;
 

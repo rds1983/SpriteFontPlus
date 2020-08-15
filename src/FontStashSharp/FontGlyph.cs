@@ -4,8 +4,6 @@ namespace FontStashSharp
 {
 	class FontGlyph
 	{
-		private readonly Int32Map<int> _kernings = new Int32Map<int>();
-
 		public Font Font;
 		public FontAtlas Atlas;
 		public int Codepoint;
@@ -27,19 +25,6 @@ namespace FontStashSharp
 			{
 				return Bounds.Width == 0 || Bounds.Height == 0;
 			}
-		}
-
-		public int GetKerning(FontGlyph nextGlyph)
-		{
-			int result;
-			if (_kernings.TryGetValue(nextGlyph.Index, out result))
-			{
-				return result;
-			}
-			result = StbTrueTypeSharp.StbTrueType.stbtt_GetGlyphKernAdvance(Font._font, Index, nextGlyph.Index);
-			_kernings[nextGlyph.Index] = result;
-
-			return result;
 		}
 	}
 }

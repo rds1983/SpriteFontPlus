@@ -6,10 +6,10 @@ namespace FontStashSharp
 {
 	internal unsafe class Font: IDisposable
 	{
-		private readonly byte[] Data;
 		private GCHandle? dataPtr = null;
 		private float AscentBase, DescentBase, LineHeightBase;
-		
+		readonly Int32Map<int> _kernings = new Int32Map<int>();
+
 		public float Ascent { get; private set; }
 		public float Descent { get; private set; }
 		public float LineHeight { get; private set; }
@@ -23,8 +23,6 @@ namespace FontStashSharp
 			{
 				throw new ArgumentNullException(nameof(data));
 			}
-
-			Data = data;
 
 			dataPtr = GCHandle.Alloc(data, GCHandleType.Pinned);
 		}
@@ -74,6 +72,19 @@ namespace FontStashSharp
 		public void RenderGlyphBitmap(byte *output, int outWidth, int outHeight, int outStride, int glyph)
 		{
 			stbtt_MakeGlyphBitmap(_font, output, outWidth, outHeight, outStride, Scale, Scale, glyph);
+		}
+
+		public int GetGlyphKernAdvance(int glyph1, int glyph2)
+		{
+			var key = ((glyph1 << 16) | (glyph1 >> 16)) ^ glyph2;
+			int result;
+			if (_kernings.TryGetValue(key, out result))
+			{
+				return result;
+			}
+			result = stbtt_GetGlyphKernAdvance(_font, glyph1, glyph2);
+			_kernings[key] = result;
+			return result;
 		}
 
 		public static Font FromMemory(byte[] data)

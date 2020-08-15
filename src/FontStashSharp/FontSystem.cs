@@ -825,7 +825,7 @@ namespace FontStashSharp
 				float adv = 0;
 				if (UseKernings && glyph.Font == prevGlyph.Font)
 				{
-					adv = prevGlyph.GetKerning(glyph) * glyph.Font.Scale;
+					adv = prevGlyph.Font.GetGlyphKernAdvance(prevGlyph.Index, glyph.Index) * glyph.Font.Scale;
 				}
 
 				x += (int)(adv + spacing + 0.5f);

@@ -129,7 +129,7 @@ namespace FontStashSharp
 
 		public int RectFits(int i, int w, int h)
 		{
-			var x = Nodes[i].X;
+			var x = Nodes[i].X + 1; // And here
 			var y = Nodes[i].Y;
 			if (x + w > Width)
 				return -1;
@@ -164,7 +164,7 @@ namespace FontStashSharp
 						besti = i;
 						bestw = Nodes[i].Width;
 						besth = y + rh;
-						bestx = Nodes[i].X;
+						bestx = Nodes[i].X + 1; // MODIFIED
 						besty = y;
 					}
 			}

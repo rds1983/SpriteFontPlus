@@ -129,10 +129,21 @@ namespace SpriteFontPlus
 
 		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color color)
 		{
+			return DrawString(new SpriteBatchGlyphRenderer(batch), text, pos, color);
+		}
+		
+		public float DrawString(IGlyphRenderer batch, string text, Vector2 pos, Color color)
+		{
 			return DrawString(batch, text, pos, color, Vector2.One);
 		}
 
-		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color color, Vector2 scale, float depth = 0f)
+		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color color, Vector2 scale,
+			float depth = 0f)
+		{
+			return DrawString(new SpriteBatchGlyphRenderer(batch), text, pos, color, scale, depth);
+		}
+		
+		public float DrawString(IGlyphRenderer batch, string text, Vector2 pos, Color color, Vector2 scale, float depth = 0f)
 		{
 			_fontSystem.Scale = scale;
 
@@ -145,10 +156,21 @@ namespace SpriteFontPlus
 
 		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color[] glyphColors)
 		{
+			return DrawString(new SpriteBatchGlyphRenderer(batch), text, pos, glyphColors);
+		}
+		
+		public float DrawString(IGlyphRenderer batch, string text, Vector2 pos, Color[] glyphColors)
+		{
 			return DrawString(batch, text, pos, glyphColors, Vector2.One);
 		}
 
-		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color[] glyphColors, Vector2 scale, float depth = 0f)
+		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color[] glyphColors, Vector2 scale,
+			float depth = 0f)
+		{
+			return DrawString(new SpriteBatchGlyphRenderer(batch), text, pos, glyphColors, scale, depth);
+		}
+		
+		public float DrawString(IGlyphRenderer batch, string text, Vector2 pos, Color[] glyphColors, Vector2 scale, float depth = 0f)
 		{
 			_fontSystem.Scale = scale;
 
@@ -161,10 +183,21 @@ namespace SpriteFontPlus
 
 		public float DrawString(SpriteBatch batch, StringBuilder text, Vector2 pos, Color color)
 		{
+			return DrawString(new SpriteBatchGlyphRenderer(batch), text, pos, color);
+		}
+		
+		public float DrawString(IGlyphRenderer batch, StringBuilder text, Vector2 pos, Color color)
+		{
 			return DrawString(batch, text, pos, color, Vector2.One);
 		}
 
-		public float DrawString(SpriteBatch batch, StringBuilder text, Vector2 pos, Color color, Vector2 scale, float depth = 0f)
+		public float DrawString(SpriteBatch batch, StringBuilder text, Vector2 pos, Color color, Vector2 scale,
+			float depth = 0f)
+		{
+			return DrawString(new SpriteBatchGlyphRenderer(batch), text, pos, color, scale, depth);
+		}
+		
+		public float DrawString(IGlyphRenderer batch, StringBuilder text, Vector2 pos, Color color, Vector2 scale, float depth = 0f)
 		{
 			_fontSystem.Scale = scale;
 
@@ -177,10 +210,21 @@ namespace SpriteFontPlus
 
 		public float DrawString(SpriteBatch batch, StringBuilder text, Vector2 pos, Color[] glyphColors)
 		{
+			return DrawString(new SpriteBatchGlyphRenderer(batch), text, pos, glyphColors);
+		}
+		
+		public float DrawString(IGlyphRenderer batch, StringBuilder text, Vector2 pos, Color[] glyphColors)
+		{
 			return DrawString(batch, text, pos, glyphColors, Vector2.One);
 		}
 
-		public float DrawString(SpriteBatch batch, StringBuilder text, Vector2 pos, Color[] glyphColors, Vector2 scale, float depth = 0f)
+		public float DrawString(SpriteBatch batch, StringBuilder text, Vector2 pos, Color[] glyphColors,
+			Vector2 scale, float depth = 0f)
+		{
+			return DrawString(new SpriteBatchGlyphRenderer(batch), text, pos, glyphColors, scale, depth);
+		}
+		
+		public float DrawString(IGlyphRenderer batch, StringBuilder text, Vector2 pos, Color[] glyphColors, Vector2 scale, float depth = 0f)
 		{
 			_fontSystem.Scale = scale;
 

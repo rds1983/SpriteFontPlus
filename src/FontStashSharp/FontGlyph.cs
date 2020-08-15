@@ -1,11 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
-using System.Collections.Generic;
 
 namespace FontStashSharp
 {
 	class FontGlyph
 	{
-		private readonly Dictionary<int, int> _kernings = new Dictionary<int, int>();
+		private readonly Int32Map<int> _kernings = new Int32Map<int>();
 
 		public Font Font;
 		public FontAtlas Atlas;

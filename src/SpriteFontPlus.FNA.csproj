@@ -10,7 +10,7 @@
     <AssemblyName>SpriteFontPlus</AssemblyName>
     <RootNamespace>SpriteFontPlus</RootNamespace>
     <Version>1.0.0.0</Version>
-    <DefineConstants>$(DefineConstants);STBSHARP_INTERNAL;FNA</DefineConstants>
+    <DefineConstants>$(DefineConstants);STBSHARP_INTERNAL;FNA;TEXTURESETDATAEXT;PREMULTIPLIEDALPHA</DefineConstants>
     <OutputPath>bin\FNA\$(Configuration)</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>

@@ -56,7 +56,7 @@ namespace FontStashSharp
 			return stbtt_FindGlyphIndex(_font, codepoint);
 		}
 
-		public void BuildGlyphBitmap(int glyph, float size, float scale, ref int advance, ref int lsb, ref int x0, ref int y0, ref int x1, ref int y1)
+		public void BuildGlyphBitmap(int glyph, float scale, ref int advance, ref int lsb, ref int x0, ref int y0, ref int x1, ref int y1)
 		{
 			int advanceTemp, lsbTemp;
 			stbtt_GetGlyphHMetrics(_font, glyph, &advanceTemp, &lsbTemp);
@@ -71,12 +71,9 @@ namespace FontStashSharp
 			y1 = y1Temp;
 		}
 
-		public void RenderGlyphBitmap(byte[] output, int outWidth, int outHeight, int outStride, int glyph)
+		public void RenderGlyphBitmap(byte *output, int outWidth, int outHeight, int outStride, int glyph)
 		{
-			fixed (byte* outputPtr = output)
-			{
-				stbtt_MakeGlyphBitmap(_font, outputPtr, outWidth, outHeight, outStride, Scale, Scale, glyph);
-			}
+			stbtt_MakeGlyphBitmap(_font, output, outWidth, outHeight, outStride, Scale, Scale, glyph);
 		}
 
 		public static Font FromMemory(byte[] data)

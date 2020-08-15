@@ -10,11 +10,11 @@ using System.Text;
 
 namespace SpriteFontPlus
 {
-	public class DynamicSpriteFont
+	public class DynamicSpriteFont : IDisposable
 	{
 		internal struct TextureEnumerator : IEnumerable<Texture2D>
 		{
-			private readonly FontSystem _font;
+			readonly FontSystem _font;
 
 			public TextureEnumerator(FontSystem font)
 			{
@@ -35,7 +35,7 @@ namespace SpriteFontPlus
 			}
 		}
 
-		private readonly FontSystem _fontSystem;
+		readonly FontSystem _fontSystem;
 
 		public IEnumerable<Texture2D> Textures
 		{
@@ -44,87 +44,50 @@ namespace SpriteFontPlus
 
 		public int Size
 		{
-			get
-			{
-				return _fontSystem.FontSize;
-			}
-			set
-			{
-				_fontSystem.FontSize = value;
-			}
+			get { return _fontSystem.FontSize; }
+			set { _fontSystem.FontSize = value; }
 		}
 
 		public float Spacing
 		{
-			get
-			{
-				return _fontSystem.Spacing;
-			}
-			set
-			{
-				_fontSystem.Spacing = value;
-			}
-		}
-
-		public float LineSpacing
-		{
-			get
-			{
-				return _fontSystem.LineSpacing;
-			}
-			set
-			{
-				_fontSystem.LineSpacing = value;
-			}
+			get { return _fontSystem.Spacing; }
+			set { _fontSystem.Spacing = value; }
 		}
 
 		public bool UseKernings
 		{
-			get
-			{
-				return _fontSystem.UseKernings;
-			}
+			get { return _fontSystem.UseKernings; }
 
-			set
-			{
-				_fontSystem.UseKernings = value;
-			}
+			set { _fontSystem.UseKernings = value; }
 		}
 
 		public int? DefaultCharacter
 		{
-			get
-			{
-				return _fontSystem.DefaultCharacter;
-			}
+			get { return _fontSystem.DefaultCharacter; }
 
-			set
-			{
-				_fontSystem.DefaultCharacter = value;
-			}
+			set { _fontSystem.DefaultCharacter = value; }
 		}
 
 		public event EventHandler CurrentAtlasFull
 		{
-			add
-			{
-				_fontSystem.CurrentAtlasFull += value;
-			}
+			add { _fontSystem.CurrentAtlasFull += value; }
 
-			remove
-			{
-				_fontSystem.CurrentAtlasFull -= value;
-			}
+			remove { _fontSystem.CurrentAtlasFull -= value; }
 		}
 
-		private DynamicSpriteFont(byte[] ttf, int defaultSize, int textureWidth, int textureHeight, int blur)
+		DynamicSpriteFont(byte[] ttf, int defaultSize, int textureWidth, int textureHeight, int blur, int stroke)
 		{
-			_fontSystem = new FontSystem(textureWidth, textureHeight, blur)
+			_fontSystem = new FontSystem(textureWidth, textureHeight, blur, stroke)
 			{
 				FontSize = defaultSize
 			};
 
 			_fontSystem.AddFontMem(ttf);
+		}
+
+		public void Dispose()
+		{
+			_fontSystem?.Dispose();
 		}
 
 		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color color)
@@ -233,11 +196,13 @@ namespace SpriteFontPlus
 			return new Rectangle((int)bounds.X, (int)bounds.Y, (int)(bounds.X2 - bounds.X), (int)(bounds.Y2 - bounds.Y));
 		}
 
-		public List<Rectangle> GetGlyphRects(Vector2 position, string text){
+		public List<Rectangle> GetGlyphRects(Vector2 position, string text)
+		{
 			return _fontSystem.GetGlyphRects(position.X, position.Y, text);
 		}
 
-		public List<Rectangle> GetGlyphRects(Vector2 position, StringBuilder text){
+		public List<Rectangle> GetGlyphRects(Vector2 position, StringBuilder text)
+		{
 			return _fontSystem.GetGlyphRects(position.X, position.Y, text);
 		}
 
@@ -251,14 +216,14 @@ namespace SpriteFontPlus
 			_fontSystem.Reset();
 		}
 
-		public static DynamicSpriteFont FromTtf(byte[] ttf, int defaultSize, int textureWidth = 1024, int textureHeight = 1024, int blur = 0)
+		public static DynamicSpriteFont FromTtf(byte[] ttf, int defaultSize, int textureWidth = 1024, int textureHeight = 1024, int blur = 0, int stroke = 0)
 		{
-			return new DynamicSpriteFont(ttf, defaultSize, textureWidth, textureHeight, blur);
+			return new DynamicSpriteFont(ttf, defaultSize, textureWidth, textureHeight, blur, stroke);
 		}
 
-		public static DynamicSpriteFont FromTtf(Stream ttfStream, int defaultSize, int textureWidth = 1024, int textureHeight = 1024, int blur = 0)
+		public static DynamicSpriteFont FromTtf(Stream ttfStream, int defaultSize, int textureWidth = 1024, int textureHeight = 1024, int blur = 0, int stroke = 0)
 		{
-			return FromTtf(ttfStream.ToByteArray(), defaultSize, textureWidth, textureHeight, blur);
+			return FromTtf(ttfStream.ToByteArray(), defaultSize, textureWidth, textureHeight, blur, stroke);
 		}
 	}
 }

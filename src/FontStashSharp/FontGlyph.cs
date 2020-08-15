@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FontStashSharp
 {
-	internal class FontGlyph
+	class FontGlyph
 	{
 		private readonly Dictionary<int, int> _kernings = new Dictionary<int, int>();
 
@@ -16,6 +16,11 @@ namespace FontStashSharp
 		public int XAdvance;
 		public int XOffset;
 		public int YOffset;
+
+		public static int PadFromBlur(int blur)
+		{
+			return blur + 2;
+		}
 
 		public bool IsEmpty
 		{

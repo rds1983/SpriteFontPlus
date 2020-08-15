@@ -3,7 +3,7 @@
 namespace FontStashSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal struct FontGlyphSquad
+	struct FontGlyphSquad
 	{
 		public float X0;
 		public float Y0;

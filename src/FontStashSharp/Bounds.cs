@@ -1,6 +1,6 @@
 ﻿namespace FontStashSharp
 {
-	internal struct Bounds
+	struct Bounds
 	{
 		public float X, Y, X2, Y2;
 	}

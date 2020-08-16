@@ -516,6 +516,8 @@ namespace FontStashSharp
 				prevGlyph = glyph;
 			}
 
+			maxx += StrokeAmount * 2;
+
 			float advance = x - startx;
 			bounds.X = minx;
 			bounds.Y = miny;
@@ -573,6 +575,8 @@ namespace FontStashSharp
 
 				prevGlyph = glyph;
 			}
+
+			maxx += StrokeAmount * 2;
 
 			float advance = x - startx;
 			bounds.X = minx;

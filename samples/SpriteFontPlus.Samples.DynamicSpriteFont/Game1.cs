@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Xna.Framework;
@@ -12,12 +13,16 @@ namespace SpriteFontPlus.Samples.TtfBaking
 	/// </summary>
 	public class Game1 : Game
 	{
+		private const int EffectAmount = 2;
+
 		GraphicsDeviceManager _graphics;
 		SpriteBatch _spriteBatch;
-		private DynamicSpriteFont _font, _blurryFont, _strokeFont;
+		private DynamicSpriteFont _font;
+		private DynamicSpriteFont[] _fonts;
+
 		private Texture2D _white;
 		private bool _drawBackground = false;
-		private bool _wasSpaceDown, _wasEnterDown;
+
 		private static readonly Color[] _colors = new Color[]
 		{
 			Color.Red,
@@ -57,19 +62,32 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			// Create a new SpriteBatch, which can be used to draw textures.
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 
+			var fonts = new List<DynamicSpriteFont>();
 			// TODO: use this.Content to load your game content here
 			using (var stream = File.OpenRead(@"Fonts/DroidSans.ttf"))
 			{
-				_font = DynamicSpriteFont.FromTtf(stream, 20);
-				_blurryFont = DynamicSpriteFont.FromTtf(stream, 30, 1024, 1024, 1);
-				_strokeFont = DynamicSpriteFont.FromTtf(stream, 30, 1024, 1024, 0, 1);
+				// Simple font
+				fonts.Add(DynamicSpriteFont.FromTtf(stream, 20));
+
+				// Blurry font
+				fonts.Add(DynamicSpriteFont.FromTtf(stream, 30, 1024, 1024, EffectAmount));
+
+				// Stroked font
+				fonts.Add(DynamicSpriteFont.FromTtf(stream, 30, 1024, 1024, 0, EffectAmount));
 			}
 
-			_font.AddTtf(File.ReadAllBytes(@"Fonts/DroidSansJapanese.ttf"));
-			using (var stream = File.OpenRead(@"Fonts/Symbola-Emoji.ttf"))
+			foreach (var font in fonts)
 			{
-				_font.AddTtf(stream);
+				font.AddTtf(File.ReadAllBytes(@"Fonts/DroidSansJapanese.ttf"));
+				using (var stream = File.OpenRead(@"Fonts/Symbola-Emoji.ttf"))
+				{
+					font.AddTtf(stream);
+				}
 			}
+
+			_fonts = fonts.ToArray();
+			_font = _fonts[0];
+
 
 			_white = new Texture2D(GraphicsDevice, 1, 1);
 			_white.SetData(new[] { Color.White });
@@ -81,26 +99,44 @@ namespace SpriteFontPlus.Samples.TtfBaking
 		{
 			base.Update(gameTime);
 
-			var state = Keyboard.GetState();
+			KeyboardUtils.Begin();
 
-			var isSpaceDown = state.IsKeyDown(Keys.Space);
-			if (isSpaceDown && !_wasSpaceDown)
+			if (KeyboardUtils.IsPressed(Keys.Space))
 			{
 				_drawBackground = !_drawBackground;
 			}
 
-			_wasSpaceDown = isSpaceDown;
+			if (KeyboardUtils.IsPressed(Keys.Tab))
+			{
+				var i = 0;
 
-			var isEnterDown = state.IsKeyDown(Keys.Enter);
-			if (isEnterDown && !_wasEnterDown)
+				for(; i < _fonts.Length; ++i)
+				{
+					if (_font == _fonts[i])
+					{
+						break;
+					}
+				}
+
+				++i;
+				if (i >= _fonts.Length)
+				{
+					i = 0;
+				}
+
+				_font = _fonts[i];
+			}
+
+			if (KeyboardUtils.IsPressed(Keys.Enter))
 			{
 				_font.UseKernings = !_font.UseKernings;
+
 			}
 
-			_wasEnterDown = isEnterDown;
+			KeyboardUtils.End();
 		}
 
-		private void DrawString(DynamicSpriteFont font, string text, int y, Color[] glyphColors)
+		private void DrawString(string text, int y, Color[] glyphColors)
 		{
 			if (_drawBackground)
 			{
@@ -108,10 +144,10 @@ namespace SpriteFontPlus.Samples.TtfBaking
 				_spriteBatch.Draw(_white, new Rectangle(0, y, (int)size.X, (int)size.Y), Color.Green);
 			}
 
-			_spriteBatch.DrawString(font, text, new Vector2(0, y), glyphColors);
+			_spriteBatch.DrawString(_font, text, new Vector2(0, y), glyphColors);
 		}
 
-		private void DrawString(DynamicSpriteFont font, string text, int y, Color color)
+		private void DrawString(string text, int y, Color color)
 		{
 			if (_drawBackground)
 			{
@@ -119,12 +155,12 @@ namespace SpriteFontPlus.Samples.TtfBaking
 				_spriteBatch.Draw(_white, new Rectangle(0, y, (int)size.X, (int)size.Y), Color.Green);
 			}
 
-			_spriteBatch.DrawString(font, text, new Vector2(0, y), color);
+			_spriteBatch.DrawString(_font, text, new Vector2(0, y), color);
 		}
 
-		private void DrawString(DynamicSpriteFont font, string text, int y)
+		private void DrawString(string text, int y)
 		{
-			DrawString(font, text, y, Color.White);
+			DrawString(text, y, Color.White);
 		}
 
 		/// <summary>
@@ -140,20 +176,15 @@ namespace SpriteFontPlus.Samples.TtfBaking
 
 			// Render some text
 			_font.Size = 18;
-			DrawString(_font, "The quick いろは brown\nfox にほへ jumps over\nt🙌h📦e l👏a👏zy dog adfasoqiw yraldh ald halwdha ldjahw dlawe havbx get872rq", 0);
+			DrawString("The quick いろは brown\nfox にほへ jumps over\nt🙌h📦e l👏a👏zy dog adfasoqiw yraldh ald halwdha ldjahw dlawe havbx get872rq", 0);
 
 			_font.Size = 30;
-			DrawString(_font, "The quick いろは brown\nfox にほへ jumps over\nt🙌h📦e l👏a👏zy dog", 80, Color.Bisque);
+			DrawString("The quick いろは brown\nfox にほへ jumps over\nt🙌h📦e l👏a👏zy dog", 80, Color.Bisque);
 
-			DrawString(_font, "Colored Text", 200, _colors);
-
-			DrawString(_blurryFont, "Blurry 'The quick brown fox jumps over the lazy dog'", 250, Color.DarkOliveGreen);
-
-			DrawString(_strokeFont, "Stroke 'The quick brown fox jumps over the lazy dog'", 300, Color.Gold);
+			DrawString("Colored Text", 200, _colors);
 
 			_font.Size = 26;
-			DrawString(_font, "Texture:", 380);
-			
+			DrawString("Texture:", 380);
 			
 			var texture = _font.Textures.First();
 			_spriteBatch.Draw(texture, new Vector2(0, 410), Color.White);

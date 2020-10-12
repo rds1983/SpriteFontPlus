@@ -16,11 +16,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\deps\StbTrueTypeSharp\src\**\*.cs" LinkBase="StbTrueTypeSharp" />
-    <Compile Include="..\deps\BMFontToSpriteFont\**\*.cs" LinkBase="BMFontToSpriteFont" />
+    <ProjectReference Include="..\..\FNA\FNA.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\FNA\FNA.Core.csproj" />
+    <Compile Include="..\deps\FontStashSharp\deps\StbTrueTypeSharp\src\**\*.cs" LinkBase="StbTrueTypeSharp" />
+    <Compile Include="..\deps\FontStashSharp\src\FontStashSharp\**\*.cs" LinkBase="FontStashSharp" />
+    <Compile Remove="..\deps\FontStashSharp\src\FontStashSharp\obj\**\*.cs" LinkBase="FontStashSharp" />
+    <Compile Include="..\deps\FontStashSharp\src\FontStashSharp.StbTrueTypeSharp\**\*.cs" LinkBase="FontStashSharp.StbTrueTypeSharp" />
+    <Compile Remove="..\deps\FontStashSharp\src\FontStashSharp.StbTrueTypeSharp\obj\**\*.cs" LinkBase="FontStashSharp.StbTrueTypeSharp" />
+    <Compile Include="..\deps\BMFontToSpriteFont\**\*.cs" LinkBase="BMFontToSpriteFont" />
   </ItemGroup>
 </Project>

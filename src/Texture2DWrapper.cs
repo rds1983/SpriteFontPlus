@@ -30,7 +30,11 @@ namespace SpriteFontPlus
 
 		public void SetData(Rectangle bounds, byte[] data)
 		{
+#if MONOGAME
 			Texture.SetData(0, 0, bounds, data, 0, bounds.Width * bounds.Height * 4);
+#elif FNA
+			Texture.SetData(0, bounds, data, 0, bounds.Width * bounds.Height * 4);
+#endif
 		}
 	}
 }

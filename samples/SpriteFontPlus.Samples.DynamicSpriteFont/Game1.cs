@@ -53,6 +53,15 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			Window.AllowUserResizing = true;
 		}
 
+		private DynamicSpriteFont LoadFont(int blurAmount, int strokeAmount)
+		{
+			var result = DynamicSpriteFont.FromTtf(GraphicsDevice, File.ReadAllBytes(@"Fonts/DroidSans.ttf"), 20, 1024, 1024, blurAmount, strokeAmount);
+			result.AddTtf(File.ReadAllBytes(@"Fonts/DroidSansJapanese.ttf"));
+			result.AddTtf(File.ReadAllBytes(@"Fonts/Symbola-Emoji.ttf"));
+
+			return result;
+		}
+
 		/// <summary>
 		/// LoadContent will be called once per game and is the place to load
 		/// all of your content.
@@ -62,28 +71,17 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			// Create a new SpriteBatch, which can be used to draw textures.
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 
-			var fonts = new List<DynamicSpriteFont>();
 			// TODO: use this.Content to load your game content here
-			using (var stream = File.OpenRead(@"Fonts/DroidSans.ttf"))
-			{
-				// Simple font
-				fonts.Add(DynamicSpriteFont.FromTtf(stream, 20));
+			var fonts = new List<DynamicSpriteFont>();
 
-				// Blurry font
-				fonts.Add(DynamicSpriteFont.FromTtf(stream, 30, 1024, 1024, EffectAmount));
+			// Simple font
+			fonts.Add(LoadFont(0, 0));
 
-				// Stroked font
-				fonts.Add(DynamicSpriteFont.FromTtf(stream, 30, 1024, 1024, 0, EffectAmount));
-			}
+			// Blurry font
+			fonts.Add(LoadFont(EffectAmount, 0));
 
-			foreach (var font in fonts)
-			{
-				font.AddTtf(File.ReadAllBytes(@"Fonts/DroidSansJapanese.ttf"));
-				using (var stream = File.OpenRead(@"Fonts/Symbola-Emoji.ttf"))
-				{
-					font.AddTtf(stream);
-				}
-			}
+			// Stroked font
+			fonts.Add(LoadFont(0, EffectAmount));
 
 			_fonts = fonts.ToArray();
 			_font = _fonts[0];
@@ -175,15 +173,15 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			_spriteBatch.Begin();
 
 			// Render some text
-			_font.Size = 18;
+			_font.FontSize = 18;
 			DrawString("The quick いろは brown\nfox にほへ jumps over\nt🙌h📦e l👏a👏zy dog adfasoqiw yraldh ald halwdha ldjahw dlawe havbx get872rq", 0);
 
-			_font.Size = 30;
+			_font.FontSize = 30;
 			DrawString("The quick いろは brown\nfox にほへ jumps over\nt🙌h📦e l👏a👏zy dog", 80, Color.Bisque);
 
 			DrawString("Colored Text", 200, _colors);
 
-			_font.Size = 26;
+			_font.FontSize = 26;
 			DrawString("Texture:", 380);
 			
 			var texture = _font.Textures.First();

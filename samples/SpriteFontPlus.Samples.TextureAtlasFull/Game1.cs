@@ -43,7 +43,7 @@ namespace SpriteFontPlus.Samples.TextureAtlasFull
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 
 			// TODO: use this.Content to load your game content here
-			_font = DynamicSpriteFont.FromTtf(File.ReadAllBytes(@"Fonts/DroidSans.ttf"), 20, AtlasSize, AtlasSize);
+			_font = DynamicSpriteFont.FromTtf(GraphicsDevice, File.ReadAllBytes(@"Fonts/DroidSans.ttf"), 20, AtlasSize, AtlasSize);
 
 			_white = new Texture2D(GraphicsDevice, 1, 1);
 			_white.SetData(new[] { Color.White });
@@ -64,7 +64,7 @@ namespace SpriteFontPlus.Samples.TextureAtlasFull
 
 			var c = (char)_random.Next(32, 100);
 
-			_font.Size = _random.Next(20, 40);
+			_font.FontSize = _random.Next(20, 40);
 			_spriteBatch.DrawString(_font, c.ToString(), Vector2.Zero, Color.White);
 
 			var count = 0;

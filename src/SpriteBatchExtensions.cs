@@ -6,44 +6,24 @@ namespace SpriteFontPlus
 {
 	public static class SpriteBatchExtensions
 	{
-		public static float DrawString(this SpriteBatch batch, DynamicSpriteFont font, string text, Vector2 pos, Color color)
+		public static float DrawString(this SpriteBatch batch, DynamicSpriteFont font, string text, Vector2 pos, Color color, float depth = 0.0f)
 		{
-			return font.DrawString(batch, text, pos, color);
+			return font.DrawString(batch, text, pos, color, depth);
 		}
 
-		public static float DrawString(this SpriteBatch batch, DynamicSpriteFont font, string text, Vector2 pos, Color color, Vector2 scale)
+		public static float DrawString(this SpriteBatch batch, DynamicSpriteFont font, string text, Vector2 pos, Color[] glyphColors, float depth = 0.0f)
 		{
-			return font.DrawString(batch, text, pos, color, scale);
+			return font.DrawString(batch, text, pos, glyphColors, depth);
 		}
 
-		public static float DrawString(this SpriteBatch batch, DynamicSpriteFont font, string text, Vector2 pos, Color[] glyphColors)
+		public static float DrawString(this SpriteBatch batch, DynamicSpriteFont font, StringBuilder text, Vector2 pos, Color color, float depth = 0.0f)
 		{
-			return font.DrawString(batch, text, pos, glyphColors);
+			return font.DrawString(batch, text, pos, color, depth);
 		}
 
-		public static float DrawString(this SpriteBatch batch, DynamicSpriteFont font, string text, Vector2 pos, Color[] glyphColors, Vector2 scale)
+		public static float DrawString(this SpriteBatch batch, DynamicSpriteFont font, StringBuilder text, Vector2 pos, Color[] glyphColors, float depth = 0.0f)
 		{
-			return font.DrawString(batch, text, pos, glyphColors, scale);
-		}
-
-		public static float DrawString(this SpriteBatch batch, DynamicSpriteFont font, StringBuilder text, Vector2 pos, Color color)
-		{
-			return font.DrawString(batch, text, pos, color);
-		}
-
-		public static float DrawString(this SpriteBatch batch, DynamicSpriteFont font, StringBuilder text, Vector2 pos, Color color, Vector2 scale)
-		{
-			return font.DrawString(batch, text, pos, color, scale);
-		}
-
-		public static float DrawString(this SpriteBatch batch, DynamicSpriteFont font, StringBuilder text, Vector2 pos, Color[] glyphColors)
-		{
-			return font.DrawString(batch, text, pos, glyphColors);
-		}
-
-		public static float DrawString(this SpriteBatch batch, DynamicSpriteFont font, StringBuilder text, Vector2 pos, Color[] glyphColors, Vector2 scale)
-		{
-			return font.DrawString(batch, text, pos, glyphColors, scale);
+			return font.DrawString(batch, text, pos, glyphColors, depth);
 		}
 	}
 }

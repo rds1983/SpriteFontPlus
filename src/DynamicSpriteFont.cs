@@ -1,4 +1,5 @@
 using FontStashSharp;
+using FontStashSharp.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SpriteFontPlus.Utility;
@@ -25,7 +26,8 @@ namespace SpriteFontPlus
 			{
 				foreach (var atlas in _font.Atlases)
 				{
-					yield return atlas.Texture;
+					var Texture2DWrapper = (Texture2DWrapper)atlas.Texture;
+					yield return Texture2DWrapper.Texture;
 				}
 			}
 
@@ -42,16 +44,22 @@ namespace SpriteFontPlus
 			get { return new TextureEnumerator(_fontSystem); }
 		}
 
-		public int Size
+		public int FontSize
 		{
 			get { return _fontSystem.FontSize; }
 			set { _fontSystem.FontSize = value; }
 		}
 
-		public float Spacing
+		public float CharacterSpacing
 		{
-			get { return _fontSystem.Spacing; }
-			set { _fontSystem.Spacing = value; }
+			get { return _fontSystem.CharacterSpacing; }
+			set { _fontSystem.CharacterSpacing = value; }
+		}
+
+		public Vector2 Scale
+		{
+			get { return _fontSystem.Scale; }
+			set { _fontSystem.Scale = value; }
 		}
 
 		public bool UseKernings
@@ -75,9 +83,11 @@ namespace SpriteFontPlus
 			remove { _fontSystem.CurrentAtlasFull -= value; }
 		}
 
-		DynamicSpriteFont(byte[] ttf, int defaultSize, int textureWidth, int textureHeight, int blur, int stroke)
+		DynamicSpriteFont(GraphicsDevice graphicsDevice, byte[] ttf, int defaultSize, int textureWidth, int textureHeight, int blur, int stroke)
 		{
-			_fontSystem = new FontSystem(textureWidth, textureHeight, blur, stroke)
+			var textureCreator = new Texture2DCreator(graphicsDevice);
+
+			_fontSystem = new FontSystem(StbTrueTypeSharpFontLoader.Instance, textureCreator, textureWidth, textureHeight, blur, stroke)
 			{
 				FontSize = defaultSize
 			};
@@ -90,68 +100,55 @@ namespace SpriteFontPlus
 			_fontSystem?.Dispose();
 		}
 
-		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color color)
+		public float DrawString(IFontStashRenderer renderer, string text, Vector2 pos, Color color, float depth = 0f)
 		{
-			return DrawString(batch, text, pos, color, Vector2.One);
+			return _fontSystem.DrawText(renderer, pos.X, pos.Y, text, color, depth);
 		}
 
-		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color color, Vector2 scale, float depth = 0f)
+		public float DrawString(IFontStashRenderer renderer, string text, Vector2 pos, Color[] glyphColors, float depth = 0f)
 		{
-			_fontSystem.Scale = scale;
-
-			var result = _fontSystem.DrawText(batch, pos.X, pos.Y, text, color, depth);
-
-			_fontSystem.Scale = Vector2.One;
-
-			return result;
+			return _fontSystem.DrawText(renderer, pos.X, pos.Y, text, glyphColors, depth);
 		}
 
-		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color[] glyphColors)
+		public float DrawString(IFontStashRenderer renderer, StringBuilder text, Vector2 pos, Color color, float depth = 0f)
 		{
-			return DrawString(batch, text, pos, glyphColors, Vector2.One);
+			return _fontSystem.DrawText(renderer, pos.X, pos.Y, text, color, depth);
 		}
 
-		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color[] glyphColors, Vector2 scale, float depth = 0f)
+		public float DrawString(IFontStashRenderer renderer, StringBuilder text, Vector2 pos, Color[] glyphColors, float depth = 0f)
 		{
-			_fontSystem.Scale = scale;
-
-			var result = _fontSystem.DrawText(batch, pos.X, pos.Y, text, glyphColors, depth);
-
-			_fontSystem.Scale = Vector2.One;
-
-			return result;
+			return _fontSystem.DrawText(renderer, pos.X, pos.Y, text, glyphColors, depth);
 		}
 
-		public float DrawString(SpriteBatch batch, StringBuilder text, Vector2 pos, Color color)
+		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color color, float depth = 0f)
 		{
-			return DrawString(batch, text, pos, color, Vector2.One);
+			var renderer = SpriteBatchRenderer.Instance;
+			renderer.Batch = batch;
+			return _fontSystem.DrawText(renderer, pos.X, pos.Y, text, color, depth);
 		}
 
-		public float DrawString(SpriteBatch batch, StringBuilder text, Vector2 pos, Color color, Vector2 scale, float depth = 0f)
+		public float DrawString(SpriteBatch batch, string text, Vector2 pos, Color[] glyphColors, float depth = 0f)
 		{
-			_fontSystem.Scale = scale;
+			var renderer = SpriteBatchRenderer.Instance;
+			renderer.Batch = batch;
 
-			var result = _fontSystem.DrawText(batch, pos.X, pos.Y, text, color, depth);
-
-			_fontSystem.Scale = Vector2.One;
-
-			return result;
+			return _fontSystem.DrawText(renderer, pos.X, pos.Y, text, glyphColors, depth);
 		}
 
-		public float DrawString(SpriteBatch batch, StringBuilder text, Vector2 pos, Color[] glyphColors)
+		public float DrawString(SpriteBatch batch, StringBuilder text, Vector2 pos, Color color, float depth = 0f)
 		{
-			return DrawString(batch, text, pos, glyphColors, Vector2.One);
+			var renderer = SpriteBatchRenderer.Instance;
+			renderer.Batch = batch;
+
+			return _fontSystem.DrawText(renderer, pos.X, pos.Y, text, color, depth);
 		}
 
-		public float DrawString(SpriteBatch batch, StringBuilder text, Vector2 pos, Color[] glyphColors, Vector2 scale, float depth = 0f)
+		public float DrawString(SpriteBatch batch, StringBuilder text, Vector2 pos, Color[] glyphColors, float depth = 0f)
 		{
-			_fontSystem.Scale = scale;
+			var renderer = SpriteBatchRenderer.Instance;
+			renderer.Batch = batch;
 
-			var result = _fontSystem.DrawText(batch, pos.X, pos.Y, text, glyphColors, depth);
-
-			_fontSystem.Scale = Vector2.One;
-
-			return result;
+			return _fontSystem.DrawText(renderer, pos.X, pos.Y, text, glyphColors, depth);
 		}
 
 		public void AddTtf(byte[] ttf)
@@ -216,14 +213,14 @@ namespace SpriteFontPlus
 			_fontSystem.Reset();
 		}
 
-		public static DynamicSpriteFont FromTtf(byte[] ttf, int defaultSize, int textureWidth = 1024, int textureHeight = 1024, int blur = 0, int stroke = 0)
+		public static DynamicSpriteFont FromTtf(GraphicsDevice graphicsDevice, byte[] ttf, int defaultSize, int textureWidth = 1024, int textureHeight = 1024, int blur = 0, int stroke = 0)
 		{
-			return new DynamicSpriteFont(ttf, defaultSize, textureWidth, textureHeight, blur, stroke);
+			return new DynamicSpriteFont(graphicsDevice, ttf, defaultSize, textureWidth, textureHeight, blur, stroke);
 		}
 
-		public static DynamicSpriteFont FromTtf(Stream ttfStream, int defaultSize, int textureWidth = 1024, int textureHeight = 1024, int blur = 0, int stroke = 0)
+		public static DynamicSpriteFont FromTtf(GraphicsDevice graphicsDevice, Stream ttfStream, int defaultSize, int textureWidth = 1024, int textureHeight = 1024, int blur = 0, int stroke = 0)
 		{
-			return FromTtf(ttfStream.ToByteArray(), defaultSize, textureWidth, textureHeight, blur, stroke);
+			return FromTtf(graphicsDevice, ttfStream.ToByteArray(), defaultSize, textureWidth, textureHeight, blur, stroke);
 		}
 	}
 }

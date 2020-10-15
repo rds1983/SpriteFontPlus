@@ -6,19 +6,16 @@
     <TargetFramework>net45</TargetFramework>
     <OutputPath>bin\FNA\$(Configuration)</OutputPath>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <ProjectReference Include="..\..\src\SpriteFontPlus.FNA.csproj" />
-  </ItemGroup>  
+  </ItemGroup>
 
   <ItemGroup>
     <None Update="Fonts\DroidSans.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Fonts\DroidSansJapanese.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Fonts\Symbola-Emoji.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>  

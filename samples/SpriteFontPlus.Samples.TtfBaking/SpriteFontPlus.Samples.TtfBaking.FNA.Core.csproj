@@ -4,19 +4,18 @@
     <ApplicationIcon />
     <StartupObject />
     <TargetFramework>net45</TargetFramework>
-    <OutputPath>bin\MonoGame\$(Configuration)</OutputPath>
+    <OutputPath>bin\FNA.Core\$(Configuration)</OutputPath>
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.7.1.189" />
+    <ProjectReference Include="..\..\src\SpriteFontPlus.FNA.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\SpriteFontPlus.MonoGame.csproj" />
-  </ItemGroup>  
-
-  <ItemGroup>
     <None Update="Fonts\DroidSans.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Fonts\DroidSansJapanese.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>  

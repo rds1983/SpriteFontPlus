@@ -1,8 +1,8 @@
 ﻿using System.IO;
 
-namespace SpriteFontPlus.Utility
+namespace SpriteFontPlus
 {
-	internal static class IOUtils
+	internal static class Utility
 	{
 		public static byte[] ToByteArray(this Stream stream)
 		{

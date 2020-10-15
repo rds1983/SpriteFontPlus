@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2036
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30517.126
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus.FNA", "..\src\SpriteFontPlus.FNA.csproj", "{DF883148-8D7E-4F59-9BE1-B1F07F99594B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{8ED83526-FD30-4BA1-90C4-8CE29F53E5FB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus.Samples.DynamicSpriteFont.FNA", "..\samples\SpriteFontPlus.Samples.DynamicSpriteFont\SpriteFontPlus.Samples.DynamicSpriteFont.FNA.csproj", "{47236E0A-F042-4CA1-BCAA-E809B3DC28DB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FNA", "..\..\FNA\FNA.csproj", "{35253CE1-C864-4CD3-8249-4D1319748E8F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus.Samples.TtfBaking.FNA", "..\samples\SpriteFontPlus.Samples.TtfBaking\SpriteFontPlus.Samples.TtfBaking.FNA.csproj", "{B0FA1493-7159-4B13-9E2B-9886765D4047}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,20 +21,20 @@ Global
 		{DF883148-8D7E-4F59-9BE1-B1F07F99594B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF883148-8D7E-4F59-9BE1-B1F07F99594B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF883148-8D7E-4F59-9BE1-B1F07F99594B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{47236E0A-F042-4CA1-BCAA-E809B3DC28DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{47236E0A-F042-4CA1-BCAA-E809B3DC28DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{47236E0A-F042-4CA1-BCAA-E809B3DC28DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{47236E0A-F042-4CA1-BCAA-E809B3DC28DB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{35253CE1-C864-4CD3-8249-4D1319748E8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{35253CE1-C864-4CD3-8249-4D1319748E8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{35253CE1-C864-4CD3-8249-4D1319748E8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{35253CE1-C864-4CD3-8249-4D1319748E8F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0FA1493-7159-4B13-9E2B-9886765D4047}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0FA1493-7159-4B13-9E2B-9886765D4047}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0FA1493-7159-4B13-9E2B-9886765D4047}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0FA1493-7159-4B13-9E2B-9886765D4047}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{47236E0A-F042-4CA1-BCAA-E809B3DC28DB} = {8ED83526-FD30-4BA1-90C4-8CE29F53E5FB}
+		{B0FA1493-7159-4B13-9E2B-9886765D4047} = {8ED83526-FD30-4BA1-90C4-8CE29F53E5FB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A9C9D369-EE58-4E9D-B9FE-63023B644741}

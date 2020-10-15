@@ -1,5 +1,4 @@
-﻿using SpriteFontPlus.Utility;
-using StbTrueTypeSharp;
+﻿using StbTrueTypeSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;

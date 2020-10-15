@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FNA.Core", "..\..\FNA\FNA.C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus.FNA.Core", "..\src\SpriteFontPlus.FNA.Core.csproj", "{ADFFC5CC-3695-4353-B0A8-88BF1DD1D714}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus.Samples.DynamicSpriteFont.FNA.Core", "..\samples\SpriteFontPlus.Samples.DynamicSpriteFont\SpriteFontPlus.Samples.DynamicSpriteFont.FNA.Core.csproj", "{B00B78C4-145D-4D3F-B90E-ABDB9C158A7F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteFontPlus.Samples.TtfBaking.FNA.Core", "..\samples\SpriteFontPlus.Samples.TtfBaking\SpriteFontPlus.Samples.TtfBaking.FNA.Core.csproj", "{C1A51A7A-97A5-4044-8E8E-4CF368E45B44}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,20 +33,20 @@ Global
 		{ADFFC5CC-3695-4353-B0A8-88BF1DD1D714}.Release|Any CPU.Build.0 = Release|Any CPU
 		{ADFFC5CC-3695-4353-B0A8-88BF1DD1D714}.Release|x64.ActiveCfg = Release|Any CPU
 		{ADFFC5CC-3695-4353-B0A8-88BF1DD1D714}.Release|x64.Build.0 = Release|Any CPU
-		{B00B78C4-145D-4D3F-B90E-ABDB9C158A7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B00B78C4-145D-4D3F-B90E-ABDB9C158A7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B00B78C4-145D-4D3F-B90E-ABDB9C158A7F}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{B00B78C4-145D-4D3F-B90E-ABDB9C158A7F}.Debug|x64.Build.0 = Debug|Any CPU
-		{B00B78C4-145D-4D3F-B90E-ABDB9C158A7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B00B78C4-145D-4D3F-B90E-ABDB9C158A7F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B00B78C4-145D-4D3F-B90E-ABDB9C158A7F}.Release|x64.ActiveCfg = Release|Any CPU
-		{B00B78C4-145D-4D3F-B90E-ABDB9C158A7F}.Release|x64.Build.0 = Release|Any CPU
+		{C1A51A7A-97A5-4044-8E8E-4CF368E45B44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1A51A7A-97A5-4044-8E8E-4CF368E45B44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1A51A7A-97A5-4044-8E8E-4CF368E45B44}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C1A51A7A-97A5-4044-8E8E-4CF368E45B44}.Debug|x64.Build.0 = Debug|Any CPU
+		{C1A51A7A-97A5-4044-8E8E-4CF368E45B44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1A51A7A-97A5-4044-8E8E-4CF368E45B44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1A51A7A-97A5-4044-8E8E-4CF368E45B44}.Release|x64.ActiveCfg = Release|Any CPU
+		{C1A51A7A-97A5-4044-8E8E-4CF368E45B44}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{B00B78C4-145D-4D3F-B90E-ABDB9C158A7F} = {8ED83526-FD30-4BA1-90C4-8CE29F53E5FB}
+		{C1A51A7A-97A5-4044-8E8E-4CF368E45B44} = {8ED83526-FD30-4BA1-90C4-8CE29F53E5FB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A9C9D369-EE58-4E9D-B9FE-63023B644741}

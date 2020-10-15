@@ -1,3 +1,5 @@
+** Warning: ** DynamicSpriteFont class is being moved in the project https://github.com/rds1983/FontStashXNA
+
 # SpriteFontPlus
 [![NuGet](https://img.shields.io/nuget/v/SpriteFontPlus.svg)](https://www.nuget.org/packages/SpriteFontPlus/) [![Build status](https://ci.appveyor.com/api/projects/status/2mbacxymarcxq4we?svg=true)](https://ci.appveyor.com/project/RomanShapiro/spritefontplus) [![Chat](https://img.shields.io/discord/628186029488340992.svg)](https://discord.gg/ZeHxhCY)
 

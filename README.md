@@ -1,4 +1,4 @@
-**Warning:** DynamicSpriteFont is being moved in the project https://github.com/rds1983/FontStashXNA
+**Warning:** DynamicSpriteFont had been moved to the project: https://github.com/rds1983/FontStashXNA
 
 # SpriteFontPlus
 [![NuGet](https://img.shields.io/nuget/v/SpriteFontPlus.svg)](https://www.nuget.org/packages/SpriteFontPlus/) [![Build status](https://ci.appveyor.com/api/projects/status/2mbacxymarcxq4we?svg=true)](https://ci.appveyor.com/project/RomanShapiro/spritefontplus) [![Chat](https://img.shields.io/discord/628186029488340992.svg)](https://discord.gg/ZeHxhCY)
@@ -8,7 +8,6 @@ Library that extends functionality of the SpriteFont.
 # Features
 * Creation of SpriteFont in the run-time from ttf.
 * Creation of SpriteFont in the run-time from AngelCode BMFont(only XML with single texture works for now).
-* DynamicSpriteFont class that renders glyphs on demand to the underlying texture atlas. Also it supports 32-bit characters and blurry text.
 
 # Adding Reference
 There are two ways of referencing SpriteFontPlus in the project:
@@ -69,39 +68,6 @@ SpriteFont font = BMFontLoader.LoadXml(fontData, name => texture);
 Full sample is here:
 [samples/SpriteFontPlus.Samples.BMFont](samples/SpriteFontPlus.Samples.BMFont)
 
-
-# DynamicSpriteFont
-DynamicSpriteFont renders glyphs on demand to the underlying texture atlas. Thus it doesnt require to explicity specify character ranges that are going to be used during the font creation.
-
-Following code creates DynamicSpriteFont from 3 different ttfs:
-```c#
-	_font = DynamicSpriteFont.FromTtf(File.ReadAllBytes(@"Fonts/DroidSans.ttf"), 20);
-	_font.AddTtf(File.ReadAllBytes(@"Fonts/DroidSansJapanese.ttf"));
-	_font.AddTtf(File.ReadAllBytes(@"Fonts/Symbola-Emoji.ttf"));
-```			
-
-Now it's possible to draw text using glyphs from all those fonts, using Size property to change the font size. 
-
-I.e. consider following code:
-```c#
-	_spriteBatch.Begin();
-
-	// Render some text
-	_font.Size = 18;
-	_spriteBatch.DrawString(_font, "The quick いろは brown\nfox にほへ jumps over\nt🙌h📦e l👏a👏zy dog", new Vector2(0, 0), Color.White);
-
-	_font.Size = 30;
-	_spriteBatch.DrawString(_font, "The quick いろは brown\nfox にほへ jumps over\nt🙌h📦e l👏a👏zy dog", new Vector2(0, 80), Color.Yellow);
-
-	_spriteBatch.End();
-```
-
-It would render following:
-![](/images/sampleDynamicSpriteFont.png)
-
-Full sample is here:
-[samples/SpriteFontPlus.Samples.DynamicSpriteFont](samples/SpriteFontPlus.Samples.DynamicSpriteFont)
-
 ## Building From Source Code
 1. Clone this repo.
 2. `git submodule update --init --recursive`
@@ -113,5 +79,3 @@ Full sample is here:
 * [BMFont](https://www.angelcode.com/products/bmfont/)
 * [Cyotek.Drawing.BitmapFont](https://github.com/cyotek/Cyotek.Drawing.BitmapFont)
 * [stb](https://github.com/nothings/stb)
-* [fontstash](https://github.com/memononen/fontstash)
-* [bartwe's fork of SpriteFontPlus](https://github.com/bartwe/SpriteFontPlus)

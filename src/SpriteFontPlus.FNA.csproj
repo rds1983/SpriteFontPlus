@@ -1,16 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
-    <PackageId>SpriteFontPlus</PackageId>
-    <Authors>SpriteFontPlusTeam</Authors>
-    <Product>SpriteFontPlus</Product>
-    <Description>Library extending functionality of the SpriteFont.</Description>
-    <PackageLicense>https://github.com/rds1983/SpriteFontPlus/blob/master/LICENSE</PackageLicense>
-    <PackageProjectUrl>https://github.com/rds1983/SpriteFontPlus</PackageProjectUrl>
-    <AssemblyName>SpriteFontPlus</AssemblyName>
-    <RootNamespace>SpriteFontPlus</RootNamespace>
-    <Version>1.0.0.0</Version>
-    <DefineConstants>$(DefineConstants);STBSHARP_INTERNAL;FNA;TEXTURESETDATAEXT;PREMULTIPLIEDALPHA</DefineConstants>
+    <TargetFrameworks>net45</TargetFrameworks>
+    <PackageId>SpriteFontPlus.FNA</PackageId>
+    <AssemblyName>SpriteFontPlus.FNA</AssemblyName>
+    <DefineConstants>$(DefineConstants);FNA</DefineConstants>
     <OutputPath>bin\FNA\$(Configuration)</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -18,9 +11,10 @@
   <ItemGroup>
     <ProjectReference Include="..\..\FNA\FNA.csproj" />
   </ItemGroup>
-
+  
   <ItemGroup>
-    <Compile Include="..\deps\StbTrueTypeSharp\src\**\*.cs" LinkBase="StbTrueTypeSharp" />
-    <Compile Include="..\deps\BMFontToSpriteFont\**\*.cs" LinkBase="BMFontToSpriteFont" />
-  </ItemGroup>
+    <PackageReference Include="Cyotek.Drawing.BitmapFont" Version="$(CyotekDrawingBitmapFontVersion)" />
+    <PackageReference Include="StbImageSharp" Version="$(StbImageSharpVersion)" />
+    <PackageReference Include="StbTrueTypeSharp" Version="$(StbTrueTypeSharpVersion)" />
+  </ItemGroup>  
 </Project>

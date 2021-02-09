@@ -37,12 +37,6 @@ namespace SpriteFontPlus.Samples.BMFont
 			// Create a new SpriteBatch, which can be used to draw textures.
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 
-			Texture2D texture;
-			using (var stream = TitleContainer.OpenStream("Fonts/test_0.png"))
-			{
-				texture = Texture2D.FromStream(GraphicsDevice, stream);
-			}
-
 			string fontData;
 			using (var stream = TitleContainer.OpenStream("Fonts/test.fnt"))
 			{
@@ -52,7 +46,7 @@ namespace SpriteFontPlus.Samples.BMFont
 				}
 			}
 
-			_font = BMFontLoader.LoadXml(fontData, name => new TextureWithOffset(texture));
+			_font = BMFontLoader.Load(fontData, name => TitleContainer.OpenStream("Fonts/" + name), GraphicsDevice);
 
 			GC.Collect();
 		}

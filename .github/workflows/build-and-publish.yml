@@ -20,4 +20,4 @@ jobs:
     - name: Install NuGet
       uses: NuGet/setup-nuget@v1
     - name: Publish SpriteFontPlus.MonoGame to NuGet
-      run: nuget.exe push src\bin\MonoGame\Release\SpriteFontPlus.MonoGame.*.nupkg ${{secrets.NUGET_APIKEY}} -Source https://api.nuget.org/v3/index.json
+      run: nuget.exe push src\bin\MonoGame\Release\SpriteFontPlus.*.nupkg ${{secrets.NUGET_APIKEY}} -Source https://api.nuget.org/v3/index.json

@@ -1,0 +1,23 @@
+name: Build & Publish
+
+on:
+  workflow_dispatch:
+
+jobs:
+  BuildAndPublish:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x'
+    - name: Build SpriteFontPlus.MonoGame
+      run: dotnet build src\SpriteFontPlus.MonoGame.csproj --configuration Release
+    - name: Install NuGet
+      uses: NuGet/setup-nuget@v1
+    - name: Publish SpriteFontPlus.MonoGame to NuGet
+      run: nuget.exe push src\bin\MonoGame\Release\SpriteFontPlus.MonoGame.*.nupkg ${{secrets.NUGET_APIKEY}} -Source https://api.nuget.org/v3/index.json

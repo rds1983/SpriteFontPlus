@@ -1,7 +1,9 @@
 **BREAKING CHANGE:** DynamicSpriteFont had been moved to the project: https://github.com/rds1983/FontStashSharp
 
 # SpriteFontPlus
-[![NuGet](https://img.shields.io/nuget/v/SpriteFontPlus.svg)](https://www.nuget.org/packages/SpriteFontPlus/) [![Build status](https://ci.appveyor.com/api/projects/status/2mbacxymarcxq4we?svg=true)](https://ci.appveyor.com/project/RomanShapiro/spritefontplus) [![Chat](https://img.shields.io/discord/628186029488340992.svg)](https://discord.gg/ZeHxhCY)
+[![NuGet](https://img.shields.io/nuget/v/SpriteFontPlus.svg)](https://www.nuget.org/packages/SpriteFontPlus/)
+![Build & Publish](https://github.com/rds1983/SpriteFontPlus/workflows/Build%20&%20Publish/badge.svg)
+[![Chat](https://img.shields.io/discord/628186029488340992.svg)](https://discord.gg/ZeHxhCY)
 
 Library that extends functionality of the SpriteFont.
 

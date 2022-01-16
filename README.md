@@ -48,12 +48,6 @@ Full sample is here:
 
 # Loading SpriteFont from AngelCode BMFont
 ```c#
-Texture2D texture;
-using (var stream = TitleContainer.OpenStream("Fonts/test_0.png"))
-{
-	texture = Texture2D.FromStream(GraphicsDevice, stream);
-}
-
 string fontData;
 using (var stream = TitleContainer.OpenStream("Fonts/test.fnt"))
 {
@@ -64,7 +58,7 @@ using (var stream = TitleContainer.OpenStream("Fonts/test.fnt"))
 }
 
 // As we use font with one texture, always return it independently from requested name
-SpriteFont font = BMFontLoader.Load(fontData, name => texture, GraphicsDevice);
+SpriteFont font = BMFontLoader.Load(fontData, name => TitleContainer.OpenStream("Fonts/" + name), GraphicsDevice);
 ```
 
 Full sample is here:

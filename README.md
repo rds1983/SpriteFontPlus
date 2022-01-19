@@ -57,7 +57,6 @@ using (var stream = TitleContainer.OpenStream("Fonts/test.fnt"))
 	}
 }
 
-// As we use font with one texture, always return it independently from requested name
 SpriteFont font = BMFontLoader.Load(fontData, name => TitleContainer.OpenStream("Fonts/" + name), GraphicsDevice);
 ```
 
